@@ -7815,3 +7815,6 @@ Library/UIElements/EditorWindows/UnityEditor.PackageManager.UI.PackageManagerWin
 Packages/manifest.json
 Urbaeum.sln
 UserSettings/EditorUserSettings.asset
+Assembly-CSharp-Editor.csproj
+Assembly-CSharp-Editor.csproj
+Assembly-CSharp.csproj
