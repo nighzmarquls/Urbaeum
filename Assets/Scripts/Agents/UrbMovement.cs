@@ -1,0 +1,83 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[RequireComponent(typeof(UrbAgent))]
+public class UrbMovement : UrbBase
+{
+    public float Speed = 2;
+    public float EnergyCost = 5;
+    public Coroutine Movement = null;
+
+    protected UrbAgent mAgent;
+    protected Renderer mRenderer;
+    protected UrbMetabolism mMetabolism;
+    void Start()
+    {
+        mAgent = GetComponent<UrbAgent>();
+        mRenderer = GetComponent<Renderer>();
+        mMetabolism = GetComponent<UrbMetabolism>();
+    }
+
+    public IEnumerator Moving(UrbTile Goal)
+    {
+        Vector3 StartingPosition = transform.position;
+        Vector3 GoalPosition = Goal.Location;
+        float Complete = 0;
+
+        if (mAgent.CurrentMap != null)
+        {
+            UrbTile departure = mAgent.CurrentMap.GetNearestTile(StartingPosition);
+            departure.OnAgentLeave(mAgent);
+        }
+
+        if(StartingPosition != GoalPosition)
+        {
+            if (mMetabolism != null)
+            {
+                mMetabolism.SpendEnergy(EnergyCost);
+            }
+        }
+
+        Goal.OnAgentArrive(mAgent);
+
+        float TravelTime = (1.0f / Speed);
+        float ArrivalTime = Time.time + TravelTime;
+        float StartTime = Time.time;
+        while ( Complete < 1.0f)
+        {
+            yield return new WaitForEndOfFrame();
+            transform.position = Vector3.Lerp(StartingPosition, GoalPosition, Complete);
+            Complete = (Time.time - StartTime) / TravelTime;
+        }
+     
+        Movement = null;
+    }
+
+    public void MoveTo(UrbTile Goal)
+    {
+        if(Movement == null)
+        {
+            Movement = StartCoroutine(Moving(Goal));
+        }
+    }
+
+    override public UrbComponentData GetComponentData()
+    {
+        UrbComponentData Data = base.GetComponentData();
+
+        Data.Fields = new UrbFieldData[]
+        {
+            new UrbFieldData{ Name = "Speed", Value = Speed },
+            new UrbFieldData{ Name = "EnergyCost", Value = EnergyCost}
+        };
+        return Data;
+    }
+
+    override public bool SetComponentData(UrbComponentData Data)
+    {
+        Speed = UrbEncoder.GetField("Speed", Data);
+        EnergyCost = UrbEncoder.GetField("EnergyCost", Data);
+        return true;
+    }
+}
