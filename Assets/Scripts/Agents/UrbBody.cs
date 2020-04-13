@@ -18,13 +18,20 @@ public class UrbBody : UrbBase
             return;
         }
 
-        BodyComposition = new UrbComposition(BodyRecipe);
+        if (BodyComposition == null)
+        {
+            BodyComposition = new UrbComposition(BodyRecipe);
+        }
         BodyComposition.SetSize(Size);
         base.Initialize();
     }
 
     public bool BodyCritical()
     {
+        if(BodyComposition == null)
+        {
+            return false;
+        }
         for(int i = 0; i < CriticalBodyPartAmounts.Length; i++)
         {
             if(BodyComposition[CriticalBodyPartAmounts[i].Substance] < CriticalBodyPartAmounts[i].SubstanceAmount)
@@ -39,7 +46,8 @@ public class UrbBody : UrbBase
     {
         UrbComponentData Data = base.GetComponentData();
 
-        UrbSubstance[] BodyContents = BodyComposition.GetCompositionIngredients();
+        
+        UrbSubstance[] BodyContents = (BodyComposition == null)? BodyRecipe : BodyComposition.GetCompositionIngredients();
 
         Data.FieldArrays = new UrbFieldArrayData[]
         {

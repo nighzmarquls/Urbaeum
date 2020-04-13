@@ -56,7 +56,8 @@ public class UrbCritterDebugDisplay : MonoBehaviour
     {
         UrbTile Tile = targetMap.GetTile(xPoint, yPoint);
 
-        if (UrbAgentSpawner.SpawnAgent(input, Tile))
+        GameObject spawned;
+        if (UrbAgentSpawner.SpawnAgent(input, Tile, out spawned))
         {
            
         }
@@ -133,6 +134,9 @@ public class UrbCritterDebugDisplay : MonoBehaviour
 
     void SetPause(bool input)
     {
+        if (paused == input)
+            return;
+
         paused = input;
         if (input)
         {
@@ -157,6 +161,14 @@ public class UrbCritterDebugDisplay : MonoBehaviour
             return;
         }
 
+        if(UrbSystemIO.Instance.Loading)
+        {
+            SetPause(true);
+        }
+        else
+        {
+            SetPause(paused);
+        }
         Ray mouseray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Vector3 Location = mouseray.origin + (mouseray.direction * (Vector3.Distance(mouseray.origin, transform.position)));
         int xPoint, yPoint;

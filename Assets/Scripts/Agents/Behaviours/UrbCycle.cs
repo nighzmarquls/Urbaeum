@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Obsolete
+/*
 [System.Serializable]
 public class UrbCycleStage
 {
@@ -104,3 +106,4 @@ public class UrbCycle : UrbBehaviour
         yield return null;
     }
 }
+*/

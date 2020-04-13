@@ -77,6 +77,7 @@ public class UrbMap : MonoBehaviour
 
     public bool LoadMapFromData(UrbMapData input)
     {
+
         if(input.X != Xsize || input.Y != Ysize)
         {
             Debug.LogError("UrbMapData size mismatch. Load Canceled");
@@ -101,9 +102,9 @@ public class UrbMap : MonoBehaviour
     }
 
     //Returns Loction of Tile Address
-    public Vector2 TileAddressToLocation(int Xaddress, int Yaddress)
+    public Vector3 TileAddressToLocation(int Xaddress, int Yaddress)
     {
-        Vector3 offSetLocation = new Vector3(Xaddress*TileSize, Yaddress*TileSize) + transform.position;
+        Vector3 offSetLocation = new Vector3(Xaddress*TileSize, Yaddress*TileSize, (Yaddress*TileSize - Xaddress)) + transform.position;
 
         return offSetLocation;
     }

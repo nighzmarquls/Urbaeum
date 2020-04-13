@@ -25,6 +25,19 @@ public class UrbMovement : UrbBase
         Vector3 GoalPosition = Goal.Location;
         float Complete = 0;
 
+        if (mAgent.DisplayObject)
+        {
+            Vector3 Direction = GoalPosition - StartingPosition;
+
+            if (Direction.x > 0 )
+            {
+                mAgent.DisplayObject.Flip = true;
+            }
+            else
+            {
+                mAgent.DisplayObject.Flip = false;
+            }
+        }
         if (mAgent.CurrentMap != null)
         {
             UrbTile departure = mAgent.CurrentMap.GetNearestTile(StartingPosition);

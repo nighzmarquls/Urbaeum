@@ -77,4 +77,38 @@ public class UrbEater : UrbBehaviour
 
         yield return null;
     }
+
+    override public UrbComponentData GetComponentData()
+    {
+        UrbComponentData Data = base.GetComponentData();
+
+       
+        UrbSubstance[] StomachContents = (Stomach == null)? new UrbSubstance[0] : Stomach.GetCompositionIngredients();
+
+        Data.FieldArrays = new UrbFieldArrayData[]
+        {
+            UrbEncoder.GetArrayFromSubstances("StomachContents" , StomachContents),
+        };
+
+        Data.Fields = new UrbFieldData[]
+        {
+            new UrbFieldData { Name = "BiteSize", Value = BiteSize}
+        };
+
+        Data.StringArrays = new UrbStringArrayData[]
+        {
+            UrbEncoder.EnumsToArray("FoodSubstances", FoodSubstances),
+            UrbEncoder.EnumsToArray("FoodScents",FoodScents)
+        };
+
+        return Data;
+    }
+
+    override public bool SetComponentData(UrbComponentData Data)
+    {
+        FoodSubstances = UrbEncoder.GetEnumArray<UrbSubstanceTag>("FoodSubstances", Data);
+        FoodScents = UrbEncoder.GetEnumArray<UrbScentTag>("FoodScents", Data);
+        Stomach = new UrbComposition(UrbEncoder.GetSubstancesFromArray("StomachContents", Data));
+        return true;
+    }
 }

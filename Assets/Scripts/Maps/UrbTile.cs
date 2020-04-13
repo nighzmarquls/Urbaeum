@@ -97,6 +97,7 @@ public class UrbTile
 
     public bool LoadTileFromData(UrbTileData input)
     {
+        LinksDirty = true;
         Links = new UrbTile[input.Links.Length];
  
         for(int i = 0; i < Links.Length; i++)
@@ -113,26 +114,18 @@ public class UrbTile
 
         if (input.Content > -1)
         {
-            UrbAgent newAgent = UrbSystemIO.LoadAgentFromID(input.Content);
-            newAgent.CurrentMap = OwningMap;
-            if(newAgent == null)
-            {
-                Debug.LogError("No Agent created from content ID");
-                return false;
-            }
-            newAgent.transform.position = OwningMap.TileAddressToLocation(XAddress, YAddress);
-            OnAgentArrive(newAgent);
+            UrbSystemIO.LoadAgentFromID(input.Content,this, input.Objects[0]);
         }
 
         Blocked = input.Blocked;
         Environment.LoadEnvironmentFromData(input.Environment);
-        TerrainTypes = new UrbPathTerrain[input.TerrainTypes.Length];
+        // This is broken somehow, fix it.
+        /*TerrainTypes = new UrbPathTerrain[input.TerrainTypes.Length];
 
         for (int i = 0; i < TerrainTypes.Length; i++)
         {
             TerrainTypes[i] = input.TerrainTypes[i];
-        }
-
+        }*/
         return true;
     }
 
@@ -161,6 +154,10 @@ public class UrbTile
         if(Content != null)
         {
             output.Content = UrbSystemIO.GetAgentID(Content);
+            output.Objects = new UrbObjectData[]
+            {
+                UrbEncoder.Read(Content.gameObject)
+            };
         }
         else
         {
@@ -169,7 +166,7 @@ public class UrbTile
 
         output.Blocked = Blocked;
 
-       output.Environment = Environment.GetEnvironmentData();
+        output.Environment = Environment.GetEnvironmentData();
 
         return output;
     }
@@ -412,6 +409,10 @@ public class UrbTile
     {
         while(true)
         {
+            if(UrbSystemIO.Instance.Loading)
+            {
+                continue;
+            }
             if (ScentDirty)
             {
 
@@ -420,6 +421,11 @@ public class UrbTile
                     for (int s = 0; s < SizeLimit; s++)
                     {
                         yield return ScentThrottle.PerformanceThrottle();
+
+                        if(TerrainFilter[(int)TerrainTypes[t]][s] == null)
+                        {
+                            continue;
+                        }
 
                         if (TerrainFilter[(int)TerrainTypes[t]][s].dirty)
                         {

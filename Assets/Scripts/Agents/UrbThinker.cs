@@ -32,19 +32,24 @@ public class UrbThinker : UrbBase
         {
             return;
         }
+        mAgent = GetComponent<UrbAgent>();
+        mBody = mAgent.Body;
         mBreeder = GetComponent<UrbBreeder>();
         BreedUrge = 0;
         mEater = GetComponent<UrbEater>();
         HungerUrge = 0;
         mMetabolism = GetComponent<UrbMetabolism>();
         RestUrge = 0;
-        mAgent = GetComponent<UrbAgent>();
-        mBody = mAgent.Body;
+        
         base.Initialize();
     }
 
     public void CheckUrges()
     {
+        if(mBody.BodyComposition == null)
+        {
+            return;
+        }
         bool CanBreed = false;
         bool CanEat = false;
         if(mBreeder != null)
@@ -56,10 +61,10 @@ public class UrbThinker : UrbBase
                     BreedUrge += 0.5f;
                     CanBreed = true;
                 }
-            }
-            else
-            {
-                BreedUrge -= 0.1f;
+                else
+                {
+                    BreedUrge -= 0.1f;
+                }
             }
         }
 

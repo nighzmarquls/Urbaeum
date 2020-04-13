@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class UrbSystemIO : MonoBehaviour
 {
-    protected static UrbSystemIO instance;
+    public static UrbSystemIO Instance { get; protected set; }
 
     [SerializeField]
     protected List<UrbAgent> AgentTypes;
@@ -13,6 +13,13 @@ public class UrbSystemIO : MonoBehaviour
     [SerializeField]
     protected List<UrbMap> Maps;
 
+    protected static float OffsetTime = 0;
+    public static float CurrentTime {get {
+            return OffsetTime + Time.time;
+        }
+    }
+
+    public bool Loading { get; protected set; }
     UrbSave GameData;
 
     public void CollectGameData()
@@ -28,6 +35,7 @@ public class UrbSystemIO : MonoBehaviour
 
         GameData = new UrbSave();
         GameData.Maps = new UrbMapData[Maps.Count];
+        GameData.OffsetTime = CurrentTime;
 
         for (int i = 0; i < Maps.Count; i ++)
         {
@@ -37,6 +45,9 @@ public class UrbSystemIO : MonoBehaviour
 
     public void AssignGameData()
     {
+        Loading = true;
+
+
         if (Maps == null || Maps.Count <= 0)
         {
             Debug.LogError("Missing Reference to UrbMap, Cannot assign Game Data");
@@ -50,6 +61,9 @@ public class UrbSystemIO : MonoBehaviour
         {
             Maps[i].LoadMapFromData(GameData.Maps[i]);
         }
+        OffsetTime = GameData.OffsetTime - Time.time;
+
+        Loading = false;
     }
 
     public void SaveGameDataToFile(string filename = "/gamesave.txt")
@@ -72,33 +86,33 @@ public class UrbSystemIO : MonoBehaviour
 
     public static int GetMapID(UrbMap input)
     {
-        if(instance == null)
+        if(Instance == null)
         {
             return -1;
         }
-        return instance.Maps.IndexOf(input);
+        return Instance.Maps.IndexOf(input);
     }
 
     public static UrbMap GetMapFromID(int ID)
     {
-        if (ID < 0 || instance == null || ID >= instance.Maps.Count)
+        if (ID < 0 || Instance == null || ID >= Instance.Maps.Count)
         {
             return null;
         }
 
-        return instance.Maps[ID];
+        return Instance.Maps[ID];
 
     }
 
     public static int GetAgentID(UrbAgent input)
     {
-        if (instance == null)
+        if (Instance == null)
         {
             return -1;
         }
-        for(int i = 0; i < instance.AgentTypes.Count; i++)
+        for(int i = 0; i < Instance.AgentTypes.Count; i++)
         {
-            UrbAgent candidate = instance.AgentTypes[i];
+            UrbAgent candidate = Instance.AgentTypes[i];
             if(candidate.TemplatesMatch(input))
             {
                 return i;
@@ -108,23 +122,26 @@ public class UrbSystemIO : MonoBehaviour
         return -1;
     }
 
-    public static UrbAgent LoadAgentFromID(int ID)
+    public static UrbAgent LoadAgentFromID(int ID, UrbTile Tile, UrbObjectData Data)
     {
-        if (ID < 0 || instance == null || ID >= instance.AgentTypes.Count)
+        if (ID < 0 || Instance == null || ID >= Instance.AgentTypes.Count)
         {
             return null;
         }
-        GameObject AgentObjject = Instantiate(instance.AgentTypes[ID].gameObject);
-        UrbAgent LoadedAgent = AgentObjject.GetComponent<UrbAgent>();
-        return LoadedAgent;
+        GameObject AgentObject;
+        if (UrbAgentSpawner.SpawnAgent(Instance.AgentTypes[ID].gameObject, Tile, out AgentObject, Data))
+        {
+            UrbAgent LoadedAgent = AgentObject.GetComponent<UrbAgent>();
+            return LoadedAgent;
+        }
+        return null;
     }
 
     private void OnEnable()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-
-            instance = this;
+            Instance = this;
         }
         else
         {
@@ -134,9 +151,9 @@ public class UrbSystemIO : MonoBehaviour
 
     private void OnDisable()
     {
-        if(instance == this)
+        if(Instance == this)
         {
-            instance = null;
+            Instance = null;
         }
     }
 

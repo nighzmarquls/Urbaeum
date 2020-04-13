@@ -15,7 +15,7 @@ public enum UrbSubstanceTag
     Fluff,
     Male,
     Female,
-    MaxSubstanceTag
+    All
 }
 
 [System.Serializable]
@@ -34,7 +34,7 @@ public struct UrbSubstance
 
 public class UrbSubstances
 {
-    public const uint MaxTag = (uint)UrbSubstanceTag.MaxSubstanceTag;
+    public const uint MaxTag = (uint)UrbSubstanceTag.All;
 
     //TODO: Make this driven by data
     static protected UrbScentTag[][] ScentsBySubstance = new UrbScentTag[][]

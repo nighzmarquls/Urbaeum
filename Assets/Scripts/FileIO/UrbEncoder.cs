@@ -137,9 +137,92 @@ public class UrbEncoder
         return new UrbRecipe[0];
     }
 
-    public static T GetEnum<T>(string StringName, UrbComponentData Data)
+    public static T GetEnum<T>(string Name, UrbComponentData Data)
     {
-        return (T)Enum.Parse(typeof(T), GetString(StringName, Data));
+        return (T)Enum.Parse(typeof(T), GetString(Name, Data));
+    }
+
+    public static UrbStringArrayData EnumsToArray<T>(string Name, T[] Enums) where T : Enum
+    {
+        UrbStringArrayData Data = new UrbStringArrayData
+        {
+            Name = Name,
+            Value = new string[Enums.Length]
+        };
+        for(int e = 0; e < Enums.Length; e++)
+        {
+            Data.Value[e] = Enums[e].ToString();
+        }
+
+        return Data;
+    }
+
+    public static T[] GetEnumArray<T>(string Name, UrbComponentData Data)
+    {
+        for (int i = 0; i < Data.StringArrays.Length; i++)
+        {
+            if (Data.StringArrays[i].Name.CompareTo(Name) == 0)
+            {
+
+                T[] Output = new T[Data.StringArrays[i].Value.Length];
+
+                for(int a = 0; a < Data.StringArrays[i].Value.Length; a++)
+                {
+                    Output[a] = (T)Enum.Parse(typeof(T), Data.StringArrays[i].Value[a]);
+                }
+
+                return Output;
+            }
+        }
+
+        return new T[0];
+    }
+
+    public static UrbStringArrayData ObjectsDataToArray(string Name, UrbObjectData[] Objects)
+    {
+        if(Objects == null)
+        {
+            return new UrbStringArrayData {
+                Name = Name,
+                Value = new string[0]};
+        }
+        UrbStringArrayData Data = new UrbStringArrayData
+        {
+            Name = Name,
+            Value = new string[Objects.Length]
+        };
+        for (int o = 0; o < Objects.Length; o++)
+        {
+            Data.Value[o] = JsonUtility.ToJson(Objects[o], true);
+        }
+
+        return Data;
+    }
+
+    public static UrbObjectData GetObjectData(string Name, UrbComponentData Data)
+    {
+        return JsonUtility.FromJson<UrbObjectData>(GetString(Name, Data));
+    }
+
+    public static UrbObjectData[] GetObjectDataArray(string Name, UrbComponentData Data)
+    {
+        for (int i = 0; i < Data.StringArrays.Length; i++)
+        {
+            if (Data.StringArrays[i].Name.CompareTo(Name) == 0)
+            {
+
+                UrbObjectData[] Output = new UrbObjectData[Data.StringArrays[i].Value.Length];
+
+                for (int o = 0; o < Data.StringArrays[i].Value.Length; o++)
+                {
+                    Output[o] = JsonUtility.FromJson<UrbObjectData>(Data.StringArrays[i].Value[o]);
+                }
+
+                return Output;
+            }
+        }
+
+        return new UrbObjectData[0];
     }
 }
 
@@ -152,6 +235,7 @@ public struct UrbComponentData
     public UrbRecipeData[] Recipes;
     public UrbRecipeArrayData[] RecipeArrays;
     public UrbStringData[] Strings;
+    public UrbStringArrayData[] StringArrays;
 }
 
 [System.Serializable]
@@ -187,4 +271,11 @@ public struct UrbStringData
 {
     public string Name;
     public string Value;
+}
+
+[System.Serializable]
+public struct UrbStringArrayData
+{
+    public string Name;
+    public string[] Value;
 }

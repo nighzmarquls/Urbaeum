@@ -65,10 +65,6 @@ public class UrbBehaviour : UrbBase
     }
     override public UrbComponentData GetComponentData()
     {
-        if (!bInitialized)
-        {
-            Initialize();
-        }
         return base.GetComponentData();
     }
 }

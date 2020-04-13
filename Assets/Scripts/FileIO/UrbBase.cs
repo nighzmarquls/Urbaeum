@@ -6,9 +6,13 @@ using UnityEngine;
 
 public class UrbBase : MonoBehaviour
 {
-    protected bool bInitialized = false;
+    protected bool bInitialized { get; private set; } = false;
     virtual public UrbComponentData GetComponentData()
     {
+        if(!bInitialized)
+        {
+            Initialize();
+        }
         UrbComponentData Data = new UrbComponentData
         {
             Type = this.GetType().ToString(),
@@ -18,7 +22,7 @@ public class UrbBase : MonoBehaviour
 
     virtual public bool SetComponentData(UrbComponentData Data)
     {
-        Debug.Log(this.GetType() + " Using Base SetComponentData");
+        //Debug.Log(this.GetType() + " Using Base SetComponentData");
         return true;
     }
 
@@ -26,4 +30,5 @@ public class UrbBase : MonoBehaviour
     {
        bInitialized = true;
     }
+
 }

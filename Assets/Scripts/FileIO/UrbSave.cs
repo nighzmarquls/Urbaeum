@@ -5,6 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public struct UrbSave
 {
+    public float OffsetTime;
     public UrbMapData[] Maps;
 }
 
@@ -20,6 +21,7 @@ public struct UrbMapData
 public struct UrbTileData
 {
     public int Content;
+    public UrbObjectData[] Objects;
     public bool Blocked;
     public UrbEnvironmentData Environment;
     public UrbTileLinkData[] Links;

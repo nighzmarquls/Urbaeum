@@ -32,4 +32,30 @@ public class UrbSmellSource : UrbBehaviour
         yield return null;
 
     }
+
+    override public UrbComponentData GetComponentData()
+    {
+        UrbComponentData Data = base.GetComponentData();
+
+        Data.Fields = new UrbFieldData[]
+        {
+            new UrbFieldData{ Name = "SmellStrength", Value = SmellStrength}
+        };
+
+        Data.StringArrays = new UrbStringArrayData[]
+        {
+            UrbEncoder.EnumsToArray<UrbScentTag>("SmellTag",SmellTag) 
+        };
+
+
+        return Data;
+    }
+
+    override public bool SetComponentData(UrbComponentData Data)
+    {
+        SmellStrength = UrbEncoder.GetField("SmellStrength", Data);
+        SmellTag = UrbEncoder.GetEnumArray<UrbScentTag>("SmellTag", Data);
+
+        return true;
+    }
 }

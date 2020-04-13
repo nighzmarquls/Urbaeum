@@ -14,6 +14,8 @@ public class UrbAgent : UrbBase
     SpriteRenderer mSpriteRenderer;
     public float BirthTime;
 
+    public UrbDisplay DisplayObject { get; private set; }
+
     public UrbMap CurrentMap;
     public UrbTile CurrentGoal;
 
@@ -80,6 +82,14 @@ public class UrbAgent : UrbBase
         {
             return;
         }
+
+        DisplayObject = GetComponentInChildren<UrbDisplay>();
+
+        if (DisplayObject == null)
+        {
+            Debug.LogError("No DisplayObject Present: Make sure a Display Object is attached to " + gameObject.name);
+        }
+
         BirthTime = Time.time;
         MovementSystem = GetComponent<UrbMovement>();
         Pathfinder = GetComponent<UrbPathfinder>();
@@ -122,6 +132,31 @@ public class UrbAgent : UrbBase
             {
                MovementSystem.MoveTo(CurrentGoal); 
             }
+            else
+            {
+                if (DisplayObject != null)
+                {
+                    if (Time.time > NextFidget)
+                    {
+                        NextFidget = Time.time + FidgetTime + Random.Range(0, FidgetTime);
+                        float Probability = Random.value;
+
+                        if (Probability > 0.85f)
+                        {
+                            DisplayObject.Flip = !DisplayObject.Flip;
+                        }
+                        else if (Probability > 0.75)
+                        {
+                            DisplayObject.Express(UrbDisplayFace.Expression.Closed);
+                        }
+                        else if (Probability > 0.70)
+                        {
+                            DisplayObject.Express(UrbDisplayFace.Expression.Default);
+                        }
+                    }
+                }
+            }
+
             if(Body != null)
             {
                 if(Body.BodyCritical())
@@ -130,9 +165,11 @@ public class UrbAgent : UrbBase
                 }
                 if (Display != null)
                 {
-                    Display.UpdateSprites(Body.BodyComposition);
+                    Display.UpdateDisplay(Body.BodyComposition);
                 }
             }
+
+            
            
         }
         else
@@ -144,6 +181,8 @@ public class UrbAgent : UrbBase
 
     }
 
+    public float FidgetTime = 1.0f;
+    float NextFidget = 0; 
     // Update is called once per frame
     void Update()
     {
@@ -158,12 +197,18 @@ public class UrbAgent : UrbBase
         {
             new UrbFieldData{ Name = "BirthTime", Value = BirthTime}
         };
+
+        Data.Strings = new UrbStringData[]
+        {
+            new UrbStringData{Name= "Name", Value = gameObject.name}
+        };
         return Data;
     }
 
     override public bool SetComponentData(UrbComponentData Data)
     {
         BirthTime = UrbEncoder.GetField("BirthTime", Data);
+        gameObject.name = UrbEncoder.GetString("Name", Data);
         return true;
     }
 }

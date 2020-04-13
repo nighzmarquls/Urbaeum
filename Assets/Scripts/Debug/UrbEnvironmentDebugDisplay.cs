@@ -63,7 +63,8 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
     {
         UrbTile Tile = targetMap.GetTile(xPoint, yPoint);
 
-        if (!UrbAgentSpawner.SpawnAgent(input, Tile))
+        GameObject spawned;
+        if (!UrbAgentSpawner.SpawnAgent(input, Tile, out spawned))
         {
             UrbAgent[] Occupants = Tile.Occupants.ToArray();
             foreach(UrbAgent Occupant in Occupants)

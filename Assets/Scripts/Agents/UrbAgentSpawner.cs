@@ -3,11 +3,13 @@ using System.Collections;
 
 public class UrbAgentSpawner 
 {
-    public static bool SpawnAgent(GameObject Template, UrbTile Tile, UrbObjectData Data = null)
+    public static bool SpawnAgent(GameObject Template, UrbTile Tile, out GameObject spawned, UrbObjectData Data = null)
     {
         UrbAgent TestAgent = Template.GetComponent<UrbAgent>();
 
-        if(TestAgent == null)
+        spawned = null;
+
+        if (TestAgent == null)
         {
             return false;
         }
@@ -20,12 +22,13 @@ public class UrbAgentSpawner
         }
 
         Vector3 SpawnLocation = Tile.Location;
-        GameObject spawned = GameObject.Instantiate(Template, SpawnLocation, Quaternion.identity);
+        spawned = GameObject.Instantiate(Template, SpawnLocation, Quaternion.identity);
         UrbAgent Agent = spawned.GetComponent<UrbAgent>();
 
-        if(Data != null)
+        if (Data != null)
         {
-
+            UrbEncoder.Write(Data, spawned);
+            //Debug.Log(JsonUtility.ToJson(Data, true));
         }
 
         UrbBase[] BaseComponents = spawned.GetComponents<UrbBase>();
@@ -33,11 +36,6 @@ public class UrbAgentSpawner
         {
             BaseComponents[i].Initialize();
         }
-
-        UrbObjectData AgentData = UrbEncoder.Read(spawned);
-        string save = JsonUtility.ToJson(AgentData, true);
-        Debug.Log(save);
-        UrbEncoder.Write(AgentData, spawned);
 
         Tile.OnAgentArrive(Agent);
         

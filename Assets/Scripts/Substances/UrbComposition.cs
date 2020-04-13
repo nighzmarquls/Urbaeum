@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class UrbComposition
 {
-    protected float MaxCapacity = 1000;
-    protected float CurrentCapacty = 0;
+    public float MaxCapacity { get; protected set; } = 1000;
+    public float CurrentCapacty { get; protected set; }  = 0;
 
     public void SetSize(int Size)
     {

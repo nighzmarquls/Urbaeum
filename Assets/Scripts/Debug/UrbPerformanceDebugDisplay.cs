@@ -51,8 +51,8 @@ public class UrbPerformanceDebugDisplay : MonoBehaviour
     public void SpawnAgent(GameObject input, int xPoint, int yPoint)
     {
         UrbTile Tile = targetMap.GetTile(xPoint, yPoint);
-
-        if (!UrbAgentSpawner.SpawnAgent(input, Tile))
+        GameObject spawned;
+        if (!UrbAgentSpawner.SpawnAgent(input, Tile, out spawned))
         {
             UrbAgent[] Occupants = Tile.Occupants.ToArray();
             foreach(UrbAgent Occupant in Occupants)
@@ -148,6 +148,11 @@ public class UrbPerformanceDebugDisplay : MonoBehaviour
 
     static UrbTile linkA = null;
     static UrbTile linkB = null;
+
+    public void TogglePause()
+    {
+        SetPause(!paused);
+    }
     bool paused = false;
 
     void SetPause(bool input)
