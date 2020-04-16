@@ -20,7 +20,7 @@ public struct UrbMapData
 [System.Serializable]
 public struct UrbTileData
 {
-    public int Content;
+    public int[] Contents;
     public UrbObjectData[] Objects;
     public bool Blocked;
     public UrbEnvironmentData Environment;

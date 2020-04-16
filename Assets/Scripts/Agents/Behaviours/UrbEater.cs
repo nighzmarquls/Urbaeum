@@ -20,8 +20,15 @@ public class UrbEater : UrbBehaviour
         
         Stomach = new UrbComposition();
         FoodScents = UrbSubstances.Scent(FoodSubstances);
-        base.Initialize();
 
+        
+        base.Initialize();
+        if (mAgent.Body.BodyComposition == null)
+        {
+            mAgent.Body.Initialize();
+        }
+
+        mAgent.Body.BodyComposition.AddComposition(Stomach);
     }
 
     protected override bool ValidToInterval()
@@ -31,9 +38,9 @@ public class UrbEater : UrbBehaviour
 
     override public IEnumerator FunctionalCoroutine()
     {
-        UrbTile[] Adjacent = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
+        UrbTile[] Search = GetSearchTiles(true);
 
-        foreach (UrbTile Tile in Adjacent)
+        foreach (UrbTile Tile in Search)
         {
             if (Stomach.AvailableCapacity > 0)
             {

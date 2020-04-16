@@ -22,12 +22,11 @@ public class UrbMovement : UrbBase
     public IEnumerator Moving(UrbTile Goal)
     {
         Vector3 StartingPosition = transform.position;
-        Vector3 GoalPosition = Goal.Location;
         float Complete = 0;
 
         if (mAgent.DisplayObject)
         {
-            Vector3 Direction = GoalPosition - StartingPosition;
+            Vector3 Direction = Goal.Location - StartingPosition;
 
             if (Direction.x > 0 )
             {
@@ -38,20 +37,18 @@ public class UrbMovement : UrbBase
                 mAgent.DisplayObject.Flip = false;
             }
         }
-        if (mAgent.CurrentMap != null)
-        {
-            UrbTile departure = mAgent.CurrentMap.GetNearestTile(StartingPosition);
-            departure.OnAgentLeave(mAgent);
-        }
 
-        if(StartingPosition != GoalPosition)
+        if (mAgent.CurrentTile != null)
         {
-            if (mMetabolism != null)
+            mAgent.CurrentTile.OnAgentLeave(mAgent);
+            if (Goal != mAgent.CurrentTile)
             {
-                mMetabolism.SpendEnergy(EnergyCost);
+                if (mMetabolism != null)
+                {
+                    mMetabolism.SpendEnergy(EnergyCost * mAgent.Mass*mAgent.Mass * UrbMetabolism.EnergyConversionRatio );
+                }
             }
         }
-
         Goal.OnAgentArrive(mAgent);
 
         float TravelTime = (1.0f / Speed);
@@ -60,10 +57,12 @@ public class UrbMovement : UrbBase
         while ( Complete < 1.0f)
         {
             yield return new WaitForEndOfFrame();
-            transform.position = Vector3.Lerp(StartingPosition, GoalPosition, Complete);
+            mAgent.Location = Vector3.Lerp(StartingPosition, Goal.Location, Complete);
             Complete = (Time.time - StartTime) / TravelTime;
         }
-     
+
+        
+
         Movement = null;
     }
 

@@ -26,8 +26,7 @@ public class UrbPathfinder : UrbBase
 
     public UrbTile GetNextGoal(UrbMap input)
     {
-        Vector3 currentPosition = transform.position;
-        UrbTile currentTile = input.GetNearestTile(currentPosition);
+        UrbTile currentTile = mAgent.CurrentTile;
         UrbTile[] Adjacent = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
 
         UrbTile goalTile = currentTile;
@@ -43,6 +42,16 @@ public class UrbPathfinder : UrbBase
                     continue;
                 }
 
+                if(Adjacent[t].Blocked)
+                {
+                    continue;
+                }
+
+                if(Adjacent[t].FreeCapacity < mAgent.Mass)
+                {
+                    continue;
+                }
+
                 float currentValue = (mThinker == null) ? Adjacent[t].TerrainFilter[TerrainType][Size][GoalTag] : mThinker.EvaluateTile(Adjacent[t], TerrainType, Size);
 
                 if (currentValue <= 0)
@@ -50,11 +59,7 @@ public class UrbPathfinder : UrbBase
                     continue;
                 }
 
-                if (Adjacent[t].CurrentContent != null && Adjacent[t].CurrentContent != mAgent)
-                {
-                    continue;
-                }
-
+                
                 if (currentValue >= bestValue)
                 {
                     bestValue = currentValue;

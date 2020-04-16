@@ -108,6 +108,7 @@ MonoBehaviour:
   TileprintString: '11
 
     11'
+  FidgetTime: 1
 --- !u!114 &4574942228798516745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,7 +122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Speed: 2
-  EnergyCost: 5
+  EnergyCost: 1
 --- !u!114 &-8220914805162621343
 MonoBehaviour:
   m_ObjectHideFlags: 0

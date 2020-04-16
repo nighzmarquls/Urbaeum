@@ -58,13 +58,17 @@ public class UrbThinker : UrbBase
             {
                 if (!mBreeder.Gestating)
                 {
-                    BreedUrge += 0.5f;
+                    BreedUrge += 0.1f;
                     CanBreed = true;
                 }
                 else
                 {
-                    BreedUrge -= 0.1f;
+                    BreedUrge = 0.0f;
                 }
+            }
+            else
+            {
+                BreedUrge -= 0.1f;
             }
         }
 

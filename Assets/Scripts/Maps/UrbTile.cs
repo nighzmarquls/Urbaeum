@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class UrbTile
 {
+    public const float TileCapacity = 1000;
     public const int MaxSize = 3;
     public const int MaxTerrain = (int)UrbPathTerrain.MaxPathTerrain;
+    public const float DepthPush = 3;
     UrbMap OwningMap;
     int XAddress;
     int YAddress;
@@ -21,6 +23,7 @@ public class UrbTile
     public UrbScent[][] TerrainFilter;
 
     protected UrbAgent Content;
+    protected List<UrbAgent> Contents;
     public List<UrbAgent> Occupants; 
 
     public UrbEnvironment Environment;
@@ -39,16 +42,90 @@ public class UrbTile
         }
     }
 
+    public float FreeCapacity {
+        get {
+            float Capacity = TileCapacity;
+            for (int c = 0; c < Contents.Count; c++)
+            {
+                Capacity -= Contents[c].Mass;
+
+                if (Capacity <= 0)
+                {
+                    return 0;
+                }
+            }
+            return Capacity;
+        }
+    }
+
     public int SizeLimit { get { return PathableSize; } }
 
     public int X { get { return XAddress; } }
     public int Y { get { return YAddress; } }
 
-    public Vector3 Location { get { return OwningMap.TileAddressToLocation(XAddress, YAddress); } }
+    protected Vector3 LocationOffset = Vector3.zero;
+
+    public Vector3 Location { get { return OwningMap.TileAddressToLocation(XAddress, YAddress) + LocationOffset;} }
+
+    bool Ordering = false;
+    public void ReorderContents()
+    {
+        if(Ordering)
+        {
+            return;
+        }
+        Ordering = true;
+        LocationOffset = Vector3.zero;
+        if (Occupants.Count > 0)
+        {
+            Vector3 Center = OwningMap.TileAddressToLocation(XAddress, YAddress);
+            UrbAgent Biggest = Occupants[0];
+            List<UrbAgent> OrderedOccupants = new List<UrbAgent>();
+
+            for (int i = 0; i < Occupants.Count; i++)
+            {
+                if(Occupants[i].Mass > Biggest.Mass)
+                {
+                    OrderedOccupants.Insert(0, Occupants[i]);
+                    Biggest = Occupants[i];
+                }
+                else
+                {
+                    OrderedOccupants.Add(Occupants[i]);
+                }
+            }
+            if (Biggest != null)
+            {
+                float Turn = 0;
+                float TurnAdjust = (Mathf.PI);
+                float Radius = 0;
+                float RadiusAdjust = 3;
+
+                float TileCapacityOffset = TileCapacity / 4f;
+
+                for (int i = 0; i < OrderedOccupants.Count; i++)
+                {
+                    float X = Mathf.Sin(Turn);
+                    float Y = Mathf.Cos(Turn);
+                    LocationOffset = new Vector3(X, Y, 0) * Radius * this.OwningMap.TileSize;
+                    OrderedOccupants[i].Location = Center + LocationOffset + new Vector3(0,0,(LocationOffset.y*DepthPush) - LocationOffset.x);
+
+                    Turn += (OrderedOccupants[i].Mass / TileCapacityOffset) * TurnAdjust;
+                    TurnAdjust *= 0.85f;
+                    Radius += (OrderedOccupants[i].Mass / TileCapacityOffset) / RadiusAdjust;
+                    RadiusAdjust += 5f;
+                }
+
+            }
+
+            Occupants = OrderedOccupants;
+        }
+    }
 
     private void Constructor(UrbMap CreatingMap)
     {
         Occupants = new List<UrbAgent>();
+        Contents = new List<UrbAgent>();
         OwningMap = CreatingMap;
 
         TerrainFilter = new UrbScent[MaxTerrain][];
@@ -112,9 +189,12 @@ public class UrbTile
 
         ClearTile();
 
-        if (input.Content > -1)
+        if (input.Contents != null && input.Contents.Length > 0)
         {
-            UrbSystemIO.LoadAgentFromID(input.Content,this, input.Objects[0]);
+            for (int c = 0; c < input.Contents.Length; c++)
+            {
+                UrbSystemIO.LoadAgentFromID(input.Contents[c], this, input.Objects[c]);
+            }
         }
 
         Blocked = input.Blocked;
@@ -151,17 +231,20 @@ public class UrbTile
             output.Links = new UrbTileLinkData[0];
         }
 
-        if(Content != null)
+        if(Contents.Count > 0)
         {
-            output.Content = UrbSystemIO.GetAgentID(Content);
-            output.Objects = new UrbObjectData[]
+            output.Contents = new int[Contents.Count];
+            output.Objects = new UrbObjectData[Contents.Count];
+            for (int c = 0; c < Contents.Count; c++)
             {
-                UrbEncoder.Read(Content.gameObject)
-            };
+                output.Contents[c] = UrbSystemIO.GetAgentID(Contents[c]);
+                output.Objects[c] = UrbEncoder.Read(Contents[c].gameObject);
+            }
         }
         else
         {
-            output.Content = -1;
+
+            output.Contents = new int[0];
         }
 
         output.Blocked = Blocked;
@@ -279,28 +362,34 @@ public class UrbTile
 
     public UrbAgent CurrentContent {
 
-        get { return Content; }
+        get {
+            if(Contents == null || Contents.Count == 0)
+            {
+                return null;
+            }
+
+            return Contents[Contents.Count-1];
+        }
 
     }
 
     public void OnAgentArrive(UrbAgent input)
     {
-        if(Content == null)
-        {
-            Content = input;
+            Ordering = false;
+            Contents.Add(input);
             input.Tileprint.ArriveAtTile(this, input);
+            input.CurrentTile = this;
             input.CurrentMap = this.OwningMap;
             input.transform.localScale = new Vector3(this.OwningMap.TileSize, this.OwningMap.TileSize, this.OwningMap.TileSize)*input.SizeOffset;
-        }
+            ReorderContents();
     }
 
     public void OnAgentLeave(UrbAgent input)
     {
-        if(Content == input)
-        {
-            Content = null;
-            input.Tileprint.DepartFromTile(this, input);
-        }
+        Ordering = false;
+        Contents.Remove(input);
+        input.Tileprint.DepartFromTile(this, input);
+        ReorderContents();
     }
 
     public void ToggleLink(UrbTile input)
@@ -409,11 +498,12 @@ public class UrbTile
     {
         while(true)
         {
-            if(UrbSystemIO.Instance.Loading)
+            Ordering = false;
+            if (UrbSystemIO.Instance == null || UrbSystemIO.Instance.Loading)
             {
-                continue;
+                ///continue;
             }
-            if (ScentDirty)
+            else if (ScentDirty)
             {
 
                 for (int t = 0; t < TerrainTypes.Length; t++)
@@ -484,7 +574,19 @@ public class UrbTile
 
     void DiffuseScent()
     {
-        float diffusion = UrbScent.ScentDiffusion;
+        float Free = FreeCapacity / TileCapacity;
+        if(Free <= 0)
+        {
+            ScentDirty = false;
+            Blocked = true;
+        }
+        else
+        {
+            Blocked = false;
+        }
+
+        float Diffusion = UrbScent.ScentDiffusion * Free;
+
         if (LinksDirty)
         {
             Adjacent = OwningMap.GetAdjacent(XAddress, YAddress, true);
@@ -510,7 +612,7 @@ public class UrbTile
                     Adjacent[t].ScentDirty = true;
                     for(int s = 0; s < Adjacent[t].SizeLimit; s++)
                     {
-                        Adjacent[t].TerrainFilter[TerrainType][s].ReceiveScent(TerrainFilter[TerrainType][s], diffusion);
+                        Adjacent[t].TerrainFilter[TerrainType][s].ReceiveScent(TerrainFilter[TerrainType][s], Diffusion);
                     }
                 }                   
             }

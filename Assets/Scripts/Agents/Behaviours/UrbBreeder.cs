@@ -80,7 +80,7 @@ public class UrbBreeder : UrbBehaviour
 
     protected override bool ValidToInterval()
     {
-        return base.ValidToInterval() && OffspringObjects.Length > 0;
+        return base.ValidToInterval() && mAgent.CurrentTile!= null && OffspringObjects.Length > 0;
     }
 
     override public IEnumerator FunctionalCoroutine()
@@ -88,11 +88,11 @@ public class UrbBreeder : UrbBehaviour
         if (!ValidToInterval())
             yield return null;
 
-        UrbTile[] Adjacent = mAgent.CurrentMap.GetNearestAdjacent(transform.position, true);
+        UrbTile[] Search = GetSearchTiles(true);
 
         int MateCount = 0;
 
-        foreach(UrbTile Tile in Adjacent)
+        foreach(UrbTile Tile in Search)
         {
             yield return BehaviourThrottle.PerformanceThrottle();
             if(Gestating)
@@ -132,11 +132,11 @@ public class UrbBreeder : UrbBehaviour
             if (!ValidToInterval())
                 yield return null;
 
-            Adjacent = mAgent.CurrentMap.GetNearestAdjacent(transform.position);
+            Search = GetSearchTiles(true);
             int NumberOffspring = 0;
             int Delay = Random.Range((int)0, (int)3);
 
-            foreach (UrbTile Tile in Adjacent)
+            foreach (UrbTile Tile in Search)
             {
                 yield return BehaviourThrottle.PerformanceThrottle();
 
@@ -144,9 +144,6 @@ public class UrbBreeder : UrbBehaviour
                 {
                     continue;
                 }
-
-                if (Tile.CurrentContent != null)
-                    continue;
 
                 if (Delay > 0)
                 {

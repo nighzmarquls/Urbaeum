@@ -95,20 +95,22 @@ public class UrbTileprint
 
     public UrbTile[] GetAdjacentPrintTiles(UrbAgent Agent, bool GetLinked = false)
     {
-        UrbTile Tile = Agent.CurrentMap.GetNearestTile(Agent.transform.position);
+        if (Agent.CurrentMap == null || Agent.CurrentTile == null)
+        {
+            return new UrbTile[0];
+        }
 
-        return GetAdjacentPrintTiles(Tile, GetLinked);
+        return GetAdjacentPrintTiles(Agent.CurrentTile, GetLinked);
     }
 
     public UrbTile[] GetBorderingTiles(UrbAgent Agent, bool GetLinked = false)
     {
-        if(Agent.CurrentMap == null)
+        if(Agent.CurrentMap == null || Agent.CurrentTile == null)
         {
             return new UrbTile[0];
         }
-        UrbTile Tile = Agent.CurrentMap.GetNearestTile(Agent.transform.position);
 
-        return GetBorderingTiles(Tile, GetLinked);
+        return GetBorderingTiles(Agent.CurrentTile, GetLinked);
     }
 
     public UrbTile[] GetBorderingTiles(UrbTile Tile, bool GetLinked = false)
@@ -180,6 +182,16 @@ public class UrbTileprint
         }
 
         return ReturnList.ToArray();
+    }
+
+    public UrbTile[] GetAllPrintTiles(UrbAgent Agent)
+    {
+        if (Agent.CurrentMap == null || Agent.CurrentTile == null)
+        {
+            return new UrbTile[0];
+        }
+
+        return GetAllPrintTiles(Agent.CurrentTile);
     }
 
     public UrbTile[] GetAllPrintTiles(UrbTile Tile)

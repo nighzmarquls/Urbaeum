@@ -7,6 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(UrbBody))]
 public class UrbMetabolism : UrbBehaviour
 {
+    public const float EnergyConversionRatio = 1 / (UrbTile.TileCapacity* UrbTile.TileCapacity);
     public UrbSubstance[] BodyGrowthRecipe;
     public UrbSubstanceTag BodyEnergyReserveStorage;
     public float GrowthRate = 10.0f;

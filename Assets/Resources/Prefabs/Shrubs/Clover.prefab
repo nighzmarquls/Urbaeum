@@ -105,7 +105,8 @@ MonoBehaviour:
   BirthTime: 0
   CurrentMap: {fileID: 0}
   SizeOffset: 1
-  TileprintString: 2
+  TileprintString: 1
+  FidgetTime: 1
 --- !u!114 &-601077773047966795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -163,10 +164,6 @@ MonoBehaviour:
     SubstanceAmount: 20
   - Substance: 1
     SubstanceAmount: 80
-  - Substance: 2
-    SubstanceAmount: 100
-  - Substance: 3
-    SubstanceAmount: 300
   BodyEnergyReserveStorage: 0
   GrowthRate: 10
 --- !u!114 &-3102135804067309858

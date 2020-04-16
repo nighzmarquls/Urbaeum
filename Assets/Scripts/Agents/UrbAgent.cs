@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class UrbAgent : UrbBase
 {
-
-    UrbMovement MovementSystem;
+    const float LocationThreshold = 0.01f;
+    public UrbMovement MovementSystem { get; protected set; }
     UrbPathfinder Pathfinder;
     UrbThinker Mind;
 
@@ -18,8 +18,33 @@ public class UrbAgent : UrbBase
 
     public UrbMap CurrentMap;
     public UrbTile CurrentGoal;
+    public UrbTile CurrentTile;
 
     public float SizeOffset = 1.0f;
+    public bool Moving { get; protected set; } = false;
+
+    protected Vector3 TargetLocation;
+    public Vector3 Location {
+
+        get { return transform.position; }
+
+        set {
+            if(TargetLocation != value)
+            {
+                TargetLocation = value;
+            }
+            //transform.position = value;
+        }
+    }
+
+    public float Mass {  get {
+            if(Body == null || Body.BodyComposition == null)
+            {
+                return 0;
+            }
+
+            return Body.BodyComposition.CurrentCapacty;
+        } }
 
     [TextArea(0, 5)]
     public string TileprintString;
@@ -110,11 +135,17 @@ public class UrbAgent : UrbBase
 
     public void Remove()
     {
-        UrbTile tile = CurrentMap.GetNearestTile(transform.position);
-        tile.OnAgentLeave(this);
+        if (CurrentTile != null)
+        {
+            CurrentTile.OnAgentLeave(this);
+        }
         CurrentMap = null;
         Destroy(gameObject);
     }
+
+
+    public float FidgetTime = 1.0f;
+    float NextFidget = 0;
 
     public void Tick()
     {
@@ -126,14 +157,23 @@ public class UrbAgent : UrbBase
             }
             if (Pathfinder != null)
             {
-                CurrentGoal = Pathfinder.GetNextGoal(CurrentMap);
+                if (!Moving)
+                {
+                    CurrentGoal = Pathfinder.GetNextGoal(CurrentMap);
+                }
             }
-            if (MovementSystem != null && CurrentGoal != null)
+            if (MovementSystem != null && CurrentGoal != null && CurrentGoal != CurrentTile)
             {
-               MovementSystem.MoveTo(CurrentGoal); 
+                Moving = true;
+                if (DisplayObject != null)
+                {
+                    DisplayObject.Express(UrbDisplayFace.Expression.Default);
+                }
+                MovementSystem.MoveTo(CurrentGoal); 
             }
             else
             {
+                Moving = false;
                 if (DisplayObject != null)
                 {
                     if (Time.time > NextFidget)
@@ -169,8 +209,20 @@ public class UrbAgent : UrbBase
                 }
             }
 
-            
-           
+            if (DisplayObject != null && DisplayObject.Invisible)
+            {
+
+            }
+            else
+            {
+                CurrentTile.ReorderContents();
+                if (TargetLocation != transform.position)
+                {
+                    Vector3 Direction = (TargetLocation - transform.position);
+
+                    transform.position = (Direction.magnitude > LocationThreshold) ? transform.position + Direction.normalized * Time.deltaTime : TargetLocation;
+                }
+            }
         }
         else
         {
@@ -181,8 +233,7 @@ public class UrbAgent : UrbBase
 
     }
 
-    public float FidgetTime = 1.0f;
-    float NextFidget = 0; 
+
     // Update is called once per frame
     void Update()
     {

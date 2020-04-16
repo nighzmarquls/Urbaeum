@@ -106,10 +106,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b2e0f7c83d69948a96dc66fccbac5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BirthTime: 0
+  BirthTime: 27.076632
   CurrentMap: {fileID: 0}
   SizeOffset: 1
   TileprintString: 1
+  FidgetTime: 1
 --- !u!114 &5738278284471327094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,7 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Speed: 2
-  EnergyCost: 5
+  EnergyCost: 1
 --- !u!114 &-2832398848432110761
 MonoBehaviour:
   m_ObjectHideFlags: 0

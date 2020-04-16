@@ -104,7 +104,7 @@ public class UrbMap : MonoBehaviour
     //Returns Loction of Tile Address
     public Vector3 TileAddressToLocation(int Xaddress, int Yaddress)
     {
-        Vector3 offSetLocation = new Vector3(Xaddress*TileSize, Yaddress*TileSize, (Yaddress*TileSize - Xaddress)) + transform.position;
+        Vector3 offSetLocation = new Vector3(Xaddress*TileSize, Yaddress*TileSize, ((Yaddress*TileSize)*UrbTile.DepthPush - Xaddress)) + transform.position;
 
         return offSetLocation;
     }

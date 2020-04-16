@@ -105,6 +105,7 @@ MonoBehaviour:
   CurrentMap: {fileID: 0}
   SizeOffset: 1
   TileprintString: 1
+  FidgetTime: 1
 --- !u!114 &4574942228798516745
 MonoBehaviour:
   m_ObjectHideFlags: 0
