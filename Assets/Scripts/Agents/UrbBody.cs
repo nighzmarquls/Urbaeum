@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(UrbAgent))]
 public class UrbBody : UrbBase
 {
     public UrbComposition BodyComposition;
 
-    [Range(1, 3)]
-    public int Size = 1;
     public UrbSubstance[] BodyRecipe;
     public UrbSubstance[] CriticalBodyPartAmounts;
+    protected UrbAgent mAgent;
 
     public override void Initialize()
     {
@@ -22,7 +22,9 @@ public class UrbBody : UrbBase
         {
             BodyComposition = new UrbComposition(BodyRecipe);
         }
-        BodyComposition.SetSize(Size);
+        mAgent = GetComponent<UrbAgent>();
+
+        BodyComposition.SetSize(mAgent.Tileprint.TileCount);
         base.Initialize();
     }
 
@@ -56,10 +58,6 @@ public class UrbBody : UrbBase
             UrbEncoder.GetArrayFromSubstances("CriticalBodyPartAmounts" , CriticalBodyPartAmounts),
         };
 
-        Data.Fields = new UrbFieldData[]
-        {
-            new UrbFieldData { Name = "Size", Value = Size}
-        } ;
 
         return Data;
     }
@@ -71,7 +69,6 @@ public class UrbBody : UrbBase
         BodyRecipe = UrbEncoder.GetSubstancesFromArray("BodyRecipe",Data);
         BodyComposition = new UrbComposition(UrbEncoder.GetSubstancesFromArray("BodyContents", Data));
         CriticalBodyPartAmounts = UrbEncoder.GetSubstancesFromArray("CriticalBodyPartAmounts", Data);
-        Size = (int)UrbEncoder.GetField("Size", Data);
         return true;
     }
 }

@@ -14,14 +14,41 @@ public class UrbDisplayFeature : MonoBehaviour
             bool IsInvisible = true;
             if (mLineRenderer != null)
             {
-                return !mLineRenderer.isVisible;
+                IsInvisible = !mLineRenderer.isVisible;
             }
-            if(mFillRenderer != null)
+            if(mFillRenderer != null && IsInvisible)
             {
-                return !mFillRenderer.isVisible;
+                IsInvisible = !mFillRenderer.isVisible;
             }
 
             return IsInvisible;
+        }
+    }
+
+    public int SortingOrder {
+        get {
+            if (mLineRenderer != null)
+            {
+                return mLineRenderer.sortingOrder;
+            }
+            if(mFillRenderer != null)
+            {
+                return mFillRenderer.sortingOrder;
+            }
+            return 0;
+        }
+        set {
+            mLineRenderer.sortingOrder = value;
+            mFillRenderer.sortingOrder = value;
+        }
+    }
+
+    public bool LineRendering {
+        get {
+            return mLineRenderer.gameObject.activeInHierarchy;
+        }
+        set {
+            mLineRenderer.gameObject.SetActive(value);
         }
     }
 

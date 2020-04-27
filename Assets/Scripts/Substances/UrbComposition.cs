@@ -12,7 +12,14 @@ public class UrbComposition
     {
         if (ContainingComposion == null)
         {
-            MaxCapacity = 1000 * (Size * Size);
+            if (Size == 1)
+            {
+                MaxCapacity = 1000;
+            }
+            else
+            {
+                MaxCapacity = 1000 * (Size * Mathf.Sqrt(Size));
+            }
         }
     }
 
@@ -36,7 +43,11 @@ public class UrbComposition
 
     public float this[UrbSubstanceTag Tag] {
         get {
-            if(Substances.ContainsKey(Tag))
+            if(Tag == UrbSubstanceTag.All)
+            {
+                return CurrentCapacty;
+            }
+            else if(Substances.ContainsKey(Tag))
             {
                 return Substances[Tag];
             }
@@ -270,6 +281,39 @@ public class UrbComposition
         return TransferAmount;
     }
 
+    public float DecomposeRecipe(UrbRecipe Recipe, float Amount)
+    {
+        if (Amount > CurrentCapacty)
+        {
+            Amount = CurrentCapacty;
+        }
+        float Result = Amount;
+
+        Result = RemoveSubstance(Recipe.Product, Result);
+
+        if(Result > 0)
+        {
+            UrbSubstance[] Proportions = UrbSubstances.GetIngredientProportions(Recipe);
+            for (int r = 0; r < Proportions.Length; r++)
+            {
+                AddSubstance(Proportions[r].Substance, Proportions[r].SubstanceAmount * Result);
+            }
+        }
+
+        return Result;
+    }
+
+    public float DecomposeRecipeInto(UrbComposition Target, UrbRecipe Recipe, float Amount)
+    {
+        float Result = (Target.Emptiness < Amount) ? Target.Emptiness : Amount;
+
+        TransferTo(Target, Recipe.Product, Result);
+
+        Result = Target.DecomposeRecipe(Recipe, Result);
+
+        return Result;
+    }
+
     public float MixRecipe(UrbRecipe Recipe, float Amount)
     {
         if(Amount > CurrentCapacty)
@@ -309,9 +353,30 @@ public class UrbComposition
 
     public float MixRecipeInto(UrbComposition Target, UrbRecipe Recipe, float Amount)
     {
-        float Result = MixRecipe(Recipe, Amount);
+        float Result = (Target.Emptiness < Amount) ? Target.Emptiness : Amount;
+
+        Result = MixRecipe(Recipe, Result);
 
         return TransferTo(Target, Recipe.Product,Result);
+    }
+
+    public float EmptyInto(UrbComposition Target)
+    {
+        float Result = 0;
+        UrbSubstanceTag[] tags = new UrbSubstanceTag[Substances.Keys.Count];
+        int i = 0;
+        foreach(UrbSubstanceTag tag in Substances.Keys)
+        {
+            tags[i] = tag;
+            i++;
+        }
+
+        for(int t = 0; t < tags.Length; t++)
+        {
+            float Amount = Substances[tags[t]];
+            Result += TransferTo(Target, tags[t], Amount);
+        }
+        return Result;
     }
 
     //TODO: Optimize this

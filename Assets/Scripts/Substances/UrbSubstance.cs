@@ -10,11 +10,14 @@ public enum UrbSubstanceTag
     Stem,
     Leaf,
     Flower,
-    Meat,
+    Muscle,
     Fat,
     Fluff,
     Male,
     Female,
+    Nerves,
+    Teeth,
+    Claw,
     All
 }
 
@@ -49,6 +52,9 @@ public class UrbSubstances
         , new UrbScentTag[]{ UrbScentTag.Fluff}
         , new UrbScentTag[]{ UrbScentTag.Male }
         , new UrbScentTag[]{ UrbScentTag.Female }
+        , new UrbScentTag[]{ UrbScentTag.Meat }
+        , new UrbScentTag[0]
+        , new UrbScentTag[0]
     };
 
     public static UrbScentTag[] Scent(UrbSubstanceTag input) {

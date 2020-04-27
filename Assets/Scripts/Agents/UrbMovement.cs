@@ -24,17 +24,17 @@ public class UrbMovement : UrbBase
         Vector3 StartingPosition = transform.position;
         float Complete = 0;
 
-        if (mAgent.DisplayObject)
+        if (mAgent.Display)
         {
             Vector3 Direction = Goal.Location - StartingPosition;
 
             if (Direction.x > 0 )
             {
-                mAgent.DisplayObject.Flip = true;
+                mAgent.Display.Flip = true;
             }
             else
             {
-                mAgent.DisplayObject.Flip = false;
+                mAgent.Display.Flip = false;
             }
         }
 
@@ -45,7 +45,7 @@ public class UrbMovement : UrbBase
             {
                 if (mMetabolism != null)
                 {
-                    mMetabolism.SpendEnergy(EnergyCost * mAgent.Mass*mAgent.Mass * UrbMetabolism.EnergyConversionRatio );
+                    mMetabolism.SpendEnergy(EnergyCost * mAgent.Mass*mAgent.Mass );
                 }
             }
         }
@@ -54,10 +54,11 @@ public class UrbMovement : UrbBase
         float TravelTime = (1.0f / Speed);
         float ArrivalTime = Time.time + TravelTime;
         float StartTime = Time.time;
+        Vector3 ArrivalLocation = Goal.Location;
         while ( Complete < 1.0f)
         {
             yield return new WaitForEndOfFrame();
-            mAgent.Location = Vector3.Lerp(StartingPosition, Goal.Location, Complete);
+            mAgent.transform.position = Vector3.Lerp(StartingPosition, ArrivalLocation, Complete);
             Complete = (Time.time - StartTime) / TravelTime;
         }
 

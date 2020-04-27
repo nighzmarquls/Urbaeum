@@ -19,6 +19,12 @@ public class UrbMetabolism : UrbBehaviour
 
     UrbEater mEater;
 
+    public float EnergyBudget {
+        get {
+            return (mAgent.Body.BodyComposition[BodyEnergyReserveStorage] - EnergyDebt)/EnergyConversionRatio;
+        }
+    }
+
     public bool Healing { get; protected set; }
     public bool Starving { get; protected set; }
 
@@ -77,7 +83,8 @@ public class UrbMetabolism : UrbBehaviour
 
     public void SpendEnergy(float cost)
     {
-        EnergyDebt += cost;
+        EnergyDebt += cost*EnergyConversionRatio;
+        
     }
 
     public override IEnumerator FunctionalCoroutine()

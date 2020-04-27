@@ -20,6 +20,8 @@ public class UrbBreeder : UrbBehaviour
     public float MateCost = 10.0f;
     public float Gestation = 1.0f;
 
+    public bool Disperse = false;
+
     public UrbBreedTag BreedType = UrbBreedTag.Plant;
 
     public UrbScentTag[] MateScents;
@@ -86,61 +88,68 @@ public class UrbBreeder : UrbBehaviour
     override public IEnumerator FunctionalCoroutine()
     {
         if (!ValidToInterval())
-            yield return null;
+            yield break;
 
         UrbTile[] Search = GetSearchTiles(true);
 
         int MateCount = 0;
 
-        foreach(UrbTile Tile in Search)
+        yield return BehaviourThrottle.PerformanceThrottle();
+
+        for (int t = 0; t < Search.Length; t++)
         {
-            yield return BehaviourThrottle.PerformanceThrottle();
             if(Gestating)
             {    
                 break;
             }
 
-            if (Tile == null)
+            if (Search[t] == null)
             {
                 continue;
             }
 
-            if(Tile.CurrentContent == null)
+            if(Search[t].CurrentContent == null)
             {
                 continue;
             }
 
-            UrbBreeder MateCandidate = Tile.CurrentContent.GetComponent<UrbBreeder>();
-
-            if(MateCandidate != null && MateCandidate != this && MateCandidate.BreedType == BreedType)
+            for (int c = 0; c < Search[t].Occupants.Count; c++)
             {
-                if(mMetabolism != null && MateRequirement > 0)
+                UrbBreeder MateCandidate = Search[t].Occupants[c].GetComponent<UrbBreeder>();
+
+                if (MateCandidate != null && MateCandidate != this && MateCandidate.BreedType == BreedType)
                 {
-                    mMetabolism.SpendEnergy(MateCost);
+                    if (mMetabolism != null && MateRequirement > 0)
+                    {
+                        mMetabolism.SpendEnergy(MateCost);
+                    }
+                    MateCount++;
                 }
-                MateCount++;
             }
         }
 
-        yield return null;
+        if(MateCount >= MateCrowding)
+        {
+            yield break;
+        }
 
-        if (Gestating || MateCount >= MateRequirement && MateCount < MateCrowding && OffspringCount > 0 && mAgent.Body.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe))
+        if (Gestating || MateCount >= MateRequirement && OffspringCount > 0 && mAgent.Body.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe))
         {
             Gestating = true;
             yield return new WaitForSeconds(Gestation);
 
             if (!ValidToInterval())
-                yield return null;
+                yield break;
 
-            Search = GetSearchTiles(true);
+            Search = Disperse ? mAgent.Tileprint.GetBorderingTiles(mAgent, true) : GetSearchTiles(true);
             int NumberOffspring = 0;
             int Delay = Random.Range((int)0, (int)3);
 
-            foreach (UrbTile Tile in Search)
-            {
-                yield return BehaviourThrottle.PerformanceThrottle();
+            yield return BehaviourThrottle.PerformanceThrottle();
 
-                if (Tile == null || Tile.Blocked)
+            for (int t = 0; t < Search.Length; t++)
+            {
+                if (Search[t] == null || Search[t].Blocked)
                 {
                     continue;
                 }
@@ -157,7 +166,7 @@ public class UrbBreeder : UrbBehaviour
 
                 GameObject OffspringObject;
 
-                if (UrbAgentSpawner.SpawnAgent(OffspringTemplate, Tile, out OffspringObject, OffspringData[OffspringChoice]))
+                if (UrbAgentSpawner.SpawnAgent(OffspringTemplate, Search[t], out OffspringObject, OffspringData[OffspringChoice]))
                 {
                     SetOffspringData(OffspringObject);
 
@@ -170,6 +179,10 @@ public class UrbBreeder : UrbBehaviour
                 {
                     Gestating = false;
                     yield break;
+                }
+                else
+                {
+                    yield return new WaitForSeconds(Interval);
                 }
             }
             Gestating = false;
@@ -188,7 +201,7 @@ public class UrbBreeder : UrbBehaviour
             new UrbFieldData{ Name = "MateRequirement", Value = MateRequirement},
             new UrbFieldData{ Name = "MateCrowding", Value = MateCrowding},
             new UrbFieldData{ Name = "OffspringCount", Value = OffspringCount},
-
+            new UrbFieldData{ Name = "Disperse", Value = (Disperse)? 1 : 0},
             new UrbFieldData{ Name = "MateCost", Value = MateCost},
             new UrbFieldData{ Name = "Gestation", Value = Gestation},
             new UrbFieldData{ Name = "Gestating", Value = (Gestating)? 1 : 0},
@@ -222,6 +235,7 @@ public class UrbBreeder : UrbBehaviour
         MateCrowding = (int)UrbEncoder.GetField("MateCrowding", Data);
         OffspringCount = (int)UrbEncoder.GetField("OffspringCount", Data);
 
+        Disperse = (UrbEncoder.GetField("Disperse", Data) > 0.0f);
         MateCost = UrbEncoder.GetField("MateCost", Data);
         Gestation = UrbEncoder.GetField("Gestation", Data);
         Gestating = (UrbEncoder.GetField("Gestating", Data) > 0.0f);

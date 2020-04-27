@@ -29,8 +29,7 @@ public class UrbDisplay : UrbBase
         Highlight
     }
 
-   
-
+    public int SortingOrder = 0;
     public float maxFaceRatio = 1.5f;
     public float minFaceRatio = 0.25f;
     public float featureOffset = 0.001f;
@@ -86,14 +85,13 @@ public class UrbDisplay : UrbBase
             return mFlip;
         }
         set {
-            if (DisplayBody.Invisible)
+            
+            if (Invisible || mFlip == value)
             {
+                mFlip = value;
                 return;
             }
-            if (mFlip == value)
-            {
-                return;
-            }
+
             mFlip = value;
             Body.localScale = new Vector3((mFlip) ? -mBodySize : mBodySize, mBodySize, mBodySize);
             Face.localScale = new Vector3((mFlip) ? -mFaceSize : mFaceSize, mFaceSize, mFaceSize);
@@ -106,6 +104,11 @@ public class UrbDisplay : UrbBase
 
     public bool Invisible {
         get {
+            if (DisplayBody == null)
+            {
+                return true;
+            }
+
             return DisplayBody.Invisible;
         }
     }
@@ -117,32 +120,29 @@ public class UrbDisplay : UrbBase
         }
 
         set {
-            if(DisplayBody.Invisible)
+            if(Invisible || value == mBodySize)
             {
+                mBodySize = value;
                 return;
             }
-
-            if(value == mBodySize)
-            {
-                return;
-            }
-
-            Body.localScale = new Vector3((mFlip) ? -value : value, value, value);
 
             float MazimumFaceSize = value * maxFaceRatio;
             if (mFaceSize > MazimumFaceSize)
             {
-                Face.localScale = new Vector3((mFlip) ? -MazimumFaceSize : MazimumFaceSize, MazimumFaceSize, MazimumFaceSize);
                 mFaceSize = MazimumFaceSize;
+                Face.localScale = new Vector3((mFlip) ? -mFaceSize : mFaceSize, mFaceSize, mFaceSize);
             }
 
             float MinimumFaceSize = value * minFaceRatio;
             if(mFaceSize < MinimumFaceSize)
             {
-                Face.localScale = new Vector3((mFlip) ? -MinimumFaceSize : MinimumFaceSize, MinimumFaceSize, MinimumFaceSize);
                 mFaceSize = MinimumFaceSize;
+                Face.localScale = new Vector3((mFlip) ? -mFaceSize : mFaceSize, mFaceSize, mFaceSize);
             }
             mBodySize = value;
+            
+            Body.localScale = new Vector3((mFlip) ? -mBodySize : mBodySize, mBodySize, mBodySize);
+       
             SynchronizeBody();
         }
     }
@@ -150,34 +150,166 @@ public class UrbDisplay : UrbBase
     public float FaceSize {
         get { return mFaceSize; }
         set {
-            if(DisplayBody.Invisible)
+            if(Invisible || mSignificance < FaceSignificance || value == mFaceSize)
             {
+                mFaceSize = value;
                 return;
             }
-
-            if (value == mFaceSize)
-            {
-                return;
-            }
-
-            Face.localScale = new Vector3((mFlip) ? -value : value, value, value);
 
             float MazimumBodySize = value / maxFaceRatio;
             if (mBodySize < MazimumBodySize)
             {
-                Body.localScale = new Vector3((mFlip) ? -MazimumBodySize : MazimumBodySize, MazimumBodySize, MazimumBodySize);
+                
                 mBodySize = MazimumBodySize;
+                Body.localScale = new Vector3((mFlip) ? -mBodySize : mBodySize, mBodySize, mBodySize);
             }
 
             float MinimumBodySize = value / minFaceRatio;
             if (mBodySize > MinimumBodySize)
             {
-                Body.localScale = new Vector3((mFlip) ? -MinimumBodySize : MinimumBodySize, MinimumBodySize, MinimumBodySize);
+                
                 mBodySize = MinimumBodySize;
+                Body.localScale = new Vector3((mFlip) ? -mBodySize : mBodySize, mBodySize, mBodySize);
             }
 
             mFaceSize = value;
+
+            
+            Face.localScale = new Vector3((mFlip) ? -mFaceSize : mFaceSize, mFaceSize, mFaceSize);
             SynchronizeBody();
+        }
+    }
+
+    const float LineSignificance = 0.09f;
+    const float FaceSignificance = 0.06f;
+    const float FeatureSignificance = 0.04f;
+
+    protected float mSignificance = 1;
+    public float Significance { get { return mSignificance; }
+        set {
+            if (Invisible || mSignificance == value)
+                return;
+
+            
+            if(value < LineSignificance)
+            {
+                DisplayBody.LineRendering = false;
+                UpdateFeatureLineRendering(false, PrimaryFeatures);
+                UpdateFeatureLineRendering(false, SecondaryFeatures);
+                UpdateFeatureLineRendering(false, DetailFeatures);
+            }
+            else if(value > LineSignificance)
+            {
+                DisplayBody.LineRendering = true;
+                DisplayBody.LineColor = mColors.PrimaryColor.Line;
+                UpdateFeatureColors(mColors.PrimaryColor, PrimaryFeatures);
+                UpdateFeatureColors(mColors.SecondaryColor, SecondaryFeatures);
+                UpdateFeatureColors(mColors.DetailColor, DetailFeatures);
+                UpdateFeatureLineRendering(true, PrimaryFeatures);
+                UpdateFeatureLineRendering(true, SecondaryFeatures);
+                UpdateFeatureLineRendering(true, DetailFeatures);
+
+            }
+            
+            if(value < FaceSignificance)
+            {
+                Face.gameObject.SetActive(false);
+                if (EffectDisplay != null)
+                {
+                    EffectDisplay.enabled = false;
+                }
+            }
+            else if(value > FaceSignificance)
+            {
+                Face.localScale = new Vector3((mFlip) ? -mFaceSize : mFaceSize, mFaceSize, mFaceSize);
+                Body.localScale = new Vector3((mFlip) ? -mBodySize : mBodySize, mBodySize, mBodySize);
+                if (EffectDisplay != null)
+                {
+                    EffectDisplay.enabled = true;
+                }
+                Face.gameObject.SetActive(true);
+                DisplayFace.FillColor = mColors.FaceColor;
+                DisplayFace.HighlightColor = mColors.HighlightColor;
+            }
+
+            if(value < FeatureSignificance)
+            {
+                ForeFeaturePoint.gameObject.SetActive(false);
+                BackFeaturePoint.gameObject.SetActive(false);
+                FaceFeaturePoint.gameObject.SetActive(false);
+            }
+            else if(value > FeatureSignificance)
+            {
+                Face.localScale = new Vector3((mFlip) ? -mFaceSize : mFaceSize, mFaceSize, mFaceSize);
+                Body.localScale = new Vector3((mFlip) ? -mBodySize : mBodySize, mBodySize, mBodySize);
+
+                UpdateFeatureColors(mColors.PrimaryColor, PrimaryFeatures);
+                UpdateFeatureColors(mColors.SecondaryColor, SecondaryFeatures);
+                UpdateFeatureColors(mColors.DetailColor, DetailFeatures);
+                ForeFeaturePoint.gameObject.SetActive(true);
+                BackFeaturePoint.gameObject.SetActive(true);
+                FaceFeaturePoint.gameObject.SetActive(true);
+                SynchronizeBody();
+            }
+
+            mSignificance = value;
+        }
+    }
+
+    protected void UpdateFeatureLineRendering(bool Render, List<UrbDisplayFeature> Features)
+    {
+        for (int i = 0; i < Features.Count; i++)
+        {
+            Features[i].LineRendering = Render;
+        }
+    }
+
+
+    public SpriteRenderer EffectDisplay = null;
+    protected List<UrbTest> EffectQueue;
+    protected List<Vector3> EffectPositionQueue;
+    float ScheduledDisplayChange = 0;
+
+    public void QueueEffectDisplay(UrbTest Input, Vector3 Position)
+    {
+        if(EffectDisplay == null)
+        {
+            return;
+        }
+        EffectQueue.Add(Input);
+        EffectPositionQueue.Add(Position);
+    }
+
+    public void UpdateEffectDisplay()
+    {
+        if (EffectDisplay == null)
+        {
+            return;
+        }
+
+        if(Time.time > ScheduledDisplayChange)
+        {
+            //EffectDisplay.transform.position = Face.transform.position;
+            if (EffectQueue.Count <= 0)
+            {
+                EffectDisplay.sprite = null;
+                EffectDisplay.transform.position = this.transform.position;
+                return;
+            }
+
+            ScheduledDisplayChange = Time.time + EffectQueue[0].DisplayTime;
+
+            if (Invisible)
+            {
+                EffectQueue.RemoveAt(0);
+                EffectPositionQueue.RemoveAt(0);
+                return;
+            }
+            EffectDisplay.transform.position = EffectPositionQueue[0];
+            EffectDisplay.color = EffectQueue[0].SuccessColor;
+            EffectDisplay.sprite = EffectQueue[0].SuccessIcon;
+            EffectQueue.RemoveAt(0);
+            EffectPositionQueue.RemoveAt(0);
         }
     }
 
@@ -188,6 +320,13 @@ public class UrbDisplay : UrbBase
             return;
         }
 
+        if(EffectDisplay != null)
+        {
+            EffectQueue = new List<UrbTest>();
+            EffectPositionQueue = new List<Vector3>();
+        }
+
+        mSignificance = 1f;
         DisplayBody = CreateFeature(BodySprite, Body);
         DisplayFace.FaceType = FaceSprite;
         
@@ -209,6 +348,7 @@ public class UrbDisplay : UrbBase
                 SecondaryFeatures.Add(CreateFeature(SecondaryFaceFeatureSprites[i], FaceFeaturePoint, offset));
                 offset += featureOffset;
             }
+            Face.transform.position += new Vector3(0, 0, offset);
 
         }
         if (ForeFeaturePoint != null)
@@ -219,6 +359,7 @@ public class UrbDisplay : UrbBase
                 PrimaryFeatures.Add(CreateFeature(PrimaryForeFeatureSprites[i], ForeFeaturePoint, offset));
                 offset += featureOffset;
             }
+            Face.transform.position += new Vector3(0, 0, offset);
         }
         if (BackFeaturePoint != null)
         {
@@ -237,7 +378,9 @@ public class UrbDisplay : UrbBase
         DisplayBody.LineColor = mColors.PrimaryColor.Line;
         DisplayFace.FillColor = mColors.FaceColor;
         DisplayFace.HighlightColor = mColors.HighlightColor;
-
+        DisplayFace.SortingOrder = SortingOrder;
+        DisplayBody.SortingOrder = SortingOrder;
+        
        
         base.Initialize();
 
@@ -251,8 +394,9 @@ public class UrbDisplay : UrbBase
     public UrbColor PrimaryColor {
         get { return mColors.PrimaryColor; }
         set {
-            if(DisplayBody.Invisible)
+            if(Invisible)
             {
+                mColors.PrimaryColor = value;
                 return;
             }
             if(value.Line == mColors.PrimaryColor.Line && value.Fill == mColors.PrimaryColor.Fill)
@@ -262,8 +406,11 @@ public class UrbDisplay : UrbBase
 
             DisplayBody.FillColor = value.Fill;
             DisplayBody.LineColor = value.Line;
-            UpdateFeatureColors(value, PrimaryFeatures);
-            
+            if (mSignificance > FeatureSignificance)
+            {
+                UpdateFeatureColors(value, PrimaryFeatures);
+            }
+
             mColors.PrimaryColor = value;
             
         }
@@ -272,8 +419,9 @@ public class UrbDisplay : UrbBase
     public UrbColor SecondaryColor {
         get { return mColors.SecondaryColor; }
         set {
-            if (DisplayBody.Invisible)
+            if (Invisible || mSignificance < FeatureSignificance)
             {
+                mColors.SecondaryColor = value;
                 return;
             }
             if (value.Line == mColors.SecondaryColor.Line && value.Fill == mColors.SecondaryColor.Fill)
@@ -290,8 +438,9 @@ public class UrbDisplay : UrbBase
     public UrbColor DetailColor {
         get { return mColors.DetailColor; }
         set {
-            if(DisplayBody.Invisible)
+            if(Invisible || mSignificance < FeatureSignificance)
             {
+                mColors.DetailColor = value;
                 return;
             }
             if (value.Line == mColors.DetailColor.Line && value.Fill == mColors.DetailColor.Fill)
@@ -319,25 +468,31 @@ public class UrbDisplay : UrbBase
         Initialize();
     }
 
+    private void Update()
+    {
+        UpdateEffectDisplay();
+    }
+
     protected UrbDisplayFeature CreateFeature(string FeatureSprite,Transform AttachmentPoint, float offset = 0.0f)
     {
         GameObject Feature = Instantiate<GameObject>(FeatureTemplate.gameObject, AttachmentPoint);
         UrbDisplayFeature DisplayFeature = Feature.GetComponent<UrbDisplayFeature>();
         DisplayFeature.SpritePath = FeatureSprite;
         Feature.transform.position += (Vector3.forward * -offset);
-        
+        DisplayFeature.SortingOrder = SortingOrder;
         return DisplayFeature;
     }
 
     public void SynchronizeBody()
     {
-        if (DisplayBody.Invisible)
+        if (Invisible || mSignificance < FeatureSignificance)
         {
             return;
         }
+
         Face.position = FacePivot.position;
 
-        FaceFeaturePoint.position = Face.position;
+        FaceFeaturePoint.position = Face.position + (Vector3.forward * featureOffset);
         FaceFeaturePoint.localScale = Face.localScale;
         FaceFeaturePoint.rotation = Face.rotation;
     }

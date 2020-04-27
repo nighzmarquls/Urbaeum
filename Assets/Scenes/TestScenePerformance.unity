@@ -1228,8 +1228,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Color: {r: 1, g: 1, b: 1, a: 1}
   TileSize: 1
-  Xsize: 100
-  Ysize: 100
+  Xsize: 64
+  Ysize: 64
   DefaultTerrain: 0
 --- !u!4 &1223764433
 Transform:
@@ -2265,7 +2265,7 @@ PrefabInstance:
     - target: {fileID: 8287119984133433075, guid: 5f41d8de6eb14de49b4811071da72e4d,
         type: 3}
       propertyPath: AgentTypes.Array.size
-      value: 5
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8287119984133433075, guid: 5f41d8de6eb14de49b4811071da72e4d,
         type: 3}
@@ -2311,6 +2311,24 @@ PrefabInstance:
       propertyPath: AgentTypes.Array.data[4]
       value: 
       objectReference: {fileID: 4574942228798516744, guid: c040dd1693ecedd44ad3dff5f67fc6aa,
+        type: 3}
+    - target: {fileID: 8287119984133433075, guid: 5f41d8de6eb14de49b4811071da72e4d,
+        type: 3}
+      propertyPath: AgentTypes.Array.data[5]
+      value: 
+      objectReference: {fileID: 4574942228798516744, guid: 6b10252381d06a74ab9ad7b6f592e3ae,
+        type: 3}
+    - target: {fileID: 8287119984133433075, guid: 5f41d8de6eb14de49b4811071da72e4d,
+        type: 3}
+      propertyPath: AgentTypes.Array.data[6]
+      value: 
+      objectReference: {fileID: 4574942228798516744, guid: 09781a599fc8cad4295eb5df370e8be2,
+        type: 3}
+    - target: {fileID: 8287119984133433075, guid: 5f41d8de6eb14de49b4811071da72e4d,
+        type: 3}
+      propertyPath: AgentTypes.Array.data[7]
+      value: 
+      objectReference: {fileID: 4574942228798516744, guid: f3dc065bcb3a2cb4fa7461eb2bde1dce,
         type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5f41d8de6eb14de49b4811071da72e4d, type: 3}

@@ -38,7 +38,7 @@ public class UrbAgentSpawner
         }
 
         Tile.OnAgentArrive(Agent);
-        
+        UrbAgent.TotalAgents++; 
         return true;
     }
 }

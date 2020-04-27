@@ -34,23 +34,32 @@ public class UrbBehaviour : UrbBase
         }
         mAgent = GetComponent<UrbAgent>();
         mCoroutine = IntervalCoroutine();
-        StartCoroutine(mCoroutine);
+        
         base.Initialize();
+        StartCoroutine(mCoroutine);
     }
+
+    UrbTile LastOriginTile = null;
+    UrbTile[] CachedSearchTile = null;
 
     virtual protected UrbTile[] GetSearchTiles(bool GetLinked)
     {
-        UrbTile[] Self = mAgent.Tileprint.GetAllPrintTiles(mAgent);
+        if (LastOriginTile == null || LastOriginTile != mAgent.CurrentTile)
+        {
+            UrbTile[] Self = mAgent.Tileprint.GetAllPrintTiles(mAgent);
 
-        UrbTile[] Adjacent = mAgent.Tileprint.GetBorderingTiles(mAgent, GetLinked);
+            UrbTile[] Adjacent = mAgent.Tileprint.GetBorderingTiles(mAgent, GetLinked);
 
-        UrbTile[] SearchTiles = new UrbTile[Adjacent.Length + Self.Length];
+            UrbTile[] SearchTiles = new UrbTile[Adjacent.Length + Self.Length];
 
-        Self.CopyTo(SearchTiles, 0);
+            Self.CopyTo(SearchTiles, 0);
 
-        Adjacent.CopyTo(SearchTiles, Self.Length);
+            Adjacent.CopyTo(SearchTiles, Self.Length);
 
-        return SearchTiles;
+            LastOriginTile = mAgent.CurrentTile;
+            CachedSearchTile = SearchTiles;
+        }
+        return CachedSearchTile;
     }
 
     virtual protected bool ValidToInterval()

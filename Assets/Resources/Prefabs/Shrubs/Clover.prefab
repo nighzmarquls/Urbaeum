@@ -16,6 +16,9 @@ GameObject:
   - component: {fileID: -3102135804067309858}
   - component: {fileID: 290428910922112158}
   - component: {fileID: -5790726441430418755}
+  - component: {fileID: 1574346835691264955}
+  - component: {fileID: 5382275929819370278}
+  - component: {fileID: -4453753241381603907}
   m_Layer: 0
   m_Name: Clover
   m_TagString: Untagged
@@ -104,6 +107,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BirthTime: 0
   CurrentMap: {fileID: 0}
+  Shuffle: 1
   SizeOffset: 1
   TileprintString: 1
   FidgetTime: 1
@@ -120,13 +124,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Modifications:
-  - DisplayDrivingSubstance: 10
+  - DisplayDrivingSubstance: 13
     SubstanceSizeRatio: 1000
     ColorsEffected: 0
     ModificationType: 2
     ColorApplied: {r: 0, g: 0, b: 0, a: 0}
     SubstanceColorRatio: 0
-  - DisplayDrivingSubstance: 10
+  - DisplayDrivingSubstance: 3
     SubstanceSizeRatio: 500
     ColorsEffected: 0
     ModificationType: 4
@@ -178,7 +182,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d2d170163064e42bda7b740df8716e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Size: 1
   BodyRecipe:
   - Substance: 2
     SubstanceAmount: 10
@@ -214,10 +217,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Interval: 1
   MateRequirement: 0
-  MateCrowding: 4
+  MateCrowding: 8
   OffspringCount: 8
   MateCost: 10
   Gestation: 2
+  Disperse: 1
   BreedType: 0
   MateScents: 
   RivalScents: 
@@ -228,6 +232,60 @@ MonoBehaviour:
     SubstanceAmount: 20
   OffspringObjects:
   - {fileID: 4574942228798516750}
+--- !u!114 &1574346835691264955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e57e4b4dcd9f0a46b73d7ff26cab5e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Interval: 5
+  MinimumMergeCount: 2
+  MinimumMass: 840
+  MinimumTiles: 1
+  MergeProduct: {fileID: 4574942228798516744, guid: 09781a599fc8cad4295eb5df370e8be2,
+    type: 3}
+--- !u!114 &5382275929819370278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e57e4b4dcd9f0a46b73d7ff26cab5e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Interval: 10
+  MinimumMergeCount: 2
+  MinimumMass: 3780
+  MinimumTiles: 9
+  MergeProduct: {fileID: 4574942228798516744, guid: 6b10252381d06a74ab9ad7b6f592e3ae,
+    type: 3}
+--- !u!114 &-4453753241381603907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e57e4b4dcd9f0a46b73d7ff26cab5e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Interval: 10
+  MinimumMergeCount: 2
+  MinimumMass: 5250
+  MinimumTiles: 25
+  MergeProduct: {fileID: 4574942228798516744, guid: f3dc065bcb3a2cb4fa7461eb2bde1dce,
+    type: 3}
 --- !u!1001 &7878978403681955433
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -459,6 +517,56 @@ PrefabInstance:
         type: 3}
       propertyPath: mColors.PrimaryColor.Line.a
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: SortingOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1661663223812267372, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1661663223812267372, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1661663223812267372, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2604074847122925515, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2604074847122925515, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2604074847122925515, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6009775441014029705, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6009775441014029705, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6009775441014029705, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d87aa7449214aee4a9f2c5c0b1d3a5df, type: 3}

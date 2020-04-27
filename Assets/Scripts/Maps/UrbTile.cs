@@ -42,13 +42,14 @@ public class UrbTile
         }
     }
 
+    protected float ScentDiffusion = UrbScent.ScentDiffusion;
+
     public float FreeCapacity {
         get {
             float Capacity = TileCapacity;
-            for (int c = 0; c < Contents.Count; c++)
+            for(int o = 0; o < Occupants.Count; o++)
             {
-                Capacity -= Contents[c].Mass;
-
+                Capacity -= Occupants[o].MassPerTile;
                 if (Capacity <= 0)
                 {
                     return 0;
@@ -81,13 +82,14 @@ public class UrbTile
             Vector3 Center = OwningMap.TileAddressToLocation(XAddress, YAddress);
             UrbAgent Biggest = Occupants[0];
             List<UrbAgent> OrderedOccupants = new List<UrbAgent>();
-
+            float BiggestMass = Biggest.MassPerTile;
             for (int i = 0; i < Occupants.Count; i++)
             {
-                if(Occupants[i].Mass > Biggest.Mass)
+                if(Occupants[i].MassPerTile > BiggestMass)
                 {
                     OrderedOccupants.Insert(0, Occupants[i]);
                     Biggest = Occupants[i];
+                    BiggestMass = Occupants[i].MassPerTile;
                 }
                 else
                 {
@@ -105,19 +107,35 @@ public class UrbTile
 
                 for (int i = 0; i < OrderedOccupants.Count; i++)
                 {
-                    float X = Mathf.Sin(Turn);
-                    float Y = Mathf.Cos(Turn);
-                    LocationOffset = new Vector3(X, Y, 0) * Radius * this.OwningMap.TileSize;
-                    OrderedOccupants[i].Location = Center + LocationOffset + new Vector3(0,0,(LocationOffset.y*DepthPush) - LocationOffset.x);
-
-                    Turn += (OrderedOccupants[i].Mass / TileCapacityOffset) * TurnAdjust;
-                    TurnAdjust *= 0.85f;
-                    Radius += (OrderedOccupants[i].Mass / TileCapacityOffset) / RadiusAdjust;
-                    RadiusAdjust += 5f;
+                    
+                        float X = Mathf.Sin(Turn);
+                        float Y = Mathf.Cos(Turn);
+                        LocationOffset = new Vector3(X, Y, 0) * Radius * this.OwningMap.TileSize;
+                        if (OrderedOccupants[i].Shuffle)
+                        {
+                            OrderedOccupants[i].Location = Center + LocationOffset + new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x);
+                        }
+                        Turn += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) * TurnAdjust;
+                        TurnAdjust *= 0.85f;
+                        Radius += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) / RadiusAdjust;
+                        RadiusAdjust += 5f;
+                    
                 }
 
             }
 
+            float Free = FreeCapacity / TileCapacity;
+            if (Free <= 0)
+            {
+                ScentDirty = false;
+                Blocked = true;
+            }
+            else
+            {
+                Blocked = false;
+            }
+
+            ScentDiffusion = UrbScent.ScentDiffusion * Free;
             Occupants = OrderedOccupants;
         }
     }
@@ -373,6 +391,17 @@ public class UrbTile
 
     }
 
+    public UrbAgent[] CurrentContents {
+        get {
+            if(Contents == null || Contents.Count == 0)
+            {
+                return new UrbAgent[0];
+            }
+
+            return Contents.ToArray();
+        }
+    }
+
     public void OnAgentArrive(UrbAgent input)
     {
             Ordering = false;
@@ -574,18 +603,7 @@ public class UrbTile
 
     void DiffuseScent()
     {
-        float Free = FreeCapacity / TileCapacity;
-        if(Free <= 0)
-        {
-            ScentDirty = false;
-            Blocked = true;
-        }
-        else
-        {
-            Blocked = false;
-        }
-
-        float Diffusion = UrbScent.ScentDiffusion * Free;
+        
 
         if (LinksDirty)
         {
@@ -612,7 +630,7 @@ public class UrbTile
                     Adjacent[t].ScentDirty = true;
                     for(int s = 0; s < Adjacent[t].SizeLimit; s++)
                     {
-                        Adjacent[t].TerrainFilter[TerrainType][s].ReceiveScent(TerrainFilter[TerrainType][s], Diffusion);
+                        Adjacent[t].TerrainFilter[TerrainType][s].ReceiveScent(TerrainFilter[TerrainType][s], ScentDiffusion);
                     }
                 }                   
             }

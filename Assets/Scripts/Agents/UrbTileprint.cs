@@ -19,6 +19,8 @@ public class UrbTileprint
 
     int X, Y;
 
+    public int TileCount { get; protected set; }
+
     public UrbTileprint(string PrintMap = "")
     {
         Initialize(PrintMap);
@@ -75,6 +77,11 @@ public class UrbTileprint
                     if(row[x] == testCharacters[i])
                     {
                         Print[y][x] = (UrbTileprintFill)i;
+
+                        if(i > 0)
+                        {
+                            TileCount++;
+                        }
                         break;
                     }
                 }
@@ -177,7 +184,10 @@ public class UrbTileprint
 
             foreach (UrbTile PrintTile in Tiles)
             {
-                ReturnList.AddRange(PrintTile.GetLinked());
+                if (PrintTile != null)
+                {
+                    ReturnList.AddRange(PrintTile.GetLinked());
+                }
             }
         }
 

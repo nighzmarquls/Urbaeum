@@ -4,21 +4,26 @@ using UnityEngine;
 
 public class UrbAgent : UrbBase
 {
+    public static int TotalAgents;
+
     const float LocationThreshold = 0.01f;
     public UrbMovement MovementSystem { get; protected set; }
     UrbPathfinder Pathfinder;
     UrbThinker Mind;
 
-    UrbBodyDisplay Display;
+    UrbBodyDisplay BodyDisplay;
 
     SpriteRenderer mSpriteRenderer;
     public float BirthTime;
 
-    public UrbDisplay DisplayObject { get; private set; }
-
+    public UrbDisplay Display { get; private set; }
+  
     public UrbMap CurrentMap;
     public UrbTile CurrentGoal;
     public UrbTile CurrentTile;
+    public bool Shuffle = true;
+
+    public bool Interacting = false;
 
     public float SizeOffset = 1.0f;
     public bool Moving { get; protected set; } = false;
@@ -33,10 +38,10 @@ public class UrbAgent : UrbBase
             {
                 TargetLocation = value;
             }
-            //transform.position = value;
         }
     }
 
+    protected float LastCheckedMass = 0;
     public float Mass {  get {
             if(Body == null || Body.BodyComposition == null)
             {
@@ -44,6 +49,17 @@ public class UrbAgent : UrbBase
             }
 
             return Body.BodyComposition.CurrentCapacty;
+        } }
+
+    public float MassPerTile { get {
+            if(tileprint.TileCount > 1)
+            {
+                return Mass / tileprint.TileCount;
+            }
+            else
+            {
+                return Mass;
+            }
         } }
 
     [TextArea(0, 5)]
@@ -55,7 +71,7 @@ public class UrbAgent : UrbBase
             {
                 return tileprint;
             }
-            tileprint = new UrbTileprint();
+            tileprint = new UrbTileprint(TileprintString);
             return tileprint;
         }
     }
@@ -108,9 +124,9 @@ public class UrbAgent : UrbBase
             return;
         }
 
-        DisplayObject = GetComponentInChildren<UrbDisplay>();
+        Display = GetComponentInChildren<UrbDisplay>();
 
-        if (DisplayObject == null)
+        if (Display == null)
         {
             Debug.LogError("No DisplayObject Present: Make sure a Display Object is attached to " + gameObject.name);
         }
@@ -126,20 +142,30 @@ public class UrbAgent : UrbBase
         tileprint = new UrbTileprint(TileprintString);
 
         Mind = GetComponent<UrbThinker>();
-        Display = GetComponent<UrbBodyDisplay>();
+        BodyDisplay = GetComponent<UrbBodyDisplay>();
 
         base.Initialize();
 
-
     }
 
+    bool Removing = false;
     public void Remove()
     {
+        if (Removing)
+        {
+            return;
+        }
+        Removing = true;
         if (CurrentTile != null)
         {
             CurrentTile.OnAgentLeave(this);
         }
         CurrentMap = null;
+        if(TotalAgents > 0)
+        {
+            TotalAgents--;
+        }
+        
         Destroy(gameObject);
     }
 
@@ -157,7 +183,7 @@ public class UrbAgent : UrbBase
             }
             if (Pathfinder != null)
             {
-                if (!Moving)
+                if (!Moving && !Interacting)
                 {
                     CurrentGoal = Pathfinder.GetNextGoal(CurrentMap);
                 }
@@ -165,17 +191,24 @@ public class UrbAgent : UrbBase
             if (MovementSystem != null && CurrentGoal != null && CurrentGoal != CurrentTile)
             {
                 Moving = true;
-                if (DisplayObject != null)
+                if (Display != null)
                 {
-                    DisplayObject.Express(UrbDisplayFace.Expression.Default);
+                    Display.Express(UrbDisplayFace.Expression.Default);
                 }
-                MovementSystem.MoveTo(CurrentGoal); 
+                MovementSystem.MoveTo(CurrentGoal);
             }
             else
             {
                 Moving = false;
-                if (DisplayObject != null)
+                if (Display != null)
                 {
+                    if (TargetLocation != transform.position && Shuffle)
+                    {
+                        Vector3 Direction = (TargetLocation - transform.position);
+
+                        transform.position = (Direction.magnitude > LocationThreshold) ? transform.position + (Direction.normalized * Time.deltaTime) : TargetLocation;
+                    }
+
                     if (Time.time > NextFidget)
                     {
                         NextFidget = Time.time + FidgetTime + Random.Range(0, FidgetTime);
@@ -183,15 +216,15 @@ public class UrbAgent : UrbBase
 
                         if (Probability > 0.85f)
                         {
-                            DisplayObject.Flip = !DisplayObject.Flip;
+                            Display.Flip = !Display.Flip;
                         }
                         else if (Probability > 0.75)
                         {
-                            DisplayObject.Express(UrbDisplayFace.Expression.Closed);
+                            Display.Express(UrbDisplayFace.Expression.Closed);
                         }
                         else if (Probability > 0.70)
                         {
-                            DisplayObject.Express(UrbDisplayFace.Expression.Default);
+                            Display.Express(UrbDisplayFace.Expression.Default);
                         }
                     }
                 }
@@ -203,25 +236,16 @@ public class UrbAgent : UrbBase
                 {
                     Remove();
                 }
-                if (Display != null)
+                if (BodyDisplay != null)
                 {
-                    Display.UpdateDisplay(Body.BodyComposition);
+                    BodyDisplay.UpdateDisplay(Body.BodyComposition);
                 }
             }
 
-            if (DisplayObject != null && DisplayObject.Invisible)
+            if (Display != null && !Display.Invisible && LastCheckedMass != Mass && Shuffle)
             {
-
-            }
-            else
-            {
+                LastCheckedMass = Mass;
                 CurrentTile.ReorderContents();
-                if (TargetLocation != transform.position)
-                {
-                    Vector3 Direction = (TargetLocation - transform.position);
-
-                    transform.position = (Direction.magnitude > LocationThreshold) ? transform.position + Direction.normalized * Time.deltaTime : TargetLocation;
-                }
             }
         }
         else

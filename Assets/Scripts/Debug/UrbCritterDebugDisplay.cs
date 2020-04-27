@@ -34,6 +34,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
         GameObject Exemplar = new GameObject("DebugSprite");
         SpriteRenderer spriteRender = Exemplar.AddComponent<SpriteRenderer>();
         spriteRender.sprite = DebugTileSprite;
+        spriteRender.sortingOrder = -1;
         Exemplar.transform.localScale = new Vector3(targetMap.TileSize, targetMap.TileSize, targetMap.TileSize);
         for (int i = 0; i < targetMap.Xsize; i++)
         {

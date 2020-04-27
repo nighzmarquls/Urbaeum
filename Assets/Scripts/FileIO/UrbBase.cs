@@ -28,7 +28,8 @@ public class UrbBase : MonoBehaviour
 
     virtual public void Initialize()
     {
-       bInitialized = true;
+        bInitialized = true;
+        enabled = true;
     }
 
 }

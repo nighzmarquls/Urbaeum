@@ -61,6 +61,7 @@ public class UrbDebugDisplayAgent : MonoBehaviour
         UrbThinker Thinker = Input.GetComponent<UrbThinker>();
 
         string displayText =
+            "Total Agents: " + UrbAgent.TotalAgents + "\n" +
             "Name: " + LocalName + "\n" +
             "Age: " + Age + "\n";
 

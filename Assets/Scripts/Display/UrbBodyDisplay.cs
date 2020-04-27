@@ -146,14 +146,22 @@ public class UrbBodyDisplay : UrbBase
 
         if (mDisplay == null)
         {
-            mDisplay = mAgent.DisplayObject;
+            mDisplay = mAgent.Display;
         }
         else
         {
             if (mDisplay.Invisible)
             {
-                return;
+                mDisplay.Significance = 0;
             }
+
+            Camera View = Camera.main;
+            if (View != null && mAgent.CurrentMap != null)
+            { 
+                float Significance = (mDisplay.BodySize / View.orthographicSize)*mAgent.CurrentMap.TileSize;
+                mDisplay.Significance = Significance;
+            }
+
             for (int s = 0; s < Modifications.Length; s++)
             {
                 Modifications[s].ApplyModification(mDisplay, input);

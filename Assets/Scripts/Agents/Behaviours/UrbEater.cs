@@ -6,10 +6,14 @@ using UnityEngine;
 public class UrbEater : UrbBehaviour
 {
     public UrbSubstanceTag[] FoodSubstances;
-    public float BiteSize =10.0f;
     public UrbComposition Stomach;
 
+    [SerializeField]
+    protected UrbBiteInteraction Interaction;
+
     public UrbScentTag[] FoodScents { get; protected set; }
+
+    protected UrbMetabolism mMetabolism;
 
     public override void Initialize()
     {
@@ -17,7 +21,7 @@ public class UrbEater : UrbBehaviour
         {
             return;
         }
-        
+        mMetabolism = GetComponent<UrbMetabolism>();
         Stomach = new UrbComposition();
         FoodScents = UrbSubstances.Scent(FoodSubstances);
 
@@ -39,46 +43,79 @@ public class UrbEater : UrbBehaviour
     override public IEnumerator FunctionalCoroutine()
     {
         UrbTile[] Search = GetSearchTiles(true);
-
-        foreach (UrbTile Tile in Search)
+        mAgent.Interacting = false;
+        for (int t = 0; t < Search.Length; t++)
         {
             if (Stomach.AvailableCapacity > 0)
             {
-
-                if (Tile == null)
+                if(mMetabolism != null)
                 {
-                    continue;
-                }
-
-                if (Tile.CurrentContent == null || Tile.CurrentContent == mAgent)
-                {
-                    continue;
-                }
-
-                UrbBody PossibleFood = Tile.CurrentContent.Body;
-
-                if (PossibleFood != null)
-                {
-                    //Debug.Log(gameObject.name + " Attempting to Eat from " + Tile.CurrentContent.gameObject.name);
-                    for (int f = 0; f < FoodSubstances.Length; f++)
+                    if (mMetabolism.EnergyBudget < Interaction.CostEstimate(mAgent) && Stomach.CurrentCapacty > 0)
                     {
-                        if (PossibleFood.BodyComposition == null)
-                            yield break;
+                        Debug.Log("Energy Budget: " + mMetabolism.EnergyBudget + " And Digesting");
+                        break;
+                    }
+                }
+                if (Search[t] == null)
+                {
+                    continue;
+                }
 
-                        float Eaten = PossibleFood.BodyComposition.TransferTo(Stomach, FoodSubstances[f], BiteSize);
-                        //Debug.Log("Eaten " + Eaten + " " + FoodSubstances[f].ToString());
-                        if (Eaten >= BiteSize)
+                if (Search[t].CurrentContent == null)
+                {
+                    continue;
+                }
+
+                for (int o = 0; o < Search[t].Occupants.Count; o++)
+                {
+                    if (Search[t].Occupants[o] == mAgent)
+                    {
+                        continue;
+                    }
+                    UrbBody PossibleFood = Search[t].Occupants[o].Body;
+                    
+                    if (PossibleFood != null)
+                    {
+                        bool ContainsFood = false;
+                        for (int f = 0; f < FoodSubstances.Length; f++)
                         {
-                            
-                            yield break;
+                            if (PossibleFood.BodyComposition == null)
+                            {
+                                break;
+                            }
+                           
+
+                            if (PossibleFood.BodyComposition[FoodSubstances[f]] > 0)
+                            {
+                                ContainsFood = true;
+                                break;
+                            }
                         }
 
+                        if(ContainsFood)
+                        {
+                            float BiteSize;
+                            if (Interaction.AttemptInteraction(mAgent, Search[t].Occupants[o], out BiteSize))
+                            {
+                                mAgent.Interacting = true;
+                                for (int f = 0; f < FoodSubstances.Length; f++)
+                                {
+                                    float Eaten = PossibleFood.BodyComposition.TransferTo(Stomach, FoodSubstances[f], BiteSize);
+                                    
+                                    if (Eaten >= BiteSize)
+                                    {
+                                        yield break;
+                                    }
+
+                                }
+                            }
+                        }
                     }
                 }
             }
             else
             {
-                yield break;
+                break;
             }
         }
 
@@ -97,11 +134,6 @@ public class UrbEater : UrbBehaviour
             UrbEncoder.GetArrayFromSubstances("StomachContents" , StomachContents),
         };
 
-        Data.Fields = new UrbFieldData[]
-        {
-            new UrbFieldData { Name = "BiteSize", Value = BiteSize}
-        };
-
         Data.StringArrays = new UrbStringArrayData[]
         {
             UrbEncoder.EnumsToArray("FoodSubstances", FoodSubstances),
@@ -116,6 +148,73 @@ public class UrbEater : UrbBehaviour
         FoodSubstances = UrbEncoder.GetEnumArray<UrbSubstanceTag>("FoodSubstances", Data);
         FoodScents = UrbEncoder.GetEnumArray<UrbScentTag>("FoodScents", Data);
         Stomach = new UrbComposition(UrbEncoder.GetSubstancesFromArray("StomachContents", Data));
+        return true;
+    }
+}
+
+[System.Serializable]
+public class UrbBiteInteraction : UrbInteraction
+{
+    public UrbTest HitTest;
+    public UrbTest DodgeTest;
+    public UrbTest BiteTest;
+    public UrbTest SoakTest;
+
+    public override float CostEstimate(UrbAgent Instigator)
+    {
+        return Test(Instigator, HitTest.Category) + Test(Instigator,BiteTest.Category);
+    }
+
+    public override bool AttemptInteraction(UrbAgent Instigator,UrbAgent Target, out float Result)
+    {
+        UrbMetabolism BiterMetabolism = Instigator.GetComponent<UrbMetabolism>();
+        UrbMetabolism TargetMetabolism = Target.GetComponent<UrbMetabolism>();
+        Result = 0;
+
+        float HitCheck = Test(Instigator, HitTest.Category);
+       
+        if (BiterMetabolism != null)
+        {
+            BiterMetabolism.SpendEnergy(HitCheck);
+            Instigator.Display.QueueEffectDisplay(HitTest, Instigator.transform.position);
+        }
+
+        if (HitCheck <= 0)
+        {
+            return false;
+        }
+
+        float DodgeCheck = Test(Target, DodgeTest.Category);
+
+        if (TargetMetabolism != null)
+        {
+            TargetMetabolism.SpendEnergy(DodgeCheck);
+        }
+
+        if (DodgeCheck > HitCheck)
+        {
+            Target.Display.QueueEffectDisplay(DodgeTest, Target.transform.position);
+            return false;
+        }
+
+        float BiteCheck = Test(Instigator, BiteTest.Category, HitCheck - DodgeCheck);
+
+        if (BiterMetabolism != null)
+        {
+            BiterMetabolism.SpendEnergy(BiteCheck);
+        }
+
+        Result = BiteCheck;
+
+        float SoakCheck = Test(Target, SoakTest.Category);
+
+        if(SoakCheck > HitCheck)
+        {
+            Target.Display.QueueEffectDisplay(SoakTest, Target.transform.position);
+            return false;
+        }
+
+        Instigator.Display.QueueEffectDisplay(BiteTest, Target.transform.position);
         return true;
     }
 }

@@ -108,6 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BirthTime: 27.076632
   CurrentMap: {fileID: 0}
+  Shuffle: 1
   SizeOffset: 1
   TileprintString: 1
   FidgetTime: 1
@@ -123,13 +124,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d2d170163064e42bda7b740df8716e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Size: 1
   BodyRecipe:
   - Substance: 6
     SubstanceAmount: 50
   - Substance: 5
     SubstanceAmount: 45
   - Substance: 8
+    SubstanceAmount: 10
+  - Substance: 10
+    SubstanceAmount: 10
+  - Substance: 11
     SubstanceAmount: 10
   CriticalBodyPartAmounts:
   - Substance: 5
@@ -198,6 +202,31 @@ MonoBehaviour:
   Interval: 0.5
   FoodSubstances: 040000000300000002000000
   BiteSize: 20
+  Interaction:
+    HitTest:
+      Category: 1
+      DisplayTime: 0.15
+      SuccessIcon: {fileID: 21300000, guid: 676e585e1801d424eb9ce96dcc0ba238, type: 3}
+      SuccessColor: {r: 0, g: 1, b: 1, a: 1}
+      Offset: {x: 0, y: 0}
+    DodgeTest:
+      Category: 1
+      DisplayTime: 1
+      SuccessIcon: {fileID: 0}
+      SuccessColor: {r: 0.35072255, g: 1, b: 0, a: 1}
+      Offset: {x: 0, y: 0}
+    BiteTest:
+      Category: 2
+      DisplayTime: 0.15
+      SuccessIcon: {fileID: 21300000, guid: f516fb8e15e2f4940bc032f3dd5237ef, type: 3}
+      SuccessColor: {r: 1, g: 0, b: 0, a: 1}
+      Offset: {x: 0, y: 0}
+    SoakTest:
+      Category: 0
+      DisplayTime: 0
+      SuccessIcon: {fileID: 0}
+      SuccessColor: {r: 0, g: 0, b: 0, a: 0}
+      Offset: {x: 0, y: 0}
 --- !u!114 &1285019260808379821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,6 +245,7 @@ MonoBehaviour:
   OffspringCount: 0
   MateCost: 10
   Gestation: 10
+  Disperse: 0
   BreedType: 1
   MateScents: 0400000006000000
   RivalScents: 05000000
@@ -265,7 +295,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Modifications:
-  - DisplayDrivingSubstance: 10
+  - DisplayDrivingSubstance: 13
     SubstanceSizeRatio: 1000
     ColorsEffected: 0
     ModificationType: 2
@@ -290,6 +320,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4574942228798516746}
     m_Modifications:
+    - target: {fileID: 917231936721376684, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 917231936721376684, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 917231936721376684, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 917231937711402368, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: m_Name
@@ -368,6 +413,11 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: PrimaryForeFeatureSprites.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: PrimaryBackFeatureSprites.Array.size
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
@@ -468,6 +518,41 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.HighlightColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: PrimaryBackFeatureSprites.Array.data[0]
+      value: Critter/Features_Bun_HindBody
+      objectReference: {fileID: 0}
+    - target: {fileID: 1661663223812267372, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1661663223812267372, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1661663223812267372, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6009775441014029705, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6009775441014029705, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6009775441014029705, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.z
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
