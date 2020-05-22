@@ -15,9 +15,11 @@ GameObject:
   - component: {fileID: 2331400768363331401}
   - component: {fileID: -3102135804067309858}
   - component: {fileID: 290428910922112158}
-  - component: {fileID: -5790726441430418755}
   - component: {fileID: 5778968908294350008}
   - component: {fileID: -1886022900920992995}
+  - component: {fileID: 1541293610166684290}
+  - component: {fileID: 8900755114888397831}
+  - component: {fileID: 3071519546060316335}
   m_Layer: 0
   m_Name: CloverPatch
   m_TagString: Untagged
@@ -107,11 +109,11 @@ MonoBehaviour:
   BirthTime: 0
   CurrentMap: {fileID: 0}
   Shuffle: 0
+  Interacting: 0
   SizeOffset: 1
   TileprintString: '11
 
     11'
-  FidgetTime: 1
 --- !u!114 &-601077773047966795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -129,7 +131,7 @@ MonoBehaviour:
     SubstanceSizeRatio: 0
     ColorsEffected: 255
     ModificationType: 1
-    ColorApplied: {r: 0.3287139, g: 1, b: 0, a: 1}
+    ColorApplied: {r: 0.6611067, g: 1, b: 0, a: 1}
     SubstanceColorRatio: 4000
   - DisplayDrivingSubstance: 3
     SubstanceSizeRatio: 4000
@@ -177,6 +179,7 @@ MonoBehaviour:
   CriticalBodyPartAmounts:
   - Substance: 2
     SubstanceAmount: 40
+  Height: 0.25
 --- !u!114 &290428910922112158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192,35 +195,6 @@ MonoBehaviour:
   Interval: 1
   SmellTag: 01000000
   SmellStrength: 10
---- !u!114 &-5790726441430418755
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4574942228798516750}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fb352cbb9e235d46a8e3c997f5983a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Interval: 5
-  MateRequirement: 0
-  MateCrowding: 4
-  OffspringCount: 8
-  MateCost: 10
-  Gestation: 2
-  Disperse: 1
-  BreedType: 0
-  MateScents: 
-  RivalScents: 
-  GestationRecipe:
-  - Substance: 1
-    SubstanceAmount: 10
-  - Substance: 4
-    SubstanceAmount: 20
-  OffspringObjects:
-  - {fileID: 4574942228798516750, guid: 8a1e98e476944c14695684e9eefa86a9, type: 3}
 --- !u!114 &5778968908294350008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -237,6 +211,7 @@ MonoBehaviour:
   MinimumMergeCount: 2
   MinimumMass: 3780
   MinimumTiles: 5
+  MaximumTiles: 9
   MergeProduct: {fileID: 4574942228798516744, guid: 6b10252381d06a74ab9ad7b6f592e3ae,
     type: 3}
 --- !u!114 &-1886022900920992995
@@ -255,8 +230,65 @@ MonoBehaviour:
   MinimumMergeCount: 2
   MinimumMass: 5250
   MinimumTiles: 5
+  MaximumTiles: 9
   MergeProduct: {fileID: 4574942228798516744, guid: f3dc065bcb3a2cb4fa7461eb2bde1dce,
     type: 3}
+--- !u!114 &1541293610166684290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 595bc0b273ea0d64c9696083da17f405, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Interval: 4
+  PerceptionPrintString: 
+  ContactPrintString: 
+  mBehaviours: []
+--- !u!114 &8900755114888397831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89760c5a60a1c48469e26698ab374520, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3071519546060316335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fb352cbb9e235d46a8e3c997f5983a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Interval: 4
+  MateRequirement: 0
+  MateCrowding: 8
+  OffspringCount: 8
+  Gestation: 2
+  Disperse: 1
+  BreedType: 0
+  MateScents: 
+  RivalScents: 
+  GestationRecipe:
+  - Substance: 1
+    SubstanceAmount: 10
+  - Substance: 4
+    SubstanceAmount: 20
+  OffspringObjects:
+  - {fileID: 4574942228798516750, guid: 8a1e98e476944c14695684e9eefa86a9, type: 3}
 --- !u!1001 &2274928895148861061
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -342,7 +374,7 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: 0a60f7baa03823e499192cf7785c0888,
         type: 3}
       propertyPath: mColors.PrimaryColor.Line.r
-      value: 0.19215687
+      value: 0.5460766
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: 0a60f7baa03823e499192cf7785c0888,
         type: 3}
@@ -352,7 +384,7 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: 0a60f7baa03823e499192cf7785c0888,
         type: 3}
       propertyPath: mColors.PrimaryColor.Line.b
-      value: 0.37254903
+      value: 0.19215687
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: 0a60f7baa03823e499192cf7785c0888,
         type: 3}
@@ -367,7 +399,7 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: 0a60f7baa03823e499192cf7785c0888,
         type: 3}
       propertyPath: mColors.PrimaryColor.Fill.r
-      value: 0.2901961
+      value: 0.5257473
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: 0a60f7baa03823e499192cf7785c0888,
         type: 3}

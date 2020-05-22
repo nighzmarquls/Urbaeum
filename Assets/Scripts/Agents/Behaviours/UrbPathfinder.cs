@@ -10,21 +10,23 @@ public enum UrbPathTerrain
 }
 
 [RequireComponent(typeof(UrbAgent))]
-public class UrbPathfinder : UrbBase
+public class UrbPathfinder : UrbBehaviour
 {
     public UrbScentTag GoalTag = UrbScentTag.Goal;
     public int Size = 0;
     public UrbPathTerrain PassableTerrain = UrbPathTerrain.Land;
 
-    protected UrbAgent mAgent;
     protected UrbThinker mThinker;
-    void Start()
+
+    public override void Initialize()
     {
-        mAgent = GetComponent<UrbAgent>();
         mThinker = GetComponent<UrbThinker>();
+        base.Initialize();
     }
 
-    public UrbTile GetNextGoal(UrbMap input)
+    public override bool ShouldInterval => false;
+
+    public UrbTile GetNextGoal()
     {
         UrbTile currentTile = mAgent.CurrentTile;
         UrbTile[] Adjacent = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
@@ -47,7 +49,7 @@ public class UrbPathfinder : UrbBase
                     continue;
                 }
 
-                if(Adjacent[t].FreeCapacity < mAgent.Mass)
+                if(Adjacent[t].FreeCapacity < mAgent.MassPerTile)
                 {
                     continue;
                 }

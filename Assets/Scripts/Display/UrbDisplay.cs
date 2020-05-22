@@ -78,7 +78,7 @@ public class UrbDisplay : UrbBase
 
     protected float mBodySize = 1;
     protected float mFaceSize = 1;
-
+    protected Vector3 mInitialOffset;
     bool mFlip = false;
     public bool Flip {
         get {
@@ -266,18 +266,27 @@ public class UrbDisplay : UrbBase
 
 
     public SpriteRenderer EffectDisplay = null;
-    protected List<UrbTest> EffectQueue;
+    protected List<UrbAction> EffectQueue;
     protected List<Vector3> EffectPositionQueue;
     float ScheduledDisplayChange = 0;
 
-    public void QueueEffectDisplay(UrbTest Input, Vector3 Position)
+    public void QueueEffectDisplay(UrbAction Input, Vector3 Position, bool Immediate = false)
     {
         if(EffectDisplay == null)
         {
             return;
         }
+
+        if (Immediate)
+        {
+            EffectQueue.Clear();
+            EffectPositionQueue.Clear();
+            ScheduledDisplayChange = Time.time;
+        }
+       
         EffectQueue.Add(Input);
         EffectPositionQueue.Add(Position);
+        
     }
 
     public void UpdateEffectDisplay()
@@ -306,8 +315,8 @@ public class UrbDisplay : UrbBase
                 return;
             }
             EffectDisplay.transform.position = EffectPositionQueue[0];
-            EffectDisplay.color = EffectQueue[0].SuccessColor;
-            EffectDisplay.sprite = EffectQueue[0].SuccessIcon;
+            EffectDisplay.color = EffectQueue[0].IconColor;
+            EffectDisplay.sprite = EffectQueue[0].ActionIcon;
             EffectQueue.RemoveAt(0);
             EffectPositionQueue.RemoveAt(0);
         }
@@ -322,10 +331,10 @@ public class UrbDisplay : UrbBase
 
         if(EffectDisplay != null)
         {
-            EffectQueue = new List<UrbTest>();
+            EffectQueue = new List<UrbAction>();
             EffectPositionQueue = new List<Vector3>();
         }
-
+        mInitialOffset = this.transform.localPosition;
         mSignificance = 1f;
         DisplayBody = CreateFeature(BodySprite, Body);
         DisplayFace.FaceType = FaceSprite;
@@ -490,10 +499,12 @@ public class UrbDisplay : UrbBase
             return;
         }
 
+        
         Face.position = FacePivot.position;
 
         FaceFeaturePoint.position = Face.position + (Vector3.forward * featureOffset);
         FaceFeaturePoint.localScale = Face.localScale;
         FaceFeaturePoint.rotation = Face.rotation;
+        transform.localPosition = mInitialOffset + Vector3.forward * BodySize;
     }
 }

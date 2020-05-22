@@ -8,12 +8,16 @@ public class UrbEater : UrbBehaviour
     public UrbSubstanceTag[] FoodSubstances;
     public UrbComposition Stomach;
 
-    [SerializeField]
-    protected UrbBiteInteraction Interaction;
+    protected static UrbBiteAttack BiteAttack = new UrbBiteAttack();
 
     public UrbScentTag[] FoodScents { get; protected set; }
 
-    protected UrbMetabolism mMetabolism;
+
+    protected List<UrbBody> DetectedFood;
+
+    public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Hunger;
+
+    public override bool ShouldInterval => false;
 
     public override void Initialize()
     {
@@ -21,11 +25,10 @@ public class UrbEater : UrbBehaviour
         {
             return;
         }
-        mMetabolism = GetComponent<UrbMetabolism>();
         Stomach = new UrbComposition();
         FoodScents = UrbSubstances.Scent(FoodSubstances);
+        DetectedFood = new List<UrbBody>();
 
-        
         base.Initialize();
         if (mAgent.Body.BodyComposition == null)
         {
@@ -33,93 +36,97 @@ public class UrbEater : UrbBehaviour
         }
 
         mAgent.Body.BodyComposition.AddComposition(Stomach);
+        mAgent.AddAction(BiteAttack);
     }
 
-    protected override bool ValidToInterval()
+    public override float TileEvaluateCheck(UrbTile Target)
     {
-        return base.ValidToInterval() && FoodSubstances.Length > 0 && Stomach != null;
-    }
+        if (Stomach == null || Target == null)
+            return 0;
 
-    override public IEnumerator FunctionalCoroutine()
-    {
-        UrbTile[] Search = GetSearchTiles(true);
-        mAgent.Interacting = false;
-        for (int t = 0; t < Search.Length; t++)
+        float Evaluation = 0;
+
+        for (int o = 0; o < Target.Occupants.Count; o++)
         {
-            if (Stomach.AvailableCapacity > 0)
+            if (Target.Occupants[o] == mAgent)
             {
-                if(mMetabolism != null)
+                continue;
+            }
+            UrbBody PossibleFood = Target.Occupants[o].Body;
+
+            if (PossibleFood != null)
+            {
+                for (int f = 0; f < FoodSubstances.Length; f++)
                 {
-                    if (mMetabolism.EnergyBudget < Interaction.CostEstimate(mAgent) && Stomach.CurrentCapacty > 0)
+                    if (PossibleFood.BodyComposition == null)
                     {
-                        Debug.Log("Energy Budget: " + mMetabolism.EnergyBudget + " And Digesting");
+                        break;
+                    }
+                    Evaluation += PossibleFood.BodyComposition[FoodSubstances[f]];
+                }
+            }
+        }
+        return Evaluation * Stomach.Emptiness;
+    }
+
+    public override void RegisterTileForBehaviour(float Evaluation, UrbTile Target, int Index)
+    {
+        for (int o = 0; o < Target.Occupants.Count; o++)
+        {
+            if (Target.Occupants[o] == mAgent)
+            {
+                continue;
+            }
+            UrbBody PossibleFood = Target.Occupants[o].Body;
+
+            if (PossibleFood != null)
+            {
+                for (int f = 0; f < FoodSubstances.Length; f++)
+                {
+                    if (PossibleFood.BodyComposition == null)
+                    {
+                        break;
+                    }
+                    if (PossibleFood.BodyComposition[FoodSubstances[f]] > 0)
+                    {
+                        DetectedFood.Add(PossibleFood);
                         break;
                     }
                 }
-                if (Search[t] == null)
-                {
-                    continue;
-                }
-
-                if (Search[t].CurrentContent == null)
-                {
-                    continue;
-                }
-
-                for (int o = 0; o < Search[t].Occupants.Count; o++)
-                {
-                    if (Search[t].Occupants[o] == mAgent)
-                    {
-                        continue;
-                    }
-                    UrbBody PossibleFood = Search[t].Occupants[o].Body;
-                    
-                    if (PossibleFood != null)
-                    {
-                        bool ContainsFood = false;
-                        for (int f = 0; f < FoodSubstances.Length; f++)
-                        {
-                            if (PossibleFood.BodyComposition == null)
-                            {
-                                break;
-                            }
-                           
-
-                            if (PossibleFood.BodyComposition[FoodSubstances[f]] > 0)
-                            {
-                                ContainsFood = true;
-                                break;
-                            }
-                        }
-
-                        if(ContainsFood)
-                        {
-                            float BiteSize;
-                            if (Interaction.AttemptInteraction(mAgent, Search[t].Occupants[o], out BiteSize))
-                            {
-                                mAgent.Interacting = true;
-                                for (int f = 0; f < FoodSubstances.Length; f++)
-                                {
-                                    float Eaten = PossibleFood.BodyComposition.TransferTo(Stomach, FoodSubstances[f], BiteSize);
-                                    
-                                    if (Eaten >= BiteSize)
-                                    {
-                                        yield break;
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-                }
             }
-            else
+        }
+        base.RegisterTileForBehaviour(Evaluation, Target, Index);
+    }
+
+    public override void ClearBehaviour()
+    {
+        DetectedFood.Clear();
+        base.ClearBehaviour();
+    }
+
+    public override void ExecuteTileBehaviour()
+    {
+        float BiteSize = BiteAttack.Test(mAgent);
+        float Eaten = 0;
+        for (int d = 0; d < DetectedFood.Count; d++)
+        {
+            float Result = BiteAttack.Execute(mAgent, DetectedFood[d].mAgent, -Eaten);
+            if (Result > 0)
             {
-                break;
+                for (int f = 0; f < FoodSubstances.Length; f++)
+                {
+                    Eaten += DetectedFood[d].BodyComposition.TransferTo(Stomach, FoodSubstances[f], Result);
+
+                    if (Eaten >= BiteSize)
+                    {
+                        return;
+                    }
+
+                }
             }
         }
 
-        yield return null;
+        base.ExecuteTileBehaviour();
     }
 
     override public UrbComponentData GetComponentData()
@@ -152,69 +159,23 @@ public class UrbEater : UrbBehaviour
     }
 }
 
-[System.Serializable]
-public class UrbBiteInteraction : UrbInteraction
+public class UrbBiteAttack : UrbAttack
 {
-    public UrbTest HitTest;
-    public UrbTest DodgeTest;
-    public UrbTest BiteTest;
-    public UrbTest SoakTest;
-
-    public override float CostEstimate(UrbAgent Instigator)
+    protected override string IconPath => IconDiretory + "BiteAttack";
+    public override Color IconColor => base.IconColor;
+    protected override UrbDamage DamageAction { get; set; } = new UrbBiteDamage();
+    public override float Test(UrbAgent target, float Modifier = 0)
     {
-        return Test(Instigator, HitTest.Category) + Test(Instigator,BiteTest.Category);
+        float Teeth = target.Body.BodyComposition[UrbSubstanceTag.Teeth];
+
+        return Mathf.Max(0,Teeth + MobilityTest(target.Body) + Modifier);
     }
 
-    public override bool AttemptInteraction(UrbAgent Instigator,UrbAgent Target, out float Result)
-    {
-        UrbMetabolism BiterMetabolism = Instigator.GetComponent<UrbMetabolism>();
-        UrbMetabolism TargetMetabolism = Target.GetComponent<UrbMetabolism>();
-        Result = 0;
+}
 
-        float HitCheck = Test(Instigator, HitTest.Category);
-       
-        if (BiterMetabolism != null)
-        {
-            BiterMetabolism.SpendEnergy(HitCheck);
-            Instigator.Display.QueueEffectDisplay(HitTest, Instigator.transform.position);
-        }
-
-        if (HitCheck <= 0)
-        {
-            return false;
-        }
-
-        float DodgeCheck = Test(Target, DodgeTest.Category);
-
-        if (TargetMetabolism != null)
-        {
-            TargetMetabolism.SpendEnergy(DodgeCheck);
-        }
-
-        if (DodgeCheck > HitCheck)
-        {
-            Target.Display.QueueEffectDisplay(DodgeTest, Target.transform.position);
-            return false;
-        }
-
-        float BiteCheck = Test(Instigator, BiteTest.Category, HitCheck - DodgeCheck);
-
-        if (BiterMetabolism != null)
-        {
-            BiterMetabolism.SpendEnergy(BiteCheck);
-        }
-
-        Result = BiteCheck;
-
-        float SoakCheck = Test(Target, SoakTest.Category);
-
-        if(SoakCheck > HitCheck)
-        {
-            Target.Display.QueueEffectDisplay(SoakTest, Target.transform.position);
-            return false;
-        }
-
-        Instigator.Display.QueueEffectDisplay(BiteTest, Target.transform.position);
-        return true;
-    }
+public class UrbBiteDamage : UrbDamage
+{
+    protected override string IconPath => IconDiretory + "BiteHit";
+    public override Color IconColor => Color.red;
+    public override UrbTestCategory Category => UrbTestCategory.Pierce;
 }

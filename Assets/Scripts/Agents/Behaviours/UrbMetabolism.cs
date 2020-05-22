@@ -84,7 +84,6 @@ public class UrbMetabolism : UrbBehaviour
     public void SpendEnergy(float cost)
     {
         EnergyDebt += cost*EnergyConversionRatio;
-        
     }
 
     public override IEnumerator FunctionalCoroutine()
@@ -172,7 +171,7 @@ public class UrbMetabolism : UrbBehaviour
         {
             if (mAgent.Body.BodyComposition[BodyGrowthRecipe[g].Substance] < BodyGrowthRecipe[g].SubstanceAmount)
             {
-                Healing = true;
+                //Healing = true;
                 if (BodyEnergyReserveStorage == UrbSubstanceTag.None)
                 {
                     Growth += mAgent.Body.BodyComposition.AddSubstance(BodyGrowthRecipe[g].Substance, GrowthRate);

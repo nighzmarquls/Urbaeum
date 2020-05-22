@@ -10,9 +10,12 @@ public class UrbBehaviour : UrbBase
     private IEnumerator mCoroutine;
     protected UrbAgent mAgent;
 
+    public virtual bool ShouldInterval { get { return true; } }
+    public virtual UrbUrgeCategory UrgeSatisfied { get { return UrbUrgeCategory.None; } }
+
     public void PauseBehaviour()
     {
-        if (mCoroutine == null)
+        if (mCoroutine == null || !isActiveAndEnabled)
             return;
 
         StopCoroutine(mCoroutine);
@@ -20,7 +23,7 @@ public class UrbBehaviour : UrbBase
 
     public void ResumeBehaviour()
     {
-        if (mCoroutine == null)
+        if (mCoroutine == null || !isActiveAndEnabled)
             return;
 
         StartCoroutine(mCoroutine);
@@ -36,7 +39,10 @@ public class UrbBehaviour : UrbBase
         mCoroutine = IntervalCoroutine();
         
         base.Initialize();
-        StartCoroutine(mCoroutine);
+        if (ShouldInterval)
+        {
+            StartCoroutine(mCoroutine);
+        }
     }
 
     UrbTile LastOriginTile = null;
@@ -60,6 +66,48 @@ public class UrbBehaviour : UrbBase
             CachedSearchTile = SearchTiles;
         }
         return CachedSearchTile;
+    }
+
+    protected UrbTile[] RegisteredTiles;
+
+    virtual public float TileEvaluateCheck(UrbTile Target)
+    {
+        return -1f;
+    }
+
+    protected void ExpandRegisteredTiles(int Index)
+    {
+        UrbTile[] ExpandedArray = new UrbTile[Index + 1];
+        RegisteredTiles.CopyTo(ExpandedArray, 0);
+        RegisteredTiles = ExpandedArray;
+    }
+
+    virtual public void RegisterTileForBehaviour(float Evaluation ,UrbTile Target, int Index)
+    {
+        if(RegisteredTiles == null)
+        {
+            RegisteredTiles = new UrbTile[Index+1];
+        }
+
+        if(Index >= RegisteredTiles.Length)
+        {
+            ExpandRegisteredTiles(Index);
+        }
+
+        RegisteredTiles[Index] = Target;
+        BehaviourEvaluation += Evaluation;
+    }
+
+    virtual public void ClearBehaviour()
+    {
+        BehaviourEvaluation = 0;
+    }
+
+    public virtual float BehaviourEvaluation { get; protected set; }
+
+    virtual public void ExecuteTileBehaviour()
+    {
+        ClearBehaviour();
     }
 
     virtual protected bool ValidToInterval()

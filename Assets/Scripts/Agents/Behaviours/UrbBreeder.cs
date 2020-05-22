@@ -17,7 +17,6 @@ public class UrbBreeder : UrbBehaviour
     public int MateCrowding = 8;
     public int OffspringCount = 1;
 
-    public float MateCost = 10.0f;
     public float Gestation = 1.0f;
 
     public bool Disperse = false;
@@ -33,9 +32,12 @@ public class UrbBreeder : UrbBehaviour
     protected UrbObjectData[] OffspringData = null;
     protected UrbMetabolism mMetabolism;
 
+    protected static UrbLoveAction LoveAction = new UrbLoveAction();
 
-
+    protected int Crowd = 0;
     public bool Gestating { get; protected set; }
+
+    public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Breed;
 
     public override void Initialize()
     {
@@ -44,6 +46,7 @@ public class UrbBreeder : UrbBehaviour
             return;
         }
         Gestating = false;
+        Crowd = 0;
 
         if (OffspringData == null || OffspringData.Length <= 0)
         {
@@ -53,13 +56,13 @@ public class UrbBreeder : UrbBehaviour
         mMetabolism = GetComponent<UrbMetabolism>();
 
         base.Initialize();
-       
+
     }
 
     protected void SetOffspringData(GameObject Offspring)
     {
         UrbBreeder OffspringBreeder = Offspring.GetComponent<UrbBreeder>();
-        if(OffspringBreeder)
+        if (OffspringBreeder)
         {
             UrbObjectData[] ChildOffspringData = new UrbObjectData[OffspringData.Length];
 
@@ -82,7 +85,108 @@ public class UrbBreeder : UrbBehaviour
 
     protected override bool ValidToInterval()
     {
-        return base.ValidToInterval() && mAgent.CurrentTile!= null && OffspringObjects.Length > 0;
+        return base.ValidToInterval() && mAgent.CurrentTile != null && OffspringData != null && OffspringData.Length > 0 && mAgent.Body != null;
+    }
+
+    public override float TileEvaluateCheck(UrbTile Target)
+    {
+        if (Gestating || Target == null || Target.Occupants == null || Crowd > MateCrowding)
+        {
+            return 0;
+        }
+
+        float Evaluation = (MateRequirement == 0)? mAgent.Mass : 0;
+
+        for (int c = 0; c < Target.Occupants.Count; c++)
+        {
+            UrbBreeder MateCandidate = Target.Occupants[c].GetComponent<UrbBreeder>();
+
+            if (MateCandidate != null && MateCandidate != this && MateCandidate.BreedType == BreedType)
+            {
+                Crowd++;
+                Evaluation += Target.Occupants[c].Mass;
+            }
+
+            if(Crowd >= MateCrowding)
+            {
+                return 0;
+            }
+        }
+        return Evaluation;
+    }
+
+    public override float BehaviourEvaluation { get {
+            if (Crowd >= MateCrowding)
+            {
+                return 0;
+            }
+            return base.BehaviourEvaluation;
+        } protected set => base.BehaviourEvaluation = value; }
+
+    public override void RegisterTileForBehaviour(float Evaluation, UrbTile Target, int Index)
+    {
+        if (Crowd < MateCrowding)
+        {
+            base.RegisterTileForBehaviour(Evaluation, Target, Index);
+        }
+    }
+
+    public override void ClearBehaviour()
+    {
+        Crowd = 0;
+        base.ClearBehaviour();
+    }
+
+    public override void ExecuteTileBehaviour()
+    {
+        if(MateRequirement == 0)
+        {
+            Gestating = true;
+            base.ExecuteTileBehaviour();
+            return;
+        }
+
+        int MateCount = 0;
+       
+        for (int i = 0; i < RegisteredTiles.Length; i++)
+        {
+            if (RegisteredTiles[i] == null)
+                continue;
+            if (RegisteredTiles[i].Occupants == null)
+                continue;
+
+            for (int o = 0; o < RegisteredTiles[i].Occupants.Count; o++)
+            {
+                UrbBreeder PossibleMate = RegisteredTiles[i].Occupants[o].GetComponent<UrbBreeder>();
+                if (PossibleMate == null || PossibleMate == this)
+                {
+                    continue;
+                }
+
+                if (PossibleMate.BreedType == this.BreedType)
+                {
+
+                    float Result = LoveAction.Execute(mAgent, PossibleMate.mAgent, 0);
+                    if (Result > 0)
+                    {
+                        Result = LoveAction.Execute(PossibleMate.mAgent, mAgent, 0);
+
+                        if (Result > 0)
+                        {
+                            MateCount++;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        if (MateCount >= MateRequirement)
+        {
+            Gestating = true;
+        }
+
+        base.ExecuteTileBehaviour();
     }
 
     override public IEnumerator FunctionalCoroutine()
@@ -90,58 +194,14 @@ public class UrbBreeder : UrbBehaviour
         if (!ValidToInterval())
             yield break;
 
-        UrbTile[] Search = GetSearchTiles(true);
-
-        int MateCount = 0;
-
-        yield return BehaviourThrottle.PerformanceThrottle();
-
-        for (int t = 0; t < Search.Length; t++)
+        if (Gestating && mAgent.Body.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe))
         {
-            if(Gestating)
-            {    
-                break;
-            }
-
-            if (Search[t] == null)
-            {
-                continue;
-            }
-
-            if(Search[t].CurrentContent == null)
-            {
-                continue;
-            }
-
-            for (int c = 0; c < Search[t].Occupants.Count; c++)
-            {
-                UrbBreeder MateCandidate = Search[t].Occupants[c].GetComponent<UrbBreeder>();
-
-                if (MateCandidate != null && MateCandidate != this && MateCandidate.BreedType == BreedType)
-                {
-                    if (mMetabolism != null && MateRequirement > 0)
-                    {
-                        mMetabolism.SpendEnergy(MateCost);
-                    }
-                    MateCount++;
-                }
-            }
-        }
-
-        if(MateCount >= MateCrowding)
-        {
-            yield break;
-        }
-
-        if (Gestating || MateCount >= MateRequirement && OffspringCount > 0 && mAgent.Body.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe))
-        {
-            Gestating = true;
             yield return new WaitForSeconds(Gestation);
 
             if (!ValidToInterval())
                 yield break;
 
-            Search = Disperse ? mAgent.Tileprint.GetBorderingTiles(mAgent, true) : GetSearchTiles(true);
+            UrbTile[] Search = Disperse ? mAgent.Tileprint.GetBorderingTiles(mAgent, true) : GetSearchTiles(true);
             int NumberOffspring = 0;
             int Delay = Random.Range((int)0, (int)3);
 
@@ -174,7 +234,7 @@ public class UrbBreeder : UrbBehaviour
                     NumberOffspring++;
                     mAgent.Body.BodyComposition.RemoveRecipe(GestationRecipe);
                 }
-                
+
                 if (OffspringCount <= NumberOffspring || mAgent.Body.BodyComposition.ContainsLessThan(GestationRecipe))
                 {
                     Gestating = false;
@@ -202,7 +262,6 @@ public class UrbBreeder : UrbBehaviour
             new UrbFieldData{ Name = "MateCrowding", Value = MateCrowding},
             new UrbFieldData{ Name = "OffspringCount", Value = OffspringCount},
             new UrbFieldData{ Name = "Disperse", Value = (Disperse)? 1 : 0},
-            new UrbFieldData{ Name = "MateCost", Value = MateCost},
             new UrbFieldData{ Name = "Gestation", Value = Gestation},
             new UrbFieldData{ Name = "Gestating", Value = (Gestating)? 1 : 0},
         };
@@ -231,12 +290,11 @@ public class UrbBreeder : UrbBehaviour
 
     override public bool SetComponentData(UrbComponentData Data)
     {
-        MateRequirement = (int) UrbEncoder.GetField("MateRequirement", Data);
+        MateRequirement = (int)UrbEncoder.GetField("MateRequirement", Data);
         MateCrowding = (int)UrbEncoder.GetField("MateCrowding", Data);
         OffspringCount = (int)UrbEncoder.GetField("OffspringCount", Data);
 
         Disperse = (UrbEncoder.GetField("Disperse", Data) > 0.0f);
-        MateCost = UrbEncoder.GetField("MateCost", Data);
         Gestation = UrbEncoder.GetField("Gestation", Data);
         Gestating = (UrbEncoder.GetField("Gestating", Data) > 0.0f);
 
@@ -247,8 +305,21 @@ public class UrbBreeder : UrbBehaviour
         RivalScents = UrbEncoder.GetEnumArray<UrbScentTag>("RivalScents", Data);
 
         GestationRecipe = UrbEncoder.GetSubstancesFromArray("GestationRecipe", Data);
-        
-   
+
+
         return true;
+    }
+
+    public class UrbLoveAction : UrbAction
+    {
+        static Color Pink = new Color(1f, 0.0f, 0.25f);
+        protected override string IconPath => IconDiretory + "Love";
+        public override Color IconColor => Pink;
+
+        public override float Test(UrbAgent target, float Modifier = 0)
+        {
+            float Sex = target.Body.BodyComposition[UrbSubstanceTag.Female] + target.Body.BodyComposition[UrbSubstanceTag.Male];
+            return MobilityTest(target.Body) + Sex + Modifier;
+        }
     }
 }

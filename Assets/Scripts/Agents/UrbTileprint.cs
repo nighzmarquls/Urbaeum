@@ -309,6 +309,7 @@ public class UrbTileprint
                 if (Tile.Occupants.Contains(Agent))
                 {
                     Tile.Occupants.Remove(Agent);
+                    Tile.ReorderContents();
                 }
                 break;
             default:

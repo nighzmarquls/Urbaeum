@@ -15,8 +15,10 @@ GameObject:
   - component: {fileID: 2331400768363331401}
   - component: {fileID: -3102135804067309858}
   - component: {fileID: 290428910922112158}
-  - component: {fileID: -5790726441430418755}
   - component: {fileID: 1804231709266065300}
+  - component: {fileID: -1458677331220286460}
+  - component: {fileID: -5655706275276601426}
+  - component: {fileID: 6921185187161276568}
   m_Layer: 0
   m_Name: CloverField
   m_TagString: Untagged
@@ -106,13 +108,13 @@ MonoBehaviour:
   BirthTime: 0
   CurrentMap: {fileID: 0}
   Shuffle: 0
+  Interacting: 0
   SizeOffset: 1
   TileprintString: '111
 
     111
 
     111'
-  FidgetTime: 1
 --- !u!114 &-601077773047966795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,7 +132,7 @@ MonoBehaviour:
     SubstanceSizeRatio: 0
     ColorsEffected: 255
     ModificationType: 1
-    ColorApplied: {r: 0.3287139, g: 1, b: 0, a: 1}
+    ColorApplied: {r: 0.7438831, g: 0.990566, b: 0.2663314, a: 1}
     SubstanceColorRatio: 9000
   - DisplayDrivingSubstance: 3
     SubstanceSizeRatio: 9000
@@ -180,6 +182,7 @@ MonoBehaviour:
   CriticalBodyPartAmounts:
   - Substance: 2
     SubstanceAmount: 90
+  Height: 0.25
 --- !u!114 &290428910922112158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,35 +198,6 @@ MonoBehaviour:
   Interval: 10
   SmellTag: 01000000
   SmellStrength: 100
---- !u!114 &-5790726441430418755
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4574942228798516750}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fb352cbb9e235d46a8e3c997f5983a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Interval: 15
-  MateRequirement: 0
-  MateCrowding: 4
-  OffspringCount: 8
-  MateCost: 10
-  Gestation: 2
-  Disperse: 1
-  BreedType: 0
-  MateScents: 
-  RivalScents: 
-  GestationRecipe:
-  - Substance: 1
-    SubstanceAmount: 10
-  - Substance: 4
-    SubstanceAmount: 20
-  OffspringObjects:
-  - {fileID: 4574942228798516750, guid: 8a1e98e476944c14695684e9eefa86a9, type: 3}
 --- !u!114 &1804231709266065300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -240,8 +214,65 @@ MonoBehaviour:
   MinimumMergeCount: 2
   MinimumMass: 5250
   MinimumTiles: 1
+  MaximumTiles: 9
   MergeProduct: {fileID: 4574942228798516744, guid: f3dc065bcb3a2cb4fa7461eb2bde1dce,
     type: 3}
+--- !u!114 &-1458677331220286460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 595bc0b273ea0d64c9696083da17f405, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Interval: 8
+  PerceptionPrintString: 
+  ContactPrintString: 
+  mBehaviours: []
+--- !u!114 &-5655706275276601426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89760c5a60a1c48469e26698ab374520, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6921185187161276568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fb352cbb9e235d46a8e3c997f5983a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Interval: 9
+  MateRequirement: 0
+  MateCrowding: 8
+  OffspringCount: 8
+  Gestation: 2
+  Disperse: 1
+  BreedType: 0
+  MateScents: 
+  RivalScents: 
+  GestationRecipe:
+  - Substance: 1
+    SubstanceAmount: 10
+  - Substance: 4
+    SubstanceAmount: 20
+  OffspringObjects:
+  - {fileID: 4574942228798516750, guid: 8a1e98e476944c14695684e9eefa86a9, type: 3}
 --- !u!1001 &4782546513096451304
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -392,32 +423,32 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.PrimaryColor.Line.g
-      value: 0.735849
+      value: 0.7372549
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.PrimaryColor.Line.b
-      value: 0.3725339
+      value: 0.19215687
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.PrimaryColor.Line.r
-      value: 0.19090424
+      value: 0.38966924
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.PrimaryColor.Fill.r
-      value: 0.28908354
+      value: 0.5454656
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.PrimaryColor.Fill.g
-      value: 0.735849
+      value: 0.7372549
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.PrimaryColor.Fill.b
-      value: 0.18396226
+      value: 0.18431373
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
@@ -432,7 +463,7 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.SecondaryColor.Line.r
-      value: 0.19215688
+      value: 0.54785466
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
@@ -442,12 +473,12 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.SecondaryColor.Line.b
-      value: 0.37254903
+      value: 0.19215687
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.SecondaryColor.Fill.r
-      value: 0.2901961
+      value: 0.5655363
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}

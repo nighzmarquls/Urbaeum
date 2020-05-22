@@ -7,6 +7,7 @@ public class UrbMerge : UrbBehaviour
     public int MinimumMergeCount = 2;
     public float MinimumMass = 0;
     public int MinimumTiles = 0;
+    public int MaximumTiles = 9;
     public UrbAgent MergeProduct;
 
     protected void MergeIntoTarget(UrbAgent Target)
@@ -102,6 +103,10 @@ public class UrbMerge : UrbBehaviour
             if(FoundMatch)
             {
                 CandidateTiles++;
+                if(CandidateTiles >= MaximumTiles)
+                {
+                    break;
+                }
             }
         }
 

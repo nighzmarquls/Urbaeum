@@ -6,9 +6,11 @@ public class UrbComposition
 {
     protected UrbComposition ContainingComposion;
     public float MaxCapacity { get; protected set; } = 1000;
-    public float CurrentCapacty { get; protected set; }  = 0;
+    public float UsedCapacity { get; protected set; } = 0;
 
-    public void SetSize(int Size)
+    public float Mass => UsedCapacity;
+
+    public void SetSize(float Size)
     {
         if (ContainingComposion == null)
         {
@@ -18,7 +20,7 @@ public class UrbComposition
             }
             else
             {
-                MaxCapacity = 1000 * (Size * Mathf.Sqrt(Size));
+                MaxCapacity = 1000 * (Size);
             }
         }
     }
@@ -31,23 +33,40 @@ public class UrbComposition
 
     public float Fullness {
         get {
-            return CurrentCapacty / MaxCapacity;
+            return UsedCapacity / MaxCapacity;
         }
     }
 
     public float AvailableCapacity {
         get {
-            return MaxCapacity - CurrentCapacty;
+            return MaxCapacity - UsedCapacity;
+        }
+    }
+
+    public float this[UrbSubstanceTag[] Tags] {
+        get {
+            float Total = 0;
+
+            for (int i = 0; i < Tags.Length; i++)
+            {
+                if (Tags[i] == UrbSubstanceTag.All)
+                {
+                    return UsedCapacity;
+                }
+                Total += this[Tags[i]];
+            }
+
+            return Total;
         }
     }
 
     public float this[UrbSubstanceTag Tag] {
         get {
-            if(Tag == UrbSubstanceTag.All)
+            if (Tag == UrbSubstanceTag.All)
             {
-                return CurrentCapacty;
+                return UsedCapacity;
             }
-            else if(Substances.ContainsKey(Tag))
+            else if (Substances.ContainsKey(Tag))
             {
                 return Substances[Tag];
             }
@@ -60,6 +79,59 @@ public class UrbComposition
 
     protected Dictionary<UrbSubstanceTag, float> Substances;
     protected List<UrbComposition> Compositions;
+
+    public void Initialize()
+    {
+        Substances = new Dictionary<UrbSubstanceTag, float>();
+        Compositions = new List<UrbComposition>();
+    }
+
+    public UrbComposition()
+    {
+        Initialize();
+    }
+
+    public UrbComposition(UrbSubstance[] CompositionRecipe)
+    {
+        Initialize();
+
+        for (int i = 0; i < CompositionRecipe.Length; i++)
+        {
+            if (Substances.ContainsKey(CompositionRecipe[i].Substance))
+            {
+                Substances[CompositionRecipe[i].Substance] += CompositionRecipe[i].SubstanceAmount;
+            }
+            else
+            {
+                Substances.Add(CompositionRecipe[i].Substance, CompositionRecipe[i].SubstanceAmount);
+            }
+            UsedCapacity += CompositionRecipe[i].SubstanceAmount;
+        }
+    }
+
+    public float GetProportionOfTotal(UrbSubstanceTag[] Tags)
+    {
+        if(UsedCapacity <= 0)
+        {
+            return 0.0f;
+        }
+
+        return this[Tags] / UsedCapacity;
+    }
+
+    public float GetProportionOf(UrbSubstanceTag Tag)
+    {
+        if (Tag == UrbSubstanceTag.None || UsedCapacity <= 0)
+        {
+            return 0.0f;
+        }
+        else if (Tag == UrbSubstanceTag.All)
+        {
+            return 1.0f;
+        }
+
+        return this[Tag] / UsedCapacity;
+    }
 
     public UrbSubstance[] GetCompositionIngredients()
     {
@@ -82,7 +154,7 @@ public class UrbComposition
     {
         input.ContainingComposion = this;
 
-        input.MaxCapacity = input.CurrentCapacty + AvailableCapacity;
+        input.MaxCapacity = input.UsedCapacity + AvailableCapacity;
         Compositions.Add(input);
     }
 
@@ -122,35 +194,6 @@ public class UrbComposition
         return CachedScents;
     }
 
-    public void Initialize()
-    {
-        Substances = new Dictionary<UrbSubstanceTag, float>();
-        Compositions = new List<UrbComposition>();
-    }
-
-    public UrbComposition()
-    {
-        Initialize();
-    }
-
-    public UrbComposition(UrbSubstance[] CompositionRecipe)
-    {
-        Initialize();
-
-        for(int i = 0; i < CompositionRecipe.Length; i++)
-        {
-            if (Substances.ContainsKey(CompositionRecipe[i].Substance))
-            {
-                Substances[CompositionRecipe[i].Substance] += CompositionRecipe[i].SubstanceAmount;
-            }
-            else
-            {
-                Substances.Add(CompositionRecipe[i].Substance, CompositionRecipe[i].SubstanceAmount);
-            }
-            CurrentCapacty += CompositionRecipe[i].SubstanceAmount;
-        }
-    }
-
     public float AddRecipe(UrbSubstance[] Recipe)
     {
         float TransferAmount = 0;
@@ -165,7 +208,7 @@ public class UrbComposition
     {
         if (ContainingComposion != null)
         {
-            MaxCapacity = ContainingComposion.AvailableCapacity + CurrentCapacty;
+            MaxCapacity = ContainingComposion.AvailableCapacity + UsedCapacity;
         }
 
         if (Amount <= 0.0f)
@@ -175,7 +218,7 @@ public class UrbComposition
 
         float TransferAmount = Amount;
 
-        float CapacityAfter = CurrentCapacty + Amount;
+        float CapacityAfter = UsedCapacity + Amount;
         if (CapacityAfter > MaxCapacity)
         {
             TransferAmount -= CapacityAfter - MaxCapacity;
@@ -191,11 +234,11 @@ public class UrbComposition
             Dirty = true;
         }
         
-        CurrentCapacty += TransferAmount;
+        UsedCapacity += TransferAmount;
     
         if(ContainingComposion != null)
         {
-            ContainingComposion.CurrentCapacty += TransferAmount;
+            ContainingComposion.UsedCapacity += TransferAmount;
         }
         return TransferAmount;
     }
@@ -219,13 +262,13 @@ public class UrbComposition
 
         if (ContainingComposion != null)
         {
-            MaxCapacity = ContainingComposion.AvailableCapacity + CurrentCapacty;
+            MaxCapacity = ContainingComposion.AvailableCapacity + UsedCapacity;
         }
 
         float TransferAmount = Amount;
         //Debug.Log("Attempting Transfer " + TransferAmount + " from " + Tag.ToString());
 
-        float CapacityAfter = CurrentCapacty + Amount;
+        float CapacityAfter = UsedCapacity + Amount;
         if (CapacityAfter < 0)
         {
             TransferAmount += CapacityAfter;
@@ -250,10 +293,10 @@ public class UrbComposition
         {
             TransferAmount = 0;
         }
-        CurrentCapacty -= TransferAmount;
+        UsedCapacity -= TransferAmount;
         if (ContainingComposion != null)
         {
-            ContainingComposion.CurrentCapacty -= TransferAmount;
+            ContainingComposion.UsedCapacity -= TransferAmount;
         }
         return TransferAmount;
     }
@@ -283,9 +326,9 @@ public class UrbComposition
 
     public float DecomposeRecipe(UrbRecipe Recipe, float Amount)
     {
-        if (Amount > CurrentCapacty)
+        if (Amount > UsedCapacity)
         {
-            Amount = CurrentCapacty;
+            Amount = UsedCapacity;
         }
         float Result = Amount;
 
@@ -316,9 +359,9 @@ public class UrbComposition
 
     public float MixRecipe(UrbRecipe Recipe, float Amount)
     {
-        if(Amount > CurrentCapacty)
+        if(Amount > UsedCapacity)
         {
-            Amount = CurrentCapacty;
+            Amount = UsedCapacity;
         }
 
         UrbSubstance[] Proportions = UrbSubstances.GetIngredientProportions(Recipe);

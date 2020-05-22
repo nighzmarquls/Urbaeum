@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 9112611929211480335}
   - component: {fileID: 2928443002927633168}
   - component: {fileID: 9142228112597239207}
+  - component: {fileID: -2491288787552444832}
   m_Layer: 0
   m_Name: BunMale
   m_TagString: Untagged
@@ -106,9 +107,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b2e0f7c83d69948a96dc66fccbac5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BirthTime: 27.076632
+  BirthTime: 3.28887
   CurrentMap: {fileID: 0}
   Shuffle: 1
+  Interacting: 0
   SizeOffset: 1
   TileprintString: 1
   FidgetTime: 1
@@ -132,12 +134,13 @@ MonoBehaviour:
   - Substance: 8
     SubstanceAmount: 10
   - Substance: 10
-    SubstanceAmount: 10
+    SubstanceAmount: 50
   - Substance: 11
     SubstanceAmount: 10
   CriticalBodyPartAmounts:
   - Substance: 5
     SubstanceAmount: 45
+  Height: 1
 --- !u!114 &8693178026798117474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -170,6 +173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7820138edadbea4ab3ada9d2530f9c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Interval: 1
   Speed: 2
   EnergyCost: 1
 --- !u!114 &-2832398848432110761
@@ -184,6 +188,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9f725e25e0b28c4d8aef6238c55a7ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Interval: 1
   GoalTag: 1
   Size: 0
   PassableTerrain: 0
@@ -201,32 +206,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Interval: 0.5
   FoodSubstances: 040000000300000002000000
-  BiteSize: 20
-  Interaction:
-    HitTest:
-      Category: 1
-      DisplayTime: 0.15
-      SuccessIcon: {fileID: 21300000, guid: 676e585e1801d424eb9ce96dcc0ba238, type: 3}
-      SuccessColor: {r: 0, g: 1, b: 1, a: 1}
-      Offset: {x: 0, y: 0}
-    DodgeTest:
-      Category: 1
-      DisplayTime: 1
-      SuccessIcon: {fileID: 0}
-      SuccessColor: {r: 0.35072255, g: 1, b: 0, a: 1}
-      Offset: {x: 0, y: 0}
-    BiteTest:
-      Category: 2
-      DisplayTime: 0.15
-      SuccessIcon: {fileID: 21300000, guid: f516fb8e15e2f4940bc032f3dd5237ef, type: 3}
-      SuccessColor: {r: 1, g: 0, b: 0, a: 1}
-      Offset: {x: 0, y: 0}
-    SoakTest:
-      Category: 0
-      DisplayTime: 0
-      SuccessIcon: {fileID: 0}
-      SuccessColor: {r: 0, g: 0, b: 0, a: 0}
-      Offset: {x: 0, y: 0}
 --- !u!114 &1285019260808379821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -311,8 +290,23 @@ MonoBehaviour:
     SubstanceSizeRatio: 0
     ColorsEffected: 3
     ModificationType: 1
-    ColorApplied: {r: 1, g: 0.8254717, b: 0.9130857, a: 1}
+    ColorApplied: {r: 1, g: 0.87016416, b: 0.8235294, a: 1}
     SubstanceColorRatio: -15
+--- !u!114 &-2491288787552444832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 595bc0b273ea0d64c9696083da17f405, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Interval: 1
+  PerceptionPrintString: 
+  ContactPrintString: 
 --- !u!1001 &2693958147845626054
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -443,32 +437,32 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.PrimaryColor.Line.r
-      value: 0.5943396
+      value: 0.59607846
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.PrimaryColor.Line.g
-      value: 0.51445544
+      value: 0.5790593
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.PrimaryColor.Line.b
-      value: 0.4233268
+      value: 0.42352942
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.PrimaryColor.Fill.r
-      value: 0.46226418
+      value: 0.5342932
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.PrimaryColor.Fill.g
-      value: 0.4399297
+      value: 0.5377358
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.PrimaryColor.Fill.b
-      value: 0.33361518
+      value: 0.31198823
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
@@ -483,17 +477,17 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.FaceColor.r
-      value: 0.23584908
+      value: 0.3018868
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.FaceColor.g
-      value: 0.18133679
+      value: 0.26500452
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: mColors.FaceColor.b
-      value: 0.18133679
+      value: 0.21502315
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}

@@ -52,7 +52,7 @@ public class DisplayModification
         {
             return;
         }
-        float SubstanceAmount = (DisplayDrivingSubstance == UrbSubstanceTag.All) ? Composition.CurrentCapacty : Composition[DisplayDrivingSubstance];
+        float SubstanceAmount = (DisplayDrivingSubstance == UrbSubstanceTag.All) ? Composition.UsedCapacity : Composition[DisplayDrivingSubstance];
 
         float SubstanceAlpha = (SubstanceSizeRatio < 0) ? 1.0f - (SubstanceAmount / Mathf.Abs(SubstanceSizeRatio) ) : SubstanceAmount / SubstanceSizeRatio;
 

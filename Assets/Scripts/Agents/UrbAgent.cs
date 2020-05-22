@@ -7,8 +7,6 @@ public class UrbAgent : UrbBase
     public static int TotalAgents;
 
     const float LocationThreshold = 0.01f;
-    public UrbMovement MovementSystem { get; protected set; }
-    UrbPathfinder Pathfinder;
     UrbThinker Mind;
 
     UrbBodyDisplay BodyDisplay;
@@ -19,7 +17,6 @@ public class UrbAgent : UrbBase
     public UrbDisplay Display { get; private set; }
   
     public UrbMap CurrentMap;
-    public UrbTile CurrentGoal;
     public UrbTile CurrentTile;
     public bool Shuffle = true;
 
@@ -48,13 +45,13 @@ public class UrbAgent : UrbBase
                 return 0;
             }
 
-            return Body.BodyComposition.CurrentCapacty;
+            return Body.BodyComposition.UsedCapacity;
         } }
 
     public float MassPerTile { get {
             if(tileprint.TileCount > 1)
             {
-                return Mass / tileprint.TileCount;
+                return Mass / ((Body.Height > 1)? tileprint.TileCount*Body.Height : tileprint.TileCount );
             }
             else
             {
@@ -77,6 +74,7 @@ public class UrbAgent : UrbBase
     }
 
     public UrbBody Body { get; private set; }
+    public UrbMetabolism Metabolism { get; private set; }
 
     public Sprite CurrentSprite {
         get {
@@ -117,6 +115,69 @@ public class UrbAgent : UrbBase
         return string.Compare(LocalName, InputName, true) == 0;
     }
 
+    public virtual void AddAction(UrbAction Action)
+    {
+        if(AvailableActions == null)
+        {
+            AvailableActions = new UrbAction[]
+            {
+                Action
+            };
+            return;
+        }
+
+        UrbAction[] newActions = new UrbAction[AvailableActions.Length + 1];
+        AvailableActions.CopyTo(newActions, 1);
+        newActions[0] = Action;
+
+    }
+
+    public virtual void RemoveAction(UrbAction Action)
+    {
+        if (AvailableActions == null)
+        {
+            return;
+        }
+
+        List<UrbAction> TempList = new List<UrbAction>(AvailableActions);
+
+        if(TempList.Contains(Action))
+        {
+            TempList.Remove(Action);
+            AvailableActions = TempList.ToArray();
+        }
+    }
+
+    public UrbAction[] AvailableActions { get; private set; }
+
+    public UrbAction PickAction(UrbTestCategory Test, float Result = 0, UrbTestCategory Exclude = UrbTestCategory.None)
+    {
+        if(Removing)
+        {
+            return null;
+        }
+
+        if(Mind == null)
+        {
+            if (AvailableActions != null)
+            {
+                for (int i = 0; i < AvailableActions.Length; i++)
+                {
+                    bool Valid = (Test & AvailableActions[i].Category) == Test &&
+                    (Exclude == UrbTestCategory.None || (Exclude & AvailableActions[i].Category) == 0);
+                    if (Valid)
+                    {
+
+                        return AvailableActions[i];
+                    }
+                }
+            }
+            return null;
+        }
+
+        return Mind.PickAction(Test, Result, Exclude);
+    }
+
     public override void Initialize()
     {
         if (bInitialized)
@@ -132,11 +193,8 @@ public class UrbAgent : UrbBase
         }
 
         BirthTime = Time.time;
-        MovementSystem = GetComponent<UrbMovement>();
-        Pathfinder = GetComponent<UrbPathfinder>();
         Body = GetComponent<UrbBody>();
-
-        CurrentGoal = null;
+        Metabolism = GetComponent<UrbMetabolism>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
         this.transform.rotation = Camera.main.transform.rotation;
         tileprint = new UrbTileprint(TileprintString);
@@ -144,6 +202,7 @@ public class UrbAgent : UrbBase
         Mind = GetComponent<UrbThinker>();
         BodyDisplay = GetComponent<UrbBodyDisplay>();
 
+        LastCheckedMass = 0;
         base.Initialize();
 
     }
@@ -169,10 +228,6 @@ public class UrbAgent : UrbBase
         Destroy(gameObject);
     }
 
-
-    public float FidgetTime = 1.0f;
-    float NextFidget = 0;
-
     public void Tick()
     {
         if (CurrentMap != null)
@@ -180,56 +235,9 @@ public class UrbAgent : UrbBase
             if (Mind != null)
             {
                 Mind.CheckUrges();
+                Mind.ChooseBehaviour();
             }
-            if (Pathfinder != null)
-            {
-                if (!Moving && !Interacting)
-                {
-                    CurrentGoal = Pathfinder.GetNextGoal(CurrentMap);
-                }
-            }
-            if (MovementSystem != null && CurrentGoal != null && CurrentGoal != CurrentTile)
-            {
-                Moving = true;
-                if (Display != null)
-                {
-                    Display.Express(UrbDisplayFace.Expression.Default);
-                }
-                MovementSystem.MoveTo(CurrentGoal);
-            }
-            else
-            {
-                Moving = false;
-                if (Display != null)
-                {
-                    if (TargetLocation != transform.position && Shuffle)
-                    {
-                        Vector3 Direction = (TargetLocation - transform.position);
-
-                        transform.position = (Direction.magnitude > LocationThreshold) ? transform.position + (Direction.normalized * Time.deltaTime) : TargetLocation;
-                    }
-
-                    if (Time.time > NextFidget)
-                    {
-                        NextFidget = Time.time + FidgetTime + Random.Range(0, FidgetTime);
-                        float Probability = Random.value;
-
-                        if (Probability > 0.85f)
-                        {
-                            Display.Flip = !Display.Flip;
-                        }
-                        else if (Probability > 0.75)
-                        {
-                            Display.Express(UrbDisplayFace.Expression.Closed);
-                        }
-                        else if (Probability > 0.70)
-                        {
-                            Display.Express(UrbDisplayFace.Expression.Default);
-                        }
-                    }
-                }
-            }
-
+               
             if(Body != null)
             {
                 if(Body.BodyCritical())
@@ -275,7 +283,8 @@ public class UrbAgent : UrbBase
 
         Data.Strings = new UrbStringData[]
         {
-            new UrbStringData{Name= "Name", Value = gameObject.name}
+            new UrbStringData{Name= "Name", Value = gameObject.name},
+            new UrbStringData{Name= "TileprintString", Value = TileprintString}
         };
         return Data;
     }
@@ -284,6 +293,7 @@ public class UrbAgent : UrbBase
     {
         BirthTime = UrbEncoder.GetField("BirthTime", Data);
         gameObject.name = UrbEncoder.GetString("Name", Data);
+        TileprintString = UrbEncoder.GetString("TileprintString", Data);
         return true;
     }
 }

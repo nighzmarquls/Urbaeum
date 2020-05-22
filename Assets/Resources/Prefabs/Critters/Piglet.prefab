@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: -7324362360393659095}
   - component: {fileID: 7104056634503351380}
   - component: {fileID: 5930587149508230605}
+  - component: {fileID: -6628564962929138631}
   m_Layer: 0
   m_Name: Piglet
   m_TagString: Untagged
@@ -79,7 +80,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 0
   m_Sprite: {fileID: 5991034777081125751, guid: 4092373694ecab745adb16878e493eb8,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -107,6 +108,7 @@ MonoBehaviour:
   BirthTime: 0
   CurrentMap: {fileID: 0}
   Shuffle: 0
+  Interacting: 0
   SizeOffset: 2
   TileprintString: '11
 
@@ -124,8 +126,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7820138edadbea4ab3ada9d2530f9c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 2
-  EnergyCost: 1
+  Interval: 1
 --- !u!114 &-8220914805162621343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -138,6 +139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9f725e25e0b28c4d8aef6238c55a7ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Interval: 1
   GoalTag: 1
   Size: 1
   PassableTerrain: 0
@@ -153,34 +155,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dfd735a9f716e74398620d0212a3ee9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Interval: 1
-  FoodSubstances: 030000000200000004000000010000000500000006000000
-  BiteSize: 50
-  Interaction:
-    HitTest:
-      Category: 0
-      TestCost: 0
-      DisplayTime: 0
-      SuccessIcon: {fileID: 0}
-      SuccessColor: {r: 0, g: 0, b: 0, a: 0}
-    DodgeTest:
-      Category: 0
-      TestCost: 0
-      DisplayTime: 0
-      SuccessIcon: {fileID: 0}
-      SuccessColor: {r: 0, g: 0, b: 0, a: 0}
-    BiteTest:
-      Category: 0
-      TestCost: 0
-      DisplayTime: 0
-      SuccessIcon: {fileID: 0}
-      SuccessColor: {r: 0, g: 0, b: 0, a: 0}
-    SoakTest:
-      Category: 0
-      TestCost: 0
-      DisplayTime: 0
-      SuccessIcon: {fileID: 0}
-      SuccessColor: {r: 0, g: 0, b: 0, a: 0}
+  Interval: 0.5
+  FoodSubstances: 040000000300000002000000060000000500000001000000
 --- !u!114 &-7516547713024925317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,12 +171,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BodyRecipe:
   - Substance: 5
-    SubstanceAmount: 2000
+    SubstanceAmount: 500
   - Substance: 6
     SubstanceAmount: 1000
+  - Substance: 11
+    SubstanceAmount: 100
+  - Substance: 10
+    SubstanceAmount: 20
   CriticalBodyPartAmounts:
   - Substance: 5
-    SubstanceAmount: 1000
+    SubstanceAmount: 250
+  Height: 1
 --- !u!114 &-7324362360393659095
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,17 +226,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Modifications:
   - DisplayDrivingSubstance: 13
-    SubstanceSizeRatio: 4000
+    SubstanceSizeRatio: 2000
     ColorsEffected: 0
     ModificationType: 2
     ColorApplied: {r: 0, g: 0, b: 0, a: 0}
     SubstanceColorRatio: 0
   - DisplayDrivingSubstance: 5
-    SubstanceSizeRatio: 4000
+    SubstanceSizeRatio: 1000
     ColorsEffected: 0
     ModificationType: 4
     ColorApplied: {r: 0, g: 0, b: 0, a: 0}
     SubstanceColorRatio: 0
+--- !u!114 &-6628564962929138631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 595bc0b273ea0d64c9696083da17f405, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Interval: 1
+  PerceptionPrintString: 
+  ContactPrintString: 
+  mBehaviours: []
 --- !u!1001 &770006864050851357
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -263,6 +260,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4574942228798516746}
     m_Modifications:
+    - target: {fileID: 917231936056925674, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 917231936721376684, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -276,6 +278,11 @@ PrefabInstance:
     - target: {fileID: 917231936721376684, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: m_LocalScale.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 917231937232593374, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 917231937711402368, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
@@ -296,7 +303,7 @@ PrefabInstance:
     - target: {fileID: 917231937711402369, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 917231937711402369, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
@@ -466,7 +473,7 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
       propertyPath: SortingOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
@@ -492,6 +499,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalPosition.z
       value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3602141613022454345, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3602141613022454345, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3602141613022454345, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6009775441014029705, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
         type: 3}
