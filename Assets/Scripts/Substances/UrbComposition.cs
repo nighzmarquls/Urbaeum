@@ -5,9 +5,11 @@ using UnityEngine;
 public class UrbComposition
 {
     protected UrbComposition ContainingComposion;
+
+    public UrbMembrane Membrane { get; protected set; }
+
     public float MaxCapacity { get; protected set; } = 1000;
     public float UsedCapacity { get; protected set; } = 0;
-
     public float Mass => UsedCapacity;
 
     public void SetSize(float Size)
@@ -80,10 +82,11 @@ public class UrbComposition
     protected Dictionary<UrbSubstanceTag, float> Substances;
     protected List<UrbComposition> Compositions;
 
-    public void Initialize()
+    public virtual void Initialize()
     {
         Substances = new Dictionary<UrbSubstanceTag, float>();
         Compositions = new List<UrbComposition>();
+        Membrane = new UrbMembrane(this);
     }
 
     public UrbComposition()
@@ -153,14 +156,18 @@ public class UrbComposition
     public void AddComposition(UrbComposition input)
     {
         input.ContainingComposion = this;
-
+        input.Membrane.ChangeComposition(this);
         input.MaxCapacity = input.UsedCapacity + AvailableCapacity;
         Compositions.Add(input);
     }
 
     public bool RemoveComposition(UrbComposition input)
     {
-        input.ContainingComposion = null;
+        if (Compositions.Contains(input))
+        {
+            input.Membrane.ChangeComposition(input);
+            input.ContainingComposion = null;
+        }
         return Compositions.Remove(input);
     }
 

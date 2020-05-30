@@ -39,7 +39,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 7056411139508372456}
+  - {fileID: 7878978403681955576}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -187,6 +187,7 @@ MonoBehaviour:
   BodyRecipe:
   - Substance: 2
     SubstanceAmount: 10
+  SkinRecipe: 
   CriticalBodyPartAmounts:
   - Substance: 2
     SubstanceAmount: 10
@@ -223,7 +224,7 @@ MonoBehaviour:
   MateCrowding: 8
   OffspringCount: 8
   Gestation: 2
-  Disperse: 1
+  DispersalDistance: 0
   BreedType: 0
   MateScents: 
   RivalScents: 
@@ -306,7 +307,6 @@ MonoBehaviour:
   Interval: 2
   PerceptionPrintString: 
   ContactPrintString: 
-  mBehaviours: []
 --- !u!114 &621066092719822574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -603,7 +603,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d87aa7449214aee4a9f2c5c0b1d3a5df, type: 3}
---- !u!4 &7056411139508372456 stripped
+--- !u!4 &7878978403681955576 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 917231937711402369, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
     type: 3}

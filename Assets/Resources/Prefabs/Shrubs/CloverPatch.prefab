@@ -176,9 +176,10 @@ MonoBehaviour:
   BodyRecipe:
   - Substance: 2
     SubstanceAmount: 10
+  SkinRecipe: 
   CriticalBodyPartAmounts:
-  - Substance: 2
-    SubstanceAmount: 40
+  - Substance: 13
+    SubstanceAmount: 400
   Height: 0.25
 --- !u!114 &290428910922112158
 MonoBehaviour:
@@ -248,7 +249,6 @@ MonoBehaviour:
   Interval: 4
   PerceptionPrintString: 
   ContactPrintString: 
-  mBehaviours: []
 --- !u!114 &8900755114888397831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -278,7 +278,7 @@ MonoBehaviour:
   MateCrowding: 8
   OffspringCount: 8
   Gestation: 2
-  Disperse: 1
+  DispersalDistance: 1
   BreedType: 0
   MateScents: 
   RivalScents: 

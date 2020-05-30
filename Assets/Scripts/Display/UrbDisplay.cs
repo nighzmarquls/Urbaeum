@@ -180,9 +180,9 @@ public class UrbDisplay : UrbBase
         }
     }
 
-    const float LineSignificance = 0.09f;
-    const float FaceSignificance = 0.06f;
-    const float FeatureSignificance = 0.04f;
+    public const float LineSignificance = 0.09f;
+    public const float FaceSignificance = 0.06f;
+    public const float FeatureSignificance = 0.04f;
 
     protected float mSignificance = 1;
     public float Significance { get { return mSignificance; }

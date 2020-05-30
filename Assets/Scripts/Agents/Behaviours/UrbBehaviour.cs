@@ -12,6 +12,8 @@ public class UrbBehaviour : UrbBase
 
     public virtual bool ShouldInterval { get { return true; } }
     public virtual UrbUrgeCategory UrgeSatisfied { get { return UrbUrgeCategory.None; } }
+    public virtual bool ContactBehaviour { get { return true; } }
+    public virtual bool SenseBehaviour { get { return false; } }
 
     public void PauseBehaviour()
     {
@@ -39,7 +41,7 @@ public class UrbBehaviour : UrbBase
         mCoroutine = IntervalCoroutine();
         
         base.Initialize();
-        if (ShouldInterval)
+        if (ShouldInterval && isActiveAndEnabled)
         {
             StartCoroutine(mCoroutine);
         }
@@ -70,7 +72,7 @@ public class UrbBehaviour : UrbBase
 
     protected UrbTile[] RegisteredTiles;
 
-    virtual public float TileEvaluateCheck(UrbTile Target)
+    virtual public float TileEvaluateCheck(UrbTile Target, bool Contact = false)
     {
         return -1f;
     }
@@ -98,8 +100,25 @@ public class UrbBehaviour : UrbBase
         BehaviourEvaluation += Evaluation;
     }
 
+    UrbTile LastBehaviourOrigin = null;
     virtual public void ClearBehaviour()
     {
+        if(LastBehaviourOrigin == null || LastBehaviourOrigin != mAgent.CurrentTile)
+        {
+            if (RegisteredTiles != null)
+            {
+                for (int t = 0; t < RegisteredTiles.Length; t++)
+                {
+                    if (RegisteredTiles[t] == null)
+                    {
+                        continue;
+                    }
+                    RegisteredTiles[t] = null;
+                }
+            }
+            LastBehaviourOrigin = mAgent.CurrentTile;
+         
+        }
         BehaviourEvaluation = 0;
     }
 

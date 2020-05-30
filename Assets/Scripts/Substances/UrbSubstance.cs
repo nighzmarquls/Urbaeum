@@ -40,25 +40,21 @@ public class UrbSubstances
     public const uint MaxTag = (uint)UrbSubstanceTag.All;
 
     //TODO: Make this driven by data
-    static protected UrbScentTag[][] ScentsBySubstance = new UrbScentTag[][]
+    public static void RegisterSubstanceProperties()
     {
-        new UrbScentTag[0]
-        , new UrbScentTag[0]
-        , new UrbScentTag[]{ UrbScentTag.Plant}
-        , new UrbScentTag[]{ UrbScentTag.Plant}
-        , new UrbScentTag[]{ UrbScentTag.Plant, UrbScentTag.Sweet}
-        , new UrbScentTag[]{ UrbScentTag.Meat}
-        , new UrbScentTag[]{ UrbScentTag.Meat}
-        , new UrbScentTag[]{ UrbScentTag.Fluff}
-        , new UrbScentTag[]{ UrbScentTag.Male }
-        , new UrbScentTag[]{ UrbScentTag.Female }
-        , new UrbScentTag[]{ UrbScentTag.Meat }
-        , new UrbScentTag[0]
-        , new UrbScentTag[0]
-    };
+        UrbSubstanceProperties.Set(UrbSubstanceTag.Stem, new UrbSubstanceProperty { Scent = new UrbScentTag[] { UrbScentTag.Plant } } );
+        UrbSubstanceProperties.Set(UrbSubstanceTag.Leaf, new UrbSubstanceProperty { Scent = new UrbScentTag[] { UrbScentTag.Plant } } );
+        UrbSubstanceProperties.Set(UrbSubstanceTag.Flower, new UrbSubstanceProperty { Scent = new UrbScentTag[] { UrbScentTag.Plant, UrbScentTag.Sweet } } );
+        UrbSubstanceProperties.Set(UrbSubstanceTag.Muscle, new UrbSubstanceProperty { Scent = new UrbScentTag[] { UrbScentTag.Meat } } );
+        UrbSubstanceProperties.Set(UrbSubstanceTag.Nerves, new UrbSubstanceProperty { Scent = new UrbScentTag[] { UrbScentTag.Meat } });
+        UrbSubstanceProperties.Set(UrbSubstanceTag.Fat, new UrbSubstanceProperty { Scent = new UrbScentTag[] { UrbScentTag.Meat } });
+        UrbSubstanceProperties.Set(UrbSubstanceTag.Fluff, new UrbSubstanceProperty { Scent = new UrbScentTag[] { UrbScentTag.Fluff } });
+        UrbSubstanceProperties.Set(UrbSubstanceTag.Male, new UrbSubstanceProperty { Scent = new UrbScentTag[] { UrbScentTag.Male } });
+        UrbSubstanceProperties.Set(UrbSubstanceTag.Female, new UrbSubstanceProperty { Scent = new UrbScentTag[] { UrbScentTag.Female } });
+    }
 
     public static UrbScentTag[] Scent(UrbSubstanceTag input) {
-        return ScentsBySubstance[(uint)input];
+        return UrbSubstanceProperties.Get(input).Scent;
     }
 
     public static UrbScentTag[] Scent(UrbSubstanceTag[] input)
@@ -79,17 +75,9 @@ public class UrbSubstances
         return ScentList.ToArray();
     }
 
-    public static bool SubstanceSmellsLike(UrbSubstanceTag substance, UrbScentTag scent)
+    public static bool SubstanceSmellsLike(UrbSubstanceTag Substance, UrbScentTag Scent)
     {
-        uint address = (uint)substance;
-        for (int s = 0; s < ScentsBySubstance[address].Length; s++)
-        {
-            if(ScentsBySubstance[address][s] == scent)
-            {
-                return true;
-            }
-        }
-        return false;
+        return UrbSubstanceProperties.CheckScent(Substance, Scent);
     }
 
     public static UrbSubstance[] GetIngredientProportions(UrbRecipe Recipe)

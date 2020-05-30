@@ -75,6 +75,7 @@ public class UrbTile
         {
             return;
         }
+
         Ordering = true;
         LocationOffset = Vector3.zero;
         if (Occupants.Count > 0)

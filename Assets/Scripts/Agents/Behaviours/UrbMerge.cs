@@ -8,7 +8,13 @@ public class UrbMerge : UrbBehaviour
     public float MinimumMass = 0;
     public int MinimumTiles = 0;
     public int MaximumTiles = 9;
+   
     public UrbAgent MergeProduct;
+    public override bool ShouldInterval => false;
+
+    float TotalMass = 0;
+    int TotalTiles = 0;
+    int TotalCount = 0;
 
     protected void MergeIntoTarget(UrbAgent Target)
     {
@@ -26,109 +32,123 @@ public class UrbMerge : UrbBehaviour
         mAgent.Remove();
     }
 
-    override public IEnumerator FunctionalCoroutine()
+    public override float TileEvaluateCheck(UrbTile Target, bool Contact = false)
     {
-        if (mAgent.Tileprint.TileCount > 1)
+        if (Target == null || Target.Occupants == null)
         {
-            UrbTile[] SelfTiles = mAgent.Tileprint.GetAllPrintTiles(mAgent);
-            for (int s = 0; s < SelfTiles.Length; s++)
+            return 0;
+        }
+
+        float Evaluation = 0;
+      
+        for (int c = 0; c < Target.Occupants.Count; c++)
+        {
+            if (MergeProduct.TemplatesMatch(Target.Occupants[c]))
             {
-                if (SelfTiles[s] == null)
+                MergeIntoTarget(Target.Occupants[c]);
+                break;
+            }
+            UrbMerge[] MergeComponents = Target.Occupants[c].GetComponents<UrbMerge>();
+            for (int i = 0; i < MergeComponents.Length; i++)
+            {
+                if (MergeComponents[i] != this)
+                {
+                    if (MergeProduct.TemplatesMatch(MergeComponents[i].MergeProduct))
+                    {
+                        if(mAgent.Mass >= Target.Occupants[c].Mass)
+                        {
+                            Evaluation += Target.Occupants[c].Mass;
+                        }
+                       
+                    }
+                }
+
+            }
+        }
+        return Evaluation;
+    }
+
+    public override void RegisterTileForBehaviour(float Evaluation, UrbTile Target, int Index)
+    {
+        for (int c = 0; c < Target.Occupants.Count; c++)
+        {
+            UrbMerge[] MergeComponents = Target.Occupants[c].GetComponents<UrbMerge>();
+            for (int i = 0; i < MergeComponents.Length; i++)
+            {
+                if (MergeComponents[i] != this)
+                {
+                    if (mAgent.Mass >= Target.Occupants[c].Mass)
+                    {
+                        TotalMass += Target.Occupants[c].Mass;
+                        TotalCount += 1;
+                    }
+                }
+            }
+        }
+        TotalTiles++;
+        base.RegisterTileForBehaviour(Evaluation, Target, Index);
+    }
+
+    public override void ClearBehaviour()
+    {
+        TotalCount = 0;
+        TotalMass = 0;
+        TotalTiles = 0;
+        base.ClearBehaviour();
+    }
+
+    public override float BehaviourEvaluation { get {
+            if (TotalMass < MinimumMass || TotalTiles > MaximumTiles || TotalTiles < MinimumTiles || TotalCount < MinimumMergeCount)
+            {
+                return 0;
+            }
+            return base.BehaviourEvaluation;
+        }
+        protected set => base.BehaviourEvaluation = value; }
+
+    public override void ExecuteTileBehaviour()
+    {
+        if(TotalMass < MinimumMass || TotalTiles > MaximumTiles || TotalTiles < MinimumTiles || TotalCount < MinimumMergeCount)
+        {
+            ClearBehaviour();
+        }
+
+        GameObject Spawned = null;
+        if (UrbAgentSpawner.SpawnAgent(MergeProduct.gameObject, mAgent.CurrentTile, out Spawned))
+        {
+            UrbAgent SpawnedAgent = Spawned.GetComponent<UrbAgent>();
+
+            MergeIntoTarget(SpawnedAgent);
+
+            for (int t = 0; t < RegisteredTiles.Length; t++)
+            {
+                if (RegisteredTiles[t] == null)
                 {
                     continue;
                 }
 
-                for (int o = 0; o < SelfTiles[s].Occupants.Count; o++)
+                for (int c = 0; c < RegisteredTiles[t].Occupants.Count; c++)
                 {
-                    if (MergeProduct.TemplatesMatch(SelfTiles[s].Occupants[o]))
+                    if (MergeProduct.TemplatesMatch(RegisteredTiles[t].Occupants[c]))
                     {
-                        MergeIntoTarget(SelfTiles[s].Occupants[o]);
-                        yield break;
+                        MergeIntoTarget(RegisteredTiles[t].Occupants[c]);
+                        break;
                     }
-                }
-            }
-        }
-        else
-        {
-            for (int o = 0; o < mAgent.CurrentTile.Occupants.Count; o++)
-            {
-                if (MergeProduct.TemplatesMatch(mAgent.CurrentTile.Occupants[o]))
-                {
-                    MergeIntoTarget(mAgent.CurrentTile.Occupants[o]);
-                    yield break;
-                }
-            }
-        }
-        UrbTile[] Search = GetSearchTiles(true);
-        List<UrbMerge> MergeCandidates = new List<UrbMerge>();
-        float MyMass = mAgent.Mass;
-        float CandidateMass = MyMass;
-        float CandidateTiles = 0;
-        bool CenterCandidate = true;
-        for (int t = 0; t < Search.Length; t++)
-        {
-            if (Search[t] == null)
-            {
-                continue;
-            }
-
-            bool FoundMatch = false;
-            for(int c = 0; c < Search[t].Occupants.Count; c++)
-            {
-                UrbMerge[] MergeComponents = Search[t].Occupants[c].GetComponents<UrbMerge>();
-                for (int i = 0; i < MergeComponents.Length; i++)
-                {
-                    if (MergeComponents[i] != this)
+                    UrbMerge[] MergeComponents = RegisteredTiles[t].Occupants[c].GetComponents<UrbMerge>();
+                    for (int i = 0; i < MergeComponents.Length; i++)
                     {
-                        if (MergeProduct.TemplatesMatch(MergeComponents[i].MergeProduct))
+                        if (MergeComponents[i] != this)
                         {
-                            FoundMatch = true;
-                            if (MergeCandidates.Contains(MergeComponents[i]))
+                            if (MergeProduct.TemplatesMatch(MergeComponents[i].MergeProduct))
                             {
-                                continue;
+                                MergeComponents[i].MergeIntoTarget(SpawnedAgent);
                             }
-
-                            MergeCandidates.Add(MergeComponents[i]);
-                            float ContentMass = Search[t].Occupants[c].Mass;
-                            if (ContentMass > MyMass)
-                            {
-                                CenterCandidate = false;
-                            }
-                            CandidateMass += Search[t].Occupants[c].Mass;
                         }
+
                     }
-                    
-                }
-            }
-            if(FoundMatch)
-            {
-                CandidateTiles++;
-                if(CandidateTiles >= MaximumTiles)
-                {
-                    break;
                 }
             }
         }
-
-        yield return BehaviourThrottle.PerformanceThrottle();
-
-        if (CenterCandidate && MergeCandidates.Count >= MinimumMergeCount && CandidateMass >= MinimumMass && CandidateTiles >= MinimumTiles)
-        {
-            GameObject Spawned = null;
-            if (UrbAgentSpawner.SpawnAgent(MergeProduct.gameObject, mAgent.CurrentTile, out Spawned))
-            {
-                UrbAgent SpawnedAgent = Spawned.GetComponent<UrbAgent>();
-
-                for (int i = 0; i < MergeCandidates.Count; i++)
-                {
-                    MergeCandidates[i].MergeIntoTarget(SpawnedAgent);
-                    
-                    
-                }
-                MergeIntoTarget(SpawnedAgent);
-                yield break;
-            }
-        }
-        yield return null;
+        base.ExecuteTileBehaviour();
     }
 }

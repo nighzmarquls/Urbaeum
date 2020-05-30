@@ -110,19 +110,19 @@ public class UrbTileprint
         return GetAdjacentPrintTiles(Agent.CurrentTile, GetLinked);
     }
 
-    public UrbTile[] GetBorderingTiles(UrbAgent Agent, bool GetLinked = false)
+    public UrbTile[] GetBorderingTiles(UrbAgent Agent, bool GetLinked = false, int Distance = 0)
     {
         if(Agent.CurrentMap == null || Agent.CurrentTile == null)
         {
             return new UrbTile[0];
         }
 
-        return GetBorderingTiles(Agent.CurrentTile, GetLinked);
+        return GetBorderingTiles(Agent.CurrentTile, GetLinked, Distance);
     }
 
-    public UrbTile[] GetBorderingTiles(UrbTile Tile, bool GetLinked = false)
+    public UrbTile[] GetBorderingTiles(UrbTile Tile, bool GetLinked = false, int Distance = 0)
     {
-        if (X < 2 && Y < 2)
+        if (X < 2 && Y < 2 && Distance == 0)
         {
             return Tile.GetAdjacent(GetLinked);
         }
@@ -136,7 +136,7 @@ public class UrbTileprint
 
         for(int i = -1; i <= X; i++)
         {
-            UrbTile CheckedTile = Tile.GetRelativeTile(i + Xoffset, Yoffset-1);
+            UrbTile CheckedTile = Tile.GetRelativeTile(i + Xoffset, Yoffset -(1+ Distance));
             if (CheckedTile == null)
             {
                 continue;
@@ -147,7 +147,7 @@ public class UrbTileprint
 
         for(int i = 0; i <= Y; i++)
         {
-            UrbTile CheckedTile = Tile.GetRelativeTile(X + Xoffset, i + Yoffset);
+            UrbTile CheckedTile = Tile.GetRelativeTile(X + Xoffset + Distance, i + Yoffset);
             if (CheckedTile == null)
             {
                 continue;
@@ -158,7 +158,7 @@ public class UrbTileprint
 
         for (int i = -1; i <= X; i++)
         {
-            UrbTile CheckedTile = Tile.GetRelativeTile(i + Xoffset, Y + Yoffset);
+            UrbTile CheckedTile = Tile.GetRelativeTile(i + Xoffset, Y + Yoffset + Distance);
             if (CheckedTile == null)
             {
                 continue;
@@ -169,7 +169,7 @@ public class UrbTileprint
 
         for(int i = 0; i < Y; i++)
         {
-            UrbTile CheckedTile = Tile.GetRelativeTile(Xoffset - 1, Yoffset + i);
+            UrbTile CheckedTile = Tile.GetRelativeTile(Xoffset - (1+Distance), Yoffset + i);
             if (CheckedTile == null)
             {
                 continue;

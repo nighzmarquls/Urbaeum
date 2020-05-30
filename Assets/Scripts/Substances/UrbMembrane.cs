@@ -5,9 +5,46 @@ using UnityEngine;
 [System.Serializable]
 public class UrbMembrane
 {
-    public UrbComposition MembraneComposition { get; protected set; }
+    protected UrbComposition ContainingComposition;
 
-    public UrbSubstanceTag[] MembraneLayers;
+    protected UrbSubstanceTag[] MembraneLayers;
+    public UrbSubstanceTag[] Layers {
+        get { return MembraneLayers; }
+        set { MembraneLayers = value; LayerDamage = new float[value.Length]; }
+    }
+
+    public float Damage {
+        get {
+            if (LayerDamage == null)
+            {
+                return 0;
+            }
+
+            float Amount = 0;
+            
+            for (int i = 0; i < LayerDamage.Length; i++)
+            {
+                Amount += LayerDamage[i];
+            }
+            return Amount;
+        }
+    }
+
+    public float Restore(float Input)
+    {
+        float Result = 0;
+        for(int i = LayerDamage.Length -1; i > -1; i++)
+        {
+            float Healing = Mathf.Min(LayerDamage[i], Input);
+            Input -= Healing;
+            Result += Healing;
+            if(Input <= 0)
+            {
+                break;
+            }
+        }
+        return Result;
+    }
 
     protected float[] LayerDamage;
 
@@ -33,12 +70,12 @@ public class UrbMembrane
     float LastRadius = 0;
     public float Radius {
         get {
-            if(MembraneComposition.Mass == LastMass)
+            if (ContainingComposition.Mass == LastMass)
             {
                 return LastRadius;
             }
             LastRadius = RadiusFromVolume(LastMass);
-            LastMass = MembraneComposition.Mass;
+            LastMass = ContainingComposition.Mass;
             return LastRadius;
         }
     }
@@ -46,7 +83,7 @@ public class UrbMembrane
     float LastArea = 0;
     public float Area {
         get {
-            if(MembraneComposition.Mass == LastMass)
+            if (ContainingComposition.Mass == LastMass)
             {
                 return LastArea;
             }
@@ -57,34 +94,34 @@ public class UrbMembrane
 
     public float TotalThickness()
     {
-        return MembraneComposition.GetProportionOfTotal(MembraneLayers) * Radius;
+        return ContainingComposition.GetProportionOfTotal(MembraneLayers) * Radius;
     }
 
     public float Thickness(UrbSubstanceTag Tag)
     {
-        return MembraneComposition.GetProportionOf(Tag) * Radius;
+        return ContainingComposition.GetProportionOf(Tag) * Radius;
     }
 
     public UrbSubstanceTag DepthSample(float Depth)
     {
-        if(MembraneLayers == null || MembraneLayers.Length == 0)
+        if (MembraneLayers == null || MembraneLayers.Length == 0)
         {
             return UrbSubstanceTag.None;
         }
 
-        if(Depth > TotalThickness())
+        if (Depth > TotalThickness())
         {
             return UrbSubstanceTag.All;
         }
 
         float Penetration = 0;
 
-        for(int DepthIndex = 0; DepthIndex < MembraneLayers.Length; DepthIndex++)
+        for (int DepthIndex = 0; DepthIndex < MembraneLayers.Length; DepthIndex++)
         {
             Penetration += Thickness(MembraneLayers[DepthIndex]);
-            if(Penetration >= Depth)
+            if (Penetration >= Depth)
             {
-               return MembraneLayers[DepthIndex];
+                return MembraneLayers[DepthIndex];
             }
         }
         return UrbSubstanceTag.All;
@@ -99,16 +136,66 @@ public class UrbMembrane
         return Result;
     }
 
-    public float PenetrationCheck( UrbSubstanceTag Penetrator, float Amount, float Force)
+    public float PenetrationCheck(UrbSubstanceTag Penetrator, float Amount, float Force)
     {
-        float Result = Amount;
+        if (Layers == null || Layers.Length == 0)
+        {
+            return Amount;
+        }
+
+        float Result = 0;
+        float Depth = Force;
+        float PenHardness = UrbSubstanceProperties.Get(Penetrator).Hardness;
+
+        for (int i = 0; i < Layers.Length; i++)
+        {
+            float LayerThickness = Thickness(Layers[i]);
+            float LayerHardness = UrbSubstanceProperties.Get(Layers[i]).Hardness;
+            float LayerFlexibility = UrbSubstanceProperties.Get(Layers[i]).Flexibility;
+
+            Depth *= PenHardness / LayerHardness;
+         
+
+            if(Depth > LayerThickness)
+            {
+                float Damage = LayerFlexibility > 0 ? (Amount*LayerThickness)/LayerFlexibility : Amount*LayerThickness;
+                LayerDamage[i] += Damage;
+                Result += Damage;
+                Depth -= LayerThickness;
+            }
+            else
+            {
+
+                float Damage = LayerFlexibility > 0 ? (Amount * Depth) / LayerFlexibility : Amount * Depth;
+                LayerDamage[i] += Damage;
+                Result += Damage;
+                break;
+            }
+        }
 
         return Result;
     }
 
-    UrbMembrane(UrbComposition Composition)
+    public UrbMembrane(UrbComposition Composition)
     {
-        MembraneComposition = Composition;
+        ContainingComposition = Composition;
     }
 
+    public void ChangeComposition(UrbComposition Composition)
+    {
+        if(Composition == null)
+        {
+            Debug.LogError("Illegal Assignment: Cannot Change Composition to Null on UrbMembrane");
+            return;
+        }
+
+        if (MembraneLayers != null)
+        {
+            for (int i = 0; i < MembraneLayers.Length; i++)
+            {
+                ContainingComposition.TransferTo(Composition, MembraneLayers[i], float.MaxValue);
+            }
+        }
+        ContainingComposition = Composition;
+    }
 }

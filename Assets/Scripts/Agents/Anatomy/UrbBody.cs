@@ -5,9 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(UrbAgent))]
 public class UrbBody : UrbBase
 {
-    public UrbComposition BodyComposition;
-
+    public UrbComposition BodyComposition { get; protected set; }
     public UrbSubstance[] BodyRecipe;
+    public UrbSubstanceTag[] SkinRecipe;
     public UrbSubstance[] CriticalBodyPartAmounts;
     public UrbAgent mAgent { get; protected set; }
     public float Height = 1;
@@ -24,7 +24,9 @@ public class UrbBody : UrbBase
         if (BodyComposition == null)
         {
             BodyComposition = new UrbComposition(BodyRecipe);
+            BodyComposition.Membrane.Layers = SkinRecipe;
         }
+
         mAgent = GetComponent<UrbAgent>();
 
         BodyComposition.SetSize(mAgent.Tileprint.TileCount * Height);
@@ -91,6 +93,10 @@ public class UrbBody : UrbBase
             UrbEncoder.GetArrayFromSubstances("CriticalBodyPartAmounts" , CriticalBodyPartAmounts),
         };
 
+        Data.StringArrays = new UrbStringArrayData[]
+        {
+            UrbEncoder.EnumsToArray("SkinRecipe" , SkinRecipe),
+        };
 
         return Data;
     }
@@ -99,6 +105,7 @@ public class UrbBody : UrbBase
     {
         Height = UrbEncoder.GetField("Height", Data);
         BodyRecipe = UrbEncoder.GetSubstancesFromArray("BodyRecipe",Data);
+        SkinRecipe = UrbEncoder.GetEnumArray<UrbSubstanceTag>("SkinRecipe", Data);
         BodyComposition = new UrbComposition(UrbEncoder.GetSubstancesFromArray("BodyContents", Data));
         CriticalBodyPartAmounts = UrbEncoder.GetSubstancesFromArray("CriticalBodyPartAmounts", Data);
         return true;
@@ -120,6 +127,13 @@ public class UrbRecoverBodyAction : UrbAction
             return 0;
         }
 
-        return Mathf.Min(Instigator.Body.Utilization, Test(Instigator));
+        float Result = Mathf.Min(Instigator.Body.Utilization, Test(Instigator));
+
+        if (Instigator.Metabolism != null)
+        {
+            Instigator.Metabolism.SpendEnergy(Result);
+        }
+
+        return Result;
     }
 }

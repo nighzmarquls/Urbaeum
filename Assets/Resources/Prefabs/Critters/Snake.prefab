@@ -111,7 +111,6 @@ MonoBehaviour:
   Interacting: 0
   SizeOffset: 1
   TileprintString: 1
-  FidgetTime: 1
 --- !u!114 &4574942228798516745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,7 +174,8 @@ MonoBehaviour:
   - Substance: 10
     SubstanceAmount: 45
   - Substance: 11
-    SubstanceAmount: 50
+    SubstanceAmount: 10
+  SkinRecipe: 
   CriticalBodyPartAmounts:
   - Substance: 5
     SubstanceAmount: 50
@@ -250,7 +250,6 @@ MonoBehaviour:
   Interval: 1
   PerceptionPrintString: 
   ContactPrintString: 
-  mBehaviours: []
 --- !u!1001 &5363061486190193616
 PrefabInstance:
   m_ObjectHideFlags: 0

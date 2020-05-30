@@ -37,19 +37,30 @@ public class UrbPerception : UrbBehaviour
                 return contactprint;
             }
 
-            contactprint = new UrbTileprint(PerceptionPrintString);
+            contactprint = new UrbTileprint(ContactPrintString);
             
             return contactprint;
         }
     }
 
-    public UrbBehaviour[] mBehaviours;
-    public UrbBehaviour[] Behaviours { get {
-            if (mBehaviours == null)
+    protected UrbBehaviour[] cBehaviours;
+    public UrbBehaviour[] ContactBehaviours { get {
+            if (cBehaviours == null)
             {
                 return new UrbBehaviour[0];
             }
-            return mBehaviours;
+            return cBehaviours;
+        }
+    }
+
+    protected UrbBehaviour[] sBehaviours;
+    public UrbBehaviour[] SenseBehaviours {
+        get {
+            if (sBehaviours == null)
+            {
+                return new UrbBehaviour[0];
+            }
+            return sBehaviours;
         }
     }
 
@@ -61,42 +72,46 @@ public class UrbPerception : UrbBehaviour
         }
        
         base.Initialize();
-        List<UrbBehaviour> BehaviourList = new List<UrbBehaviour>();
+        List<UrbBehaviour> ContactList = new List<UrbBehaviour>();
+        List<UrbBehaviour> SenseList = new List<UrbBehaviour>();
 
         UrbBehaviour[] Components = GetComponents<UrbBehaviour>();
 
-        UrbTile[] Search = (ContactPrint == null) ? GetSearchTiles(true) : ContactPrint.GetAllPrintTiles(mAgent);
-
-        int MaxIndex = Search.Length;
         for (int c = 0; c < Components.Length; c++)
         {
-            if (Components[c].TileEvaluateCheck(mAgent.CurrentTile) > -1f)
+            if (Components[c].TileEvaluateCheck(mAgent.CurrentTile) > -1f && Components[c].ContactBehaviour)
             {
-                BehaviourList.Add(Components[c]);
+                ContactList.Add(Components[c]);
+            }
+            if (Components[c].TileEvaluateCheck(mAgent.CurrentTile) > -1f && Components[c].SenseBehaviour)
+            {
+                SenseList.Add(Components[c]);
             }
         }
-        mBehaviours = BehaviourList.ToArray();
+        cBehaviours = ContactList.ToArray();
+        sBehaviours = SenseList.ToArray();
+        ContactList.Clear();
     }
 
     protected IEnumerator ContactCheck()
     {
         UrbTile[] Search = (ContactPrint == null) ? GetSearchTiles(true) : ContactPrint.GetAllPrintTiles(mAgent);
  
-        for(int b = 0; b < Behaviours.Length; b++)
+        for(int b = 0; b < ContactBehaviours.Length; b++)
         {
-            Behaviours[b].ClearBehaviour();
+            ContactBehaviours[b].ClearBehaviour();
         }
 
         yield return BehaviourThrottle;
 
         for (int i = 0; i < Search.Length; i++)
         {
-            for(int b = 0; b < Behaviours.Length; b++)
+            for(int b = 0; b < ContactBehaviours.Length; b++)
             {
-                float Evaluation = Behaviours[b].TileEvaluateCheck(Search[i]);
+                float Evaluation = ContactBehaviours[b].TileEvaluateCheck(Search[i], true);
                 if (Evaluation > float.Epsilon)
                 {
-                    Behaviours[b].RegisterTileForBehaviour(Evaluation, Search[i], i);
+                    ContactBehaviours[b].RegisterTileForBehaviour(Evaluation, Search[i], i);
                 }
             }
         }
@@ -105,6 +120,27 @@ public class UrbPerception : UrbBehaviour
     {
         if (SensePrint == null)
             yield break;
+
+        UrbTile[] Search = SensePrint.GetAllPrintTiles(mAgent);
+
+        for (int b = 0; b < SenseBehaviours.Length; b++)
+        {
+            SenseBehaviours[b].ClearBehaviour();
+        }
+
+        yield return BehaviourThrottle;
+
+        for (int i = 0; i < Search.Length; i++)
+        {
+            for (int b = 0; b < SenseBehaviours.Length; b++)
+            {
+                float Evaluation = SenseBehaviours[b].TileEvaluateCheck(Search[i], true);
+                if (Evaluation > float.Epsilon)
+                {
+                    SenseBehaviours[b].RegisterTileForBehaviour(Evaluation, Search[i], i);
+                }
+            }
+        }
 
         yield return BehaviourThrottle;
     }

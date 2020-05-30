@@ -228,6 +228,8 @@ public class UrbAgent : UrbBase
         Destroy(gameObject);
     }
 
+    float RepositionInterval = 0.1f;
+    float NextReposition = 0;
     public void Tick()
     {
         if (CurrentMap != null)
@@ -250,10 +252,24 @@ public class UrbAgent : UrbBase
                 }
             }
 
-            if (Display != null && !Display.Invisible && LastCheckedMass != Mass && Shuffle)
+            if (Display != null && !Display.Invisible && Shuffle)
             {
-                LastCheckedMass = Mass;
-                CurrentTile.ReorderContents();
+                if (LastCheckedMass != Mass && Shuffle)
+                {
+                    LastCheckedMass = Mass;
+                    CurrentTile.ReorderContents();
+                }
+
+                if(Time.time > NextReposition && Display.Significance > UrbDisplay.FeatureSignificance)
+                {
+                    if (TargetLocation != transform.position)
+                    {
+                        NextReposition = Time.time + RepositionInterval;
+                        Vector3 Direction = (TargetLocation - transform.position);
+
+                        transform.position = (Direction.magnitude > LocationThreshold) ? transform.position + (Direction.normalized * Time.deltaTime) : TargetLocation;
+                    }
+                }
             }
         }
         else

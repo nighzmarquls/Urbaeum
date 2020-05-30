@@ -19,7 +19,7 @@ public class UrbBreeder : UrbBehaviour
 
     public float Gestation = 1.0f;
 
-    public bool Disperse = false;
+    public int DispersalDistance = -1;
 
     public UrbBreedTag BreedType = UrbBreedTag.Plant;
 
@@ -38,6 +38,13 @@ public class UrbBreeder : UrbBehaviour
     public bool Gestating { get; protected set; }
 
     public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Breed;
+
+    public bool CanBreed { get {
+            if (mAgent == null || mAgent.Body == null || mAgent.Body.BodyComposition == null)
+                return false;
+
+            return mAgent.Body.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe);
+        } }
 
     public override void Initialize()
     {
@@ -88,7 +95,7 @@ public class UrbBreeder : UrbBehaviour
         return base.ValidToInterval() && mAgent.CurrentTile != null && OffspringData != null && OffspringData.Length > 0 && mAgent.Body != null;
     }
 
-    public override float TileEvaluateCheck(UrbTile Target)
+    public override float TileEvaluateCheck(UrbTile Target , bool Contact = false)
     {
         if (Gestating || Target == null || Target.Occupants == null || Crowd > MateCrowding)
         {
@@ -121,7 +128,7 @@ public class UrbBreeder : UrbBehaviour
                 return 0;
             }
             return base.BehaviourEvaluation;
-        } protected set => base.BehaviourEvaluation = value; }
+    } protected set => base.BehaviourEvaluation = value; }
 
     public override void RegisterTileForBehaviour(float Evaluation, UrbTile Target, int Index)
     {
@@ -194,14 +201,14 @@ public class UrbBreeder : UrbBehaviour
         if (!ValidToInterval())
             yield break;
 
-        if (Gestating && mAgent.Body.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe))
+        if (Gestating && CanBreed)
         {
             yield return new WaitForSeconds(Gestation);
 
             if (!ValidToInterval())
                 yield break;
 
-            UrbTile[] Search = Disperse ? mAgent.Tileprint.GetBorderingTiles(mAgent, true) : GetSearchTiles(true);
+            UrbTile[] Search = DispersalDistance < 0 ? mAgent.Tileprint.GetAllPrintTiles(mAgent) : mAgent.Tileprint.GetBorderingTiles(mAgent, true, DispersalDistance);
             int NumberOffspring = 0;
             int Delay = Random.Range((int)0, (int)3);
 
@@ -233,6 +240,14 @@ public class UrbBreeder : UrbBehaviour
                     Delay = Random.Range((int)0, (int)2);
                     NumberOffspring++;
                     mAgent.Body.BodyComposition.RemoveRecipe(GestationRecipe);
+                    if(mAgent.Metabolism != null)
+                    {
+                        UrbAgent OffspringAgent = OffspringObject.GetComponent<UrbAgent>();
+                        if (OffspringAgent != null)
+                        {
+                            mAgent.Metabolism.SpendEnergy(OffspringAgent.Mass);
+                        }
+                    }
                 }
 
                 if (OffspringCount <= NumberOffspring || mAgent.Body.BodyComposition.ContainsLessThan(GestationRecipe))
@@ -261,7 +276,7 @@ public class UrbBreeder : UrbBehaviour
             new UrbFieldData{ Name = "MateRequirement", Value = MateRequirement},
             new UrbFieldData{ Name = "MateCrowding", Value = MateCrowding},
             new UrbFieldData{ Name = "OffspringCount", Value = OffspringCount},
-            new UrbFieldData{ Name = "Disperse", Value = (Disperse)? 1 : 0},
+            new UrbFieldData{ Name = "DispersalDistance", Value = DispersalDistance},
             new UrbFieldData{ Name = "Gestation", Value = Gestation},
             new UrbFieldData{ Name = "Gestating", Value = (Gestating)? 1 : 0},
         };
@@ -294,7 +309,7 @@ public class UrbBreeder : UrbBehaviour
         MateCrowding = (int)UrbEncoder.GetField("MateCrowding", Data);
         OffspringCount = (int)UrbEncoder.GetField("OffspringCount", Data);
 
-        Disperse = (UrbEncoder.GetField("Disperse", Data) > 0.0f);
+        DispersalDistance = (int)UrbEncoder.GetField("DispersalDistance", Data);
         Gestation = UrbEncoder.GetField("Gestation", Data);
         Gestating = (UrbEncoder.GetField("Gestating", Data) > 0.0f);
 

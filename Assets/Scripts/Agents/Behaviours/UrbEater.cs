@@ -39,7 +39,7 @@ public class UrbEater : UrbBehaviour
         mAgent.AddAction(BiteAttack);
     }
 
-    public override float TileEvaluateCheck(UrbTile Target)
+    public override float TileEvaluateCheck(UrbTile Target, bool Contact = false)
     {
         if (Stomach == null || Target == null)
             return 0;
@@ -175,6 +175,7 @@ public class UrbBiteAttack : UrbAttack
 
 public class UrbBiteDamage : UrbDamage
 {
+    protected override UrbSubstanceTag DamageSubstance => UrbSubstanceTag.Teeth; 
     protected override string IconPath => IconDiretory + "BiteHit";
     public override Color IconColor => Color.red;
     public override UrbTestCategory Category => UrbTestCategory.Pierce;

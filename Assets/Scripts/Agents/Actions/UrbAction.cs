@@ -40,7 +40,7 @@ public class UrbAction
 
     public virtual float CostEstimate(UrbAgent Instigator)
     {
-        return Test(Instigator);
+        return Test(Instigator)*UrbMetabolism.EnergyConversionRatio;
     }
 
     protected static float MobilityTest(UrbBody TestBody)

@@ -9,7 +9,8 @@ public enum UrbUrgeCategory
     None = 0,
     Breed = 1,
     Hunger = 2,
-    Rest = 4,
+    Safety = 4,
+    Rest = 8,
 }
 
 [RequireComponent(typeof(UrbAgent))]
@@ -25,6 +26,8 @@ public class UrbThinker : UrbBase
 
     protected UrbMetabolism mMetabolism;
     public float RestUrge { get; protected set; }
+
+    public float SafetyUrge { get; protected set; }
 
     protected UrbPathfinder mPathfinder;
     protected UrbMovement mMovement;
@@ -55,25 +58,26 @@ public class UrbThinker : UrbBase
         HungerUrge = 0;
         mMetabolism = GetComponent<UrbMetabolism>();
         RestUrge = 0;
-        
+        SafetyUrge = 1;
+
         base.Initialize();
     }
 
     public void ChooseBehaviour()
     {
-        if(mPerception == null || mPerception.Behaviours == null)
+        if(mPerception == null || mPerception.ContactBehaviours == null)
         {
             return;
         }
 
         UrbBehaviour ChosenBehaviour = null;
         float BestEvaluation = 0;
-        for(int i = 0; i < mPerception.Behaviours.Length; i++)
+        for(int i = 0; i < mPerception.ContactBehaviours.Length; i++)
         {
-            float Evaluation = EvaluateBehaviour(mPerception.Behaviours[i]);
+            float Evaluation = EvaluateBehaviour(mPerception.ContactBehaviours[i]);
             if(BestEvaluation < Evaluation)
             {
-                ChosenBehaviour = mPerception.Behaviours[i];
+                ChosenBehaviour = mPerception.ContactBehaviours[i];
                 BestEvaluation = Evaluation;
             }
         }
@@ -100,22 +104,29 @@ public class UrbThinker : UrbBase
         bool CanEat = false;
         if(mBreeder != null)
         {
-            if (!mBody.BodyComposition.ContainsLessThan(mBreeder.GestationRecipe))
+            if (mBreeder.CanBreed)
             {
                 if (!mBreeder.Gestating)
                 {
                     BreedUrge = 1.0f;
+                    SafetyUrge = 0.25f;
                     CanBreed = true;
                 }
                 else
                 {
+                    SafetyUrge = 1.0f;
                     BreedUrge = 0.0f;
                 }
             }
             else
             {
+                SafetyUrge = 0.5f;
                 BreedUrge -= 0.1f;
             }
+        }
+        else
+        {
+            SafetyUrge = 0.0f;
         }
 
         if(mEater != null)
@@ -138,6 +149,7 @@ public class UrbThinker : UrbBase
                 {
                     HungerUrge += 1.0f;
                 }
+                SafetyUrge -= 0.5f;
                 RestUrge = 0.0f;
             }
             else
@@ -150,6 +162,8 @@ public class UrbThinker : UrbBase
 
             if(mMetabolism.Healing)
             {
+                SafetyUrge += 1.0f;
+
                 if (CanBreed)
                 {
                     BreedUrge -= 1.0f;
@@ -187,6 +201,11 @@ public class UrbThinker : UrbBase
             }
         }
 
+        if (SafetyUrge > 0)
+        {
+            TileValue -= Tile.TerrainFilter[TerrainType][Size][UrbScentTag.Violence] * SafetyUrge;
+        }
+
         if (RestUrge > 0)
         {
             TileValue -= RestUrge;
@@ -214,7 +233,14 @@ public class UrbThinker : UrbBase
         {
             Evaluation *= RestUrge;
         }
-
+        if ((Input.UrgeSatisfied & UrbUrgeCategory.Safety) > 0)
+        {
+            Evaluation *= SafetyUrge;
+        }
+        else
+        {
+            Evaluation *=  1-SafetyUrge;
+        }
         return Evaluation;
     }
 

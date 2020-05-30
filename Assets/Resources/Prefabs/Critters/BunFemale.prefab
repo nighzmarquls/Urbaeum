@@ -107,13 +107,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b2e0f7c83d69948a96dc66fccbac5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BirthTime: 180.78026
+  BirthTime: 330.09988
   CurrentMap: {fileID: 0}
   Shuffle: 1
   Interacting: 0
   SizeOffset: 1
   TileprintString: 1
-  FidgetTime: 1
 --- !u!114 &5738278284471327094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,9 +136,12 @@ MonoBehaviour:
     SubstanceAmount: 50
   - Substance: 11
     SubstanceAmount: 10
+  SkinRecipe: 07000000
   CriticalBodyPartAmounts:
   - Substance: 5
     SubstanceAmount: 45
+  - Substance: 9
+    SubstanceAmount: 1
   Height: 1
 --- !u!114 &8693178026798117474
 MonoBehaviour:
@@ -156,7 +158,7 @@ MonoBehaviour:
   Interval: 2
   BodyGrowthRecipe:
   - Substance: 7
-    SubstanceAmount: 15
+    SubstanceAmount: 100
   - Substance: 5
     SubstanceAmount: 100
   BodyEnergyReserveStorage: 6
@@ -174,8 +176,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Interval: 1
-  Speed: 2
-  EnergyCost: 1
 --- !u!114 &-2832398848432110761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -222,15 +222,16 @@ MonoBehaviour:
   MateRequirement: 1
   MateCrowding: 2
   OffspringCount: 8
-  MateCost: 10
   Gestation: 10
-  Disperse: 0
+  DispersalDistance: 0
   BreedType: 1
   MateScents: 0500000004000000
   RivalScents: 06000000
   GestationRecipe:
   - Substance: 6
     SubstanceAmount: 100
+  - Substance: 9
+    SubstanceAmount: 1
   OffspringObjects:
   - {fileID: 4574942228798516750, guid: c040dd1693ecedd44ad3dff5f67fc6aa, type: 3}
   - {fileID: 4574942228798516750}

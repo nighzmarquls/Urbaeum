@@ -54,6 +54,7 @@ public class UrbDebugDisplayAgent : MonoBehaviour
 
         string LocalName = Input.gameObject.name.Split('(')[0];
         string Age = Mathf.Round(Time.time - Input.BirthTime).ToString();
+        UrbMetabolism Metabolism = Input.Metabolism;
         UrbBody Body = Input.Body;
         UrbEater Eater = Input.GetComponent<UrbEater>();
         UrbBreeder Breeder = Input.GetComponent<UrbBreeder>();
@@ -65,14 +66,20 @@ public class UrbDebugDisplayAgent : MonoBehaviour
             "Name: " + LocalName + "\n" +
             "Age: " + Age + "\n";
 
+        if(Metabolism != null)
+        {
+            displayText += "Energy: " + Metabolism.EnergyBudget + "\n";
+        }
+
         if(Thinker != null)
         {
             string Thoughts = "Thoughts- \n";
 
-            Thoughts += (Thinker.BreedUrge > 0) ? "Breed Desire: " + Thinker.BreedUrge + "\n" : "";
-            Thoughts += (Thinker.HungerUrge > 0) ? "Hunger Desire: " + Thinker.HungerUrge + "\n" : "";
-            Thoughts += (Thinker.RestUrge > 0) ? "Rest Desire: " + Thinker.RestUrge + "\n" : "";
-
+            Thoughts += (Thinker.SafetyUrge > 0) ? "Safety Desire: " + Thinker.SafetyUrge + "\n " : "";
+            Thoughts += (Thinker.BreedUrge > 0 ) ? "Breed Desire: " + Thinker.BreedUrge + "\n" : "";
+            Thoughts += (Thinker.HungerUrge > 0 ) ? "Hunger Desire: " + Thinker.HungerUrge + "\n" : "";
+            Thoughts += (Thinker.RestUrge > 0 ) ? "Rest Desire: " + Thinker.RestUrge + "\n" : "";
+            
             displayText += Thoughts;
         }
 

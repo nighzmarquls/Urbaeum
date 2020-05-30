@@ -156,10 +156,4 @@ public class UrbSystemIO : MonoBehaviour
             Instance = null;
         }
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

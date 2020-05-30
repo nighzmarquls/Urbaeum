@@ -13,6 +13,7 @@ public class UrbSaveLoadDebug : MonoBehaviour
     void Start()
     {
         IO = GetComponent<UrbSystemIO>();
+        UrbSubstances.RegisterSubstanceProperties();
     }
 
     public void StartSave()

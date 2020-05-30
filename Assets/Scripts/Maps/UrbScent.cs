@@ -12,6 +12,7 @@ public enum UrbScentTag
     Fluff,
     Male,
     Female,
+    Violence,
     MaxScentTag
 }
 
