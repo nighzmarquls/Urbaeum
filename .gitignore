@@ -7,3 +7,6 @@ Assembly-CSharp-Editor.csproj
 Assembly-CSharp.csproj
 .vs/*
 obj/*
+*.psd~
+Assets/FriendlyCleanUI/_raw/photoshop/source.psd
+Assets/FriendlyCleanUI/_raw/photoshop/source.psd.meta
