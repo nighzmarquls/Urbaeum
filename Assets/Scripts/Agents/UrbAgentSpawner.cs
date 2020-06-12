@@ -42,3 +42,23 @@ public class UrbAgentSpawner
         return true;
     }
 }
+
+public class UrbSpawnAction : UrbUserAction
+{
+    public GameObject SpawnedTemplate;
+
+    public override void MouseClick(UrbTile currentCursorTile)
+    {
+        Debug.Log(Name + " Spawn Attempt!");
+        GameObject SpawnedObject;
+        if(UrbAgentSpawner.SpawnAgent(SpawnedTemplate,currentCursorTile ,out SpawnedObject))
+        {
+            Debug.Log(Name + "Spawn Successful!");
+        }
+        else
+        {
+            Debug.Log(Name + "Spawn Failed");
+        }
+    }
+
+}

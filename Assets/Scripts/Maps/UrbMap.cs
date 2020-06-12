@@ -6,16 +6,19 @@ public class UrbMap : MonoBehaviour
 {
     public Color Color = Color.white;
     public float TileSize = 1.0f;
-    public int Xsize;
-    public int Ysize;
+    public int Xsize = 0;
+    public int Ysize = 0;
     public UrbPathTerrain DefaultTerrain = UrbPathTerrain.Land;
 
-    UrbTile[][] MapTiles;
+    UrbTile[][] MapTiles = null;
 
     // Start is called before the first frame update
     void Start()
     {
-        GenerateMap();
+        if (Xsize > 0 && Ysize > 0 && MapTiles == null)
+        {
+            GenerateMap();
+        }
     }
 
     public void SetNewMap(int newX, int newY, float newTileSize, UrbPathTerrain TerrainType = UrbPathTerrain.Land)
@@ -23,7 +26,7 @@ public class UrbMap : MonoBehaviour
         ClearMap();
         TileSize = newTileSize;
         Xsize = newX;
-        Xsize = newY;
+        Ysize = newY;
         DefaultTerrain = TerrainType;
         GenerateMap();
     }
@@ -104,7 +107,7 @@ public class UrbMap : MonoBehaviour
     //Returns Loction of Tile Address
     public Vector3 TileAddressToLocation(int Xaddress, int Yaddress)
     {
-        Vector3 offSetLocation = new Vector3(Xaddress*TileSize, Yaddress*TileSize, ((Yaddress*TileSize)*UrbTile.DepthPush - Xaddress)) + transform.position;
+        Vector3 offSetLocation = transform.localToWorldMatrix * new Vector3(Xaddress*TileSize, Yaddress*TileSize, ((Yaddress)*UrbTile.DepthPush - Xaddress));
 
         return offSetLocation;
     }
@@ -112,7 +115,7 @@ public class UrbMap : MonoBehaviour
     //Returns true if the location is within the map and gives the correct address, returns false and outs closest tile address if it is not within the map.
     public bool LocationToTileAddress(Vector3 Location, out int Xaddress, out int Yaddress)
     {
-        Vector3 offsetLocation = (Location - transform.position)/TileSize;
+        Vector3 offsetLocation = (transform.worldToLocalMatrix * (Location))/TileSize;
         Xaddress = Mathf.RoundToInt(Mathf.Min(Mathf.Max(0.0f, offsetLocation.x), Xsize - 1));
         Yaddress = Mathf.RoundToInt(Mathf.Min(Mathf.Max(0.0f, offsetLocation.y), Ysize - 1));
 

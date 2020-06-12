@@ -18,11 +18,6 @@ public class UrbMapEditor : Editor
 
             Vector3 Position = ((UrbMap)target).transform.position;
 
-          
-
-            Position.x -= width / 2;
-            Position.y -= height / 2;
-
             Rect MapRect = new Rect(Position, new Vector2(width,height));
             Handles.DrawSolidRectangleWithOutline(MapRect, Color.clear, ((UrbMap)target).Color);
         }

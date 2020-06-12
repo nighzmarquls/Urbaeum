@@ -14,6 +14,7 @@ public class UrbSmellSource : UrbBehaviour
         if(mAgent.Body != null && mAgent.Body.BodyComposition != null)
         {
             SmellTag = mAgent.Body.BodyComposition.GetScent();
+            //SmellStrength = mAgent.Mass;
         }
         UrbTile[] Tiles = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
         float DiffusedSmell = SmellStrength / Tiles.Length;

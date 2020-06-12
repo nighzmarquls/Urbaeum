@@ -10,6 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6388468349689632466}
   - component: {fileID: 8287119984133433075}
+  - component: {fileID: 913064731}
+  - component: {fileID: 2714881977392233129}
+  - component: {fileID: 715143067}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -43,3 +46,56 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f3dd862716e424e865a514de1ba0de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AgentTypes:
+  - {fileID: 4574942228798516744, guid: 19c19e44250f1a94bbe0f2cd566ceaf4, type: 3}
+  - {fileID: 4574942228798516744, guid: c040dd1693ecedd44ad3dff5f67fc6aa, type: 3}
+  - {fileID: 4574942228798516744, guid: 4489daa56aeb7924f9005237e52657a4, type: 3}
+  - {fileID: 4574942228798516744, guid: 0c2e68a6cef0c6847ae1bcba3a2abeb3, type: 3}
+  - {fileID: 4574942228798516744, guid: 8a1e98e476944c14695684e9eefa86a9, type: 3}
+  - {fileID: 4574942228798516744, guid: 6b10252381d06a74ab9ad7b6f592e3ae, type: 3}
+  - {fileID: 4574942228798516744, guid: f3dc065bcb3a2cb4fa7461eb2bde1dce, type: 3}
+  - {fileID: 4574942228798516744, guid: 09781a599fc8cad4295eb5df370e8be2, type: 3}
+  Maps:
+  - {fileID: 0}
+--- !u!114 &913064731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618441047085783132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e0f742bf17acc4ab9794389a3bf04c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2714881977392233129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618441047085783132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 012551a97fdbfc34ca810fcfa3277f8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Toolbar: {fileID: 0}
+  ActionSquare: {fileID: 0}
+  Atlas: {fileID: 715143067}
+--- !u!114 &715143067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618441047085783132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0c6a2df4de4a234ca877ac21d672ae8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AtlasX: 0
+  AtlasY: 0
+  SkySizeFactor: 0

@@ -7,6 +7,7 @@ public class UrbCameraControls : MonoBehaviour
     public float CameraSpeed = 1.0f;
     public float CameraZoomSpeed = 1.0f;
     public float MinZoomSize = 1.25f;
+
     Camera mCamera;
 
     public Vector3 CursorWorldPosition {
@@ -38,9 +39,11 @@ public class UrbCameraControls : MonoBehaviour
     {
         Vector3 PushInput = Vector2.zero;
 
-        PushInput.x = ViewportPosition.x > 0.9f ? 1 : ViewportPosition.x < 0.1f ? -1 : 0;
-
-        PushInput.y = ViewportPosition.y > 0.9f ? 1 : ViewportPosition.y < 0.1f ? -1 : 0;
+        if (UrbUIManager.MouseOver)
+        {
+            PushInput.x = ViewportPosition.x > 0.9f ? 1 : ViewportPosition.x < 0.1f ? -1 : 0;
+            PushInput.y = ViewportPosition.y > 0.9f ? 1 : ViewportPosition.y < 0.1f ? -1 : 0;
+        }
 
         return PushInput ;
     }
@@ -78,7 +81,7 @@ public class UrbCameraControls : MonoBehaviour
     void Update()
     {
         SynchronizeMousePosition();
-        Vector3 CameraMoveInput = GetKeyboardInput();//  GetScreenPushInput() + GetKeyboardInput();
+        Vector3 CameraMoveInput = GetScreenPushInput() + GetKeyboardInput();
         mCamera.orthographicSize = GetZoomTarget();
         this.transform.position += (CameraMoveInput*Time.deltaTime* AdjustedCameraSpeed);
     }

@@ -53,6 +53,10 @@ public class UrbDisplay : UrbBase
     public string[] SecondaryForeFeatureSprites;
     public string[] SecondaryBackFeatureSprites;
 
+    public string[] DetailFaceFeatureSprites;
+    public string[] DetailForeFeatureSprites;
+    public string[] DetailBackFeatureSprites;
+
     protected List<UrbDisplayFeature> PrimaryFeatures;
     protected List<UrbDisplayFeature> SecondaryFeatures;
     protected List<UrbDisplayFeature> DetailFeatures;
@@ -298,7 +302,6 @@ public class UrbDisplay : UrbBase
 
         if(Time.time > ScheduledDisplayChange)
         {
-            //EffectDisplay.transform.position = Face.transform.position;
             if (EffectQueue.Count <= 0)
             {
                 EffectDisplay.sprite = null;
@@ -357,6 +360,12 @@ public class UrbDisplay : UrbBase
                 SecondaryFeatures.Add(CreateFeature(SecondaryFaceFeatureSprites[i], FaceFeaturePoint, offset));
                 offset += featureOffset;
             }
+
+            for (int i = 0; i < DetailFaceFeatureSprites.Length; i++)
+            {
+                DetailFeatures.Add(CreateFeature(DetailFaceFeatureSprites[i], FaceFeaturePoint, offset));
+                offset += featureOffset;
+            }
             Face.transform.position += new Vector3(0, 0, offset);
 
         }
@@ -368,6 +377,19 @@ public class UrbDisplay : UrbBase
                 PrimaryFeatures.Add(CreateFeature(PrimaryForeFeatureSprites[i], ForeFeaturePoint, offset));
                 offset += featureOffset;
             }
+
+            for (int i = 0; i < SecondaryForeFeatureSprites.Length; i++)
+            {
+                SecondaryFeatures.Add(CreateFeature(SecondaryForeFeatureSprites[i], ForeFeaturePoint, offset));
+                offset += featureOffset;
+            }
+
+            for (int i = 0; i < DetailForeFeatureSprites.Length; i++)
+            {
+                SecondaryFeatures.Add(CreateFeature(DetailForeFeatureSprites[i], ForeFeaturePoint, offset));
+                offset += featureOffset;
+            }
+
             Face.transform.position += new Vector3(0, 0, offset);
         }
         if (BackFeaturePoint != null)
@@ -376,6 +398,18 @@ public class UrbDisplay : UrbBase
             for (int i = 0; i < PrimaryBackFeatureSprites.Length; i++)
             {
                 PrimaryFeatures.Add(CreateFeature(PrimaryBackFeatureSprites[i], BackFeaturePoint, offset));
+                offset += featureOffset;
+            }
+
+            for (int i = 0; i < SecondaryBackFeatureSprites.Length; i++)
+            {
+                SecondaryFeatures.Add(CreateFeature(SecondaryBackFeatureSprites[i], BackFeaturePoint, offset));
+                offset += featureOffset;
+            }
+
+            for (int i = 0; i < DetailBackFeatureSprites.Length; i++)
+            {
+                SecondaryFeatures.Add(CreateFeature(DetailBackFeatureSprites[i], BackFeaturePoint, offset));
                 offset += featureOffset;
             }
         }

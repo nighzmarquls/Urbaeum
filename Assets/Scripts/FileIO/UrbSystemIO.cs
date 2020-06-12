@@ -7,11 +7,34 @@ public class UrbSystemIO : MonoBehaviour
 {
     public static UrbSystemIO Instance { get; protected set; }
 
-    [SerializeField]
-    protected List<UrbAgent> AgentTypes;
+    public List<UrbAgent> AgentTypes;
 
     [SerializeField]
     protected List<UrbMap> Maps;
+
+    public static void RegisterMap(UrbMap Map)
+    {
+        if(Instance.Maps == null)
+        {
+            Instance.Maps = new List<UrbMap>();
+        }
+
+        if(Instance.Maps.Contains(Map))
+        {
+            return;
+        }
+
+        Instance.Maps.Add(Map);
+    }
+
+    public static void UnregisterMap(UrbMap Map)
+    {
+        if(Instance.Maps == null || !Instance.Maps.Contains(Map))
+        {
+            return;
+        }
+        Instance.Maps.Remove(Map);
+    }
 
     protected static float OffsetTime = 0;
     public static float CurrentTime {get {
