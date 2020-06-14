@@ -8,9 +8,12 @@ public class UrbMap : MonoBehaviour
     public float TileSize = 1.0f;
     public int Xsize = 0;
     public int Ysize = 0;
+    public float TimeMultiplier = 1f;
     public UrbPathTerrain DefaultTerrain = UrbPathTerrain.Land;
 
     UrbTile[][] MapTiles = null;
+
+    public IEnumerator[] MapCoroutines { get; protected set; }
 
     // Start is called before the first frame update
     void Start()
@@ -47,6 +50,8 @@ public class UrbMap : MonoBehaviour
         Vector3 positionOffset = new Vector3(Xsize * TileSize * 0.5f, Ysize * TileSize * 0.5f);
         transform.position -= positionOffset;
         MapTiles = new UrbTile[Xsize][];
+
+        List<IEnumerator> CoroutineList = new List<IEnumerator>();
         for (int i = 0; i < Xsize; i++)
         {
             MapTiles[i] = new UrbTile[Ysize];
@@ -54,8 +59,12 @@ public class UrbMap : MonoBehaviour
             {
                 MapTiles[i][ii] = new UrbTile(this, i, ii);
                 MapTiles[i][ii].TerrainTypes = new UrbPathTerrain[] { DefaultTerrain };
+                CoroutineList.Add(MapTiles[i][ii].ScentCoroutine());
+                CoroutineList.Add(MapTiles[i][ii].Environment.EnvironmentCoroutine());
             }
         }
+
+        MapCoroutines = CoroutineList.ToArray();
     }
 
     public UrbMapData GetMapData()
@@ -110,6 +119,13 @@ public class UrbMap : MonoBehaviour
         Vector3 offSetLocation = transform.localToWorldMatrix * new Vector3(Xaddress*TileSize, Yaddress*TileSize, ((Yaddress)*UrbTile.DepthPush - Xaddress));
 
         return offSetLocation;
+    }
+
+    // Quick Function to check if Location is within MapBounds
+    public bool LocationInBounds(Vector3 Location)
+    {
+        Vector3 offsetLocation = (transform.worldToLocalMatrix * (Location)) / TileSize;
+        return (offsetLocation.x > 0 && offsetLocation.x < Xsize && offsetLocation.y > 0 && offsetLocation.y < Ysize);
     }
 
     //Returns true if the location is within the map and gives the correct address, returns false and outs closest tile address if it is not within the map.

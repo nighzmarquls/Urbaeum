@@ -5,6 +5,11 @@ using UnityEngine;
 public class UrbUIManager : MonoBehaviour
 {
     public static UrbUIManager Instance { get; protected set; }
+
+    [TextArea(0, 5)]
+    public string OverlayPrintString;
+    public UrbTileprint OverlayPrint { get; protected set; }
+
     public UrbTile CurrentCursorTile { get; protected set; } = null;
     public UrbUserAction CurrentAction { get; protected set; } = null;
     public UrbToolBar Toolbar;
@@ -12,7 +17,7 @@ public class UrbUIManager : MonoBehaviour
 
     public UrbAtlas Atlas;
 
-    static bool MapActionInvalid {  get { return Instance == null || Instance.Atlas == null || Instance.CurrentAction == null || Instance.CurrentCursorTile == null; } }
+    static bool MapActionInvalid {  get { return Instance == null || Instance.Atlas == null || Instance.CurrentAction == null || Instance.CurrentCursorTile == null || Instance.IsPaused; } }
 
     public static void SetCurrentAction(UrbUserAction Action)
     {
@@ -56,13 +61,17 @@ public class UrbUIManager : MonoBehaviour
         Instance.CurrentAction.MouseUp(Instance.CurrentCursorTile);
     }
 
+
     public static void OnMapMouseOver()
     {
         if(MapActionInvalid)
         {
             return;
         }
+
+
         Instance.CurrentAction.MouseOver(Instance.CurrentCursorTile);
+
     }
 
     public static bool MouseOver { get; protected set; } = false;
@@ -93,7 +102,13 @@ public class UrbUIManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+
             Atlas = GetComponent<UrbAtlas>();
+
+            if (!string.IsNullOrEmpty(OverlayPrintString))
+            {
+                OverlayPrint = new UrbTileprint(OverlayPrintString);
+            }
         }
         else
         {
@@ -116,6 +131,7 @@ public class UrbUIManager : MonoBehaviour
         Ray mouseray = Camera.main.ScreenPointToRay(LastMousePosition);
         Vector3 Location = mouseray.origin + (mouseray.direction * (Vector3.Distance(mouseray.origin, transform.position)));
         CurrentCursorTile = Atlas.GetTile(Location);
+
     }
 
     private void OnDisable()
@@ -126,6 +142,27 @@ public class UrbUIManager : MonoBehaviour
         }
     }
 
+    public bool IsPaused { get; protected set; } = false;
+    public void SetPause(bool Pause)
+    {
+        if(Pause == IsPaused)
+        {
+            return;
+        }
+
+        IsPaused = Pause;
+        if (Pause)
+        {
+            Atlas.PauseBehaviours();
+        }
+        else
+        {
+            Atlas.ResumeBehaviours();
+        }
+        UrbAgentManager.SetPauseOnAllAgents(Pause);
+        
+    }
+
     public void Update()
     {
         if (MouseOver)
@@ -133,5 +170,29 @@ public class UrbUIManager : MonoBehaviour
             GetMouseTile();
             OnMapMouseOver();
         }
+    }
+}
+
+public class UrbPauseAction : UrbUserAction
+{
+    public override string Name => "Pause";
+
+    public override void SelectAction()
+    {
+        UrbUIManager.Instance.SetPause(true);
+        
+        base.SelectAction();
+    }
+}
+
+public class UrbResumeAction : UrbUserAction
+{
+    public override string Name => "Resume";
+
+    public override void SelectAction()
+    {
+        UrbUIManager.Instance.SetPause(false);
+
+        base.SelectAction();
     }
 }

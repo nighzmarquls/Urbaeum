@@ -10,6 +10,14 @@ public class UrbBody : UrbBase
     public UrbSubstanceTag[] SkinRecipe;
     public UrbSubstance[] CriticalBodyPartAmounts;
     public UrbAgent mAgent { get; protected set; }
+    public float SurfaceArea { get {
+            if(BodyComposition != null)
+            {
+                return BodyComposition.Membrane.Area;
+            }
+            return 0;
+        }
+    }
     public float Height = 1;
 
     protected static UrbRecoverBodyAction RecoverAction = new UrbRecoverBodyAction();

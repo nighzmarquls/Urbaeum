@@ -42,8 +42,18 @@ public class UrbAtlas : MonoBehaviour
         UrbSystemIO.RegisterMap(LandMap);
         Maps.Add(SkyMap);
         UrbSystemIO.RegisterMap(SkyMap);
+
+        RefreshAllMaps();
+        StartBehaviours();
     }
 
+    void RefreshAllMaps()
+    {
+        for (int i = 0; i < Maps.Count; i++)
+        {
+            Maps[i].RefreshAllPathableSize();
+        }
+    }
     void LinkSkyToLand()
     {
         for(int x = 0; x < AtlasX; x++)
@@ -70,4 +80,54 @@ public class UrbAtlas : MonoBehaviour
         return Result;
     }
 
+    bool IsPaused;
+    public void StartBehaviours()
+    {
+        IsPaused = false;
+
+        for (int i = 0; i < Maps.Count; i++)
+        {
+            for (int c = 0; c < Maps[i].MapCoroutines.Length; c++)
+            {
+                StartCoroutine(Maps[i].MapCoroutines[c]);
+            }
+        }
+    }
+
+    public void PauseBehaviours()
+    {
+        if(IsPaused)
+        {
+            return;
+        }
+        IsPaused = true;
+
+        for (int i = 0; i < Maps.Count; i++)
+        {
+            for(int c = 0; c < Maps[i].MapCoroutines.Length; c++)
+            {
+                StopCoroutine(Maps[i].MapCoroutines[c]);
+            }
+        }
+        
+    }
+
+    public void ResumeBehaviours()
+    {
+        if (!IsPaused)
+        {
+            return;
+        }
+
+        IsPaused = false;
+
+        for (int i = 0; i < Maps.Count; i++)
+        {
+            for (int c = 0; c < Maps[i].MapCoroutines.Length; c++)
+            {
+                StartCoroutine(Maps[i].MapCoroutines[c]);
+            }
+        }
+        
+    }
 }

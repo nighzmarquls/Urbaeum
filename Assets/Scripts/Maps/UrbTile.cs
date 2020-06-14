@@ -8,7 +8,7 @@ public class UrbTile
     public const int MaxSize = 3;
     public const int MaxTerrain = (int)UrbPathTerrain.MaxPathTerrain;
     public const float DepthPush = 3;
-    UrbMap OwningMap;
+    public UrbMap OwningMap { get; protected set; }
     int XAddress;
     int YAddress;
 
@@ -17,6 +17,8 @@ public class UrbTile
     UrbTile[] Links;
     public UrbTile[] CachedAdjacent { get { return Adjacent; } }
     protected UrbTile[] Adjacent;
+
+    public float TimeMultiplier { get { return OwningMap.TimeMultiplier;  } }
 
     bool ScentDirty = false;
     public UrbPathTerrain[] TerrainTypes;
@@ -67,6 +69,7 @@ public class UrbTile
     protected Vector3 LocationOffset = Vector3.zero;
 
     public Vector3 Location { get { return OwningMap.TileAddressToLocation(XAddress, YAddress) + LocationOffset;} }
+    public Vector3 RawLocation { get { return OwningMap.TileAddressToLocation(XAddress, YAddress); } }
 
     bool Ordering = false;
     public void ReorderContents()
@@ -518,12 +521,13 @@ public class UrbTile
         }
         else
         {
-            Content.Remove();
+            for (int i = 0; i < Contents.Count; i++)
+            {
+                Contents[i].Remove();
+            }
         }
     }
 
-    UrbUtility.UrbThrottle ScentThrottle = new UrbUtility.UrbThrottle();
-    
     public IEnumerator ScentCoroutine()
     {
         while(true)
@@ -540,8 +544,6 @@ public class UrbTile
                 {
                     for (int s = 0; s < SizeLimit; s++)
                     {
-                        yield return ScentThrottle.PerformanceThrottle();
-
                         if(TerrainFilter[(int)TerrainTypes[t]][s] == null)
                         {
                             continue;
@@ -550,25 +552,27 @@ public class UrbTile
                         if (TerrainFilter[(int)TerrainTypes[t]][s].dirty)
                         {
                             TerrainFilter[(int)TerrainTypes[t]][s].dirty = false;
-                            TerrainFilter[(int)TerrainTypes[t]][s].DecayScent();
-                            ScentDirty = true;
+                            yield return TerrainFilter[(int)TerrainTypes[t]][s].DecayScent();
+                            ScentDirty = (TerrainFilter[(int)TerrainTypes[t]][s].dirty)? true : ScentDirty;
                         }
                     }
 
-                    if (ScentDirty)
-                    {
-                        DiffuseScent();
-                        ScentDirty = false;
-                    }
+                    
                 }
-               
+
+                if (ScentDirty)
+                {
+                    yield return DiffuseScent();
+                    ScentDirty = false;
+                }
+
             }
             else
             {
-                yield return new WaitForSeconds(0.25f);
+                yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
             }
 
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
             
         }
     }
@@ -602,10 +606,8 @@ public class UrbTile
         }
     }
 
-    void DiffuseScent()
+    IEnumerator DiffuseScent()
     {
-        
-
         if (LinksDirty)
         {
             Adjacent = OwningMap.GetAdjacent(XAddress, YAddress, true);
@@ -614,7 +616,6 @@ public class UrbTile
 
         for (int i = 0; i < TerrainTypes.Length; i++)
         {
-            int TerrainType = (int)TerrainTypes[i];
 
             for(int t = 0; t < Adjacent.Length; t++)
             {
@@ -625,13 +626,13 @@ public class UrbTile
 
                 for (int check = 0; check < Adjacent[t].TerrainTypes.Length; check++)
                 {
-                    if (check != TerrainType)
+                    if (check != (int)TerrainTypes[i])
                         continue;
 
                     Adjacent[t].ScentDirty = true;
                     for(int s = 0; s < Adjacent[t].SizeLimit; s++)
                     {
-                        Adjacent[t].TerrainFilter[TerrainType][s].ReceiveScent(TerrainFilter[TerrainType][s], ScentDiffusion);
+                        yield return Adjacent[t].TerrainFilter[(int)TerrainTypes[i]][s].ReceiveScent(TerrainFilter[(int)TerrainTypes[i]][s], ScentDiffusion);
                     }
                 }                   
             }

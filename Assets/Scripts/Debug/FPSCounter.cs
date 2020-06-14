@@ -10,22 +10,20 @@ public class FPSCounter : MonoBehaviour
     void Start()
     {
         mText = GetComponent<Text>();
-        lastFPS = 1 / Time.deltaTime;
-        lastLastFPS = lastFPS;
         StartCoroutine(CountCoroutine());
     }
-    float lastLastFPS = 0;
-    float lastFPS = 0;
+
     IEnumerator CountCoroutine()
     {
         while (true)
         {
+
             if (mText == null)
             {
                 yield return null;
             }
-            yield return new WaitForEndOfFrame();
-            float FPS = Mathf.Round( ((1 / Time.deltaTime) + lastFPS + lastLastFPS)/3);
+            yield return new WaitForSeconds(0.05f);
+            float FPS = Mathf.Round( (1 / Time.deltaTime));
  
             if (FPS > 60)
             {
@@ -45,8 +43,6 @@ public class FPSCounter : MonoBehaviour
             }
 
             mText.text = FPS.ToString();
-            lastLastFPS = lastFPS;
-            lastFPS = FPS;
 
 
         }

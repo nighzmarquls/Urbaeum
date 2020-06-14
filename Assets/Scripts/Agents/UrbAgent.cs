@@ -203,6 +203,9 @@ public class UrbAgent : UrbBase
         BodyDisplay = GetComponent<UrbBodyDisplay>();
 
         LastCheckedMass = 0;
+
+        UrbAgentManager.RegisterAgent(this);
+        IsPaused = UrbAgentManager.IsPaused;
         base.Initialize();
 
     }
@@ -215,6 +218,9 @@ public class UrbAgent : UrbBase
             return;
         }
         Removing = true;
+
+        UrbAgentManager.UnregisterAgent(this);
+
         if (CurrentTile != null)
         {
             CurrentTile.OnAgentLeave(this);
@@ -228,10 +234,41 @@ public class UrbAgent : UrbBase
         Destroy(gameObject);
     }
 
+    public bool IsPaused { get; protected set; } = false;
+    public bool Pause {
+        get { return IsPaused; }
+        set {
+            if (value != IsPaused)
+            {
+                UrbBehaviour[] AgentBehaviours = GetComponents<UrbBehaviour>();
+                if(value == true)
+                {
+                    for(int i = 0; i < AgentBehaviours.Length; i++)
+                    {
+                        AgentBehaviours[i].PauseBehaviour();
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < AgentBehaviours.Length; i++)
+                    {
+                        AgentBehaviours[i].ResumeBehaviour();
+                    }
+                }
+                IsPaused = value;
+            }
+        }
+    }
+
     float RepositionInterval = 0.1f;
     float NextReposition = 0;
     public void Tick()
     {
+        if (IsPaused)
+        {
+            return;
+        }
+
         if (CurrentMap != null)
         {
             if (Mind != null)

@@ -107,7 +107,7 @@ public class UrbEnvironment
                 PerformEnvironmentFlow();
                 
             }
-            yield return new WaitForSeconds(EnvironmentInterval);
+            yield return new WaitForSeconds(EnvironmentInterval*OwningTile.TimeMultiplier);
         }
     }
 

@@ -5,6 +5,7 @@ using UnityEngine;
 public class UrbCreateTool : UrbUserAction
 {
     public override string Name => "Create Tool";
+    public override string MapDisplayAssetPath => "";
 
     UrbSpawnAction[] Creatable = null;
 
@@ -17,7 +18,9 @@ public class UrbCreateTool : UrbUserAction
             UrbSpawnAction CreateAction = new UrbSpawnAction {
                 SpawnedTemplate = UrbSystemIO.Instance.AgentTypes[i].gameObject,
                 Icon = UrbSystemIO.Instance.AgentTypes[i].CurrentSprite,
-                Name = UrbSystemIO.Instance.AgentTypes[i].gameObject.name };
+                Name = UrbSystemIO.Instance.AgentTypes[i].gameObject.name,
+                MapDisplaySprite = UrbSystemIO.Instance.AgentTypes[i].CurrentSprite
+            };
 
             Creatable[i] = CreateAction;
         }

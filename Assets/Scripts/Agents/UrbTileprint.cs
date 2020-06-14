@@ -19,6 +19,11 @@ public class UrbTileprint
 
     int X, Y;
 
+    public Vector2 CenterOffset {
+        get {
+            return new Vector2(X / 2, Y / 2);
+        } }
+
     public int TileCount { get; protected set; }
 
     public UrbTileprint(string PrintMap = "")
@@ -222,12 +227,14 @@ public class UrbTileprint
 
         UrbTile[] ReturnTiles = new UrbTile[X * Y];
 
+        int Index = 0;
         for (int y = 0; y < Print.Length; y++)
         {
             for (int x = 0; x < Print[y].Length; x++)
             {
                 UrbTile CheckedTile = Tile.GetRelativeTile(x + Xoffset, y + Yoffset);
-                ReturnTiles[x + y] = CheckedTile;
+                ReturnTiles[Index] = CheckedTile;
+                Index++;
             }
         }
 
