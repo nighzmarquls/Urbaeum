@@ -152,6 +152,11 @@ public class UrbMap : MonoBehaviour
     //Will return null is the location is out of bounds.
     public UrbTile GetInboundsTile(Vector2 Location)
     {
+        if(MapTiles == null)
+        {
+            return null;
+        }
+
         int Xaddress = 0;
         int Yaddress = 0;
 

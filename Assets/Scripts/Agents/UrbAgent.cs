@@ -26,6 +26,18 @@ public class UrbAgent : UrbBase
     public bool Moving { get; protected set; } = false;
 
     protected Vector3 TargetLocation;
+
+    public float TimeMultiplier {
+        get {
+            if(CurrentMap == null)
+            {
+                return 0;
+            }
+
+            return CurrentMap.TimeMultiplier;
+        }
+    }
+
     public Vector3 Location {
 
         get { return transform.position; }
@@ -109,6 +121,10 @@ public class UrbAgent : UrbBase
 
     public bool TemplatesMatch(UrbAgent input)
     {
+        if(Removing)
+        {
+            return false;
+        }
         string LocalName = gameObject.name.Split('(')[0];
         string InputName = input.gameObject.name.Split('(')[0];
 

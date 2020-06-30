@@ -14,7 +14,7 @@ public class UrbToolBar : UrbUIPanel
         for (int i = 0; i < InterfaceInputs.Length; i++)
         {
             InterfaceInputs[i].UserAction = null;
-            InterfaceInputs[i].SetIcon(null);
+            InterfaceInputs[i].SetIcon(null, Color.clear);
         }
     }
 
@@ -41,7 +41,8 @@ public class UrbToolBar : UrbUIPanel
         for(int i =0; i+Index < AssignedActions.Length && i < InterfaceInputs.Length; i++)
         {
             InterfaceInputs[i].UserAction = AssignedActions[Index+i];
-            InterfaceInputs[i].SetIcon(AssignedActions[Index + i].Icon);
+            InterfaceInputs[i].SetIcon(AssignedActions[Index + i].Icon, AssignedActions[Index + i].IconColor);
+            
         }
     }
 }

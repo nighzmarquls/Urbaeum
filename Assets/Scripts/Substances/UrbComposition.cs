@@ -178,19 +178,40 @@ public class UrbComposition
         if (Dirty)
         {
             List<UrbScentTag> ScentList = new List<UrbScentTag>();
-
-            foreach (UrbSubstanceTag tag in Substances.Keys)
+            /* TODO: This may never be the prefered solution but it has some logic to it.
+             * if (Membrane != null && Membrane.Layers != null && Membrane.Layers.Length > 0)
             {
-                if (Substances[tag] > 0.0)
+                for(int i = 0; i < Membrane.Layers.Length; i++)
                 {
-                    UrbScentTag[] Scents = UrbSubstances.Scent(tag);
-                    for (int s = 0; s < Scents.Length; s++)
+                    if (this[Membrane.Layers[i]] > 0.0)
                     {
-                        if (ScentList.Contains(Scents[s]))
+                        UrbScentTag[] Scents = UrbSubstances.Scent(Membrane.Layers[i]);
+                        for (int s = 0; s < Scents.Length; s++)
                         {
-                            continue;
+                            if (ScentList.Contains(Scents[s]))
+                            {
+                                continue;
+                            }
+                            ScentList.Add(Scents[s]);
                         }
-                        ScentList.Add(Scents[s]);
+                    }
+                }
+            }
+            else*/
+            {
+                foreach (UrbSubstanceTag tag in Substances.Keys)
+                {
+                    if (this[tag] > 0.0)
+                    {
+                        UrbScentTag[] Scents = UrbSubstances.Scent(tag);
+                        for (int s = 0; s < Scents.Length; s++)
+                        {
+                            if (ScentList.Contains(Scents[s]))
+                            {
+                                continue;
+                            }
+                            ScentList.Add(Scents[s]);
+                        }
                     }
                 }
             }

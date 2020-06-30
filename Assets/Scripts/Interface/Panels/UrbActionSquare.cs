@@ -8,9 +8,13 @@ public class UrbActionSquare : UrbUIPanel
     {
         base.Initialize();
 
-        InterfaceInputs[0].UserAction = new UrbCreateTool();
+        InterfaceInputs[0].UserAction = new UrbSpawnMenu();
         InterfaceInputs[1].UserAction = new UrbPauseAction();
         InterfaceInputs[2].UserAction = new UrbResumeAction();
-        InterfaceInputs[3].UserAction = new UrbInvestigatorTool();
+        InterfaceInputs[3].UserAction = new UrbInvestigatorMenu { Icon = InterfaceInputs[3].GetIcon()};
+        InterfaceInputs[4].UserAction = new UrbSaveAction();
+        InterfaceInputs[5].UserAction = new UrbLoadAction();
+
+        InterfaceInputs[8].UserAction = new UrbQuitAction();
     }
 }

@@ -56,9 +56,11 @@ public class UrbSystemIO : MonoBehaviour
             Debug.LogError("Missing UrbAgent Prefab Key, Cannot collect Game Data");
         }
 
-        GameData = new UrbSave();
-        GameData.Maps = new UrbMapData[Maps.Count];
-        GameData.OffsetTime = CurrentTime;
+        GameData = new UrbSave
+        {
+            Maps = new UrbMapData[Maps.Count],
+            OffsetTime = CurrentTime
+        };
 
         for (int i = 0; i < Maps.Count; i ++)
         {
@@ -164,7 +166,9 @@ public class UrbSystemIO : MonoBehaviour
     {
         if (Instance == null)
         {
-            Instance = this;
+           Instance = this;
+           UrbSubstances.RegisterSubstanceProperties();
+
         }
         else
         {
@@ -178,5 +182,47 @@ public class UrbSystemIO : MonoBehaviour
         {
             Instance = null;
         }
+    }
+}
+
+public class UrbSaveAction : UrbUserAction
+{
+    public override string Name => "Save";
+    public override string MapDisplayAssetPath => "";
+
+    public override void SelectAction()
+    {
+        if (UrbUIManager.Instance.CurrentAction != null && UrbUIManager.Instance.CurrentAction == this)
+        {
+            return;
+        }
+
+        UrbUIManager.Instance.SetPause(true);
+        UrbSystemIO.Instance.CollectGameData();
+        UrbSystemIO.Instance.SaveGameDataToFile();
+        UrbUIManager.Instance.SetPause(false);
+
+        base.SelectAction();
+    }
+}
+
+public class UrbLoadAction : UrbUserAction
+{
+    public override string Name => "Load";
+    public override string MapDisplayAssetPath => "";
+
+    public override void SelectAction()
+    {
+        if (UrbUIManager.Instance.CurrentAction != null && UrbUIManager.Instance.CurrentAction == this)
+        {
+            return;
+        }
+
+        UrbUIManager.Instance.SetPause(true);
+        UrbSystemIO.Instance.LoadGameDataFromFile();
+        UrbSystemIO.Instance.AssignGameData();
+        UrbUIManager.Instance.SetPause(false);
+
+        base.SelectAction();
     }
 }

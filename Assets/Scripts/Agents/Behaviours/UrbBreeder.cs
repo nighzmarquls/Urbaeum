@@ -16,6 +16,7 @@ public class UrbBreeder : UrbBehaviour
     public int MateRequirement = 0;
     public int MateCrowding = 8;
     public int OffspringCount = 1;
+    public float OffspringRequiredSpace = 500;
 
     public float Gestation = 1.0f;
 
@@ -196,6 +197,25 @@ public class UrbBreeder : UrbBehaviour
         base.ExecuteTileBehaviour();
     }
 
+    // Cached Values for Functional Coroutine;
+    private UrbTile LastBreedTile = null;
+    private UrbTile[] SearchCache;
+    private GameObject OffspringTemplate;
+    private GameObject OffspringObject;
+
+    private int Delay;
+    private int NumberOffspring;
+    private int OffspringChoice = -1;
+
+    private void SetOffspringTemplate(int Choice)
+    {
+        if (Choice != OffspringChoice && Choice > -1 && Choice < OffspringObjects.Length)
+        {
+            OffspringChoice = Choice;
+            OffspringTemplate = OffspringObjects[OffspringChoice];
+        }
+    }
+
     override public IEnumerator FunctionalCoroutine()
     {
         if (!ValidToInterval())
@@ -203,20 +223,25 @@ public class UrbBreeder : UrbBehaviour
 
         if (Gestating && CanBreed)
         {
-            yield return new WaitForSeconds(Gestation);
+            yield return new WaitForSeconds(Gestation * mAgent.TimeMultiplier);
 
             if (!ValidToInterval())
                 yield break;
 
-            UrbTile[] Search = DispersalDistance < 0 ? mAgent.Tileprint.GetAllPrintTiles(mAgent) : mAgent.Tileprint.GetBorderingTiles(mAgent, true, DispersalDistance);
-            int NumberOffspring = 0;
-            int Delay = Random.Range((int)0, (int)3);
+            SetOffspringTemplate(Random.Range(0, OffspringObjects.Length));
 
-            yield return BehaviourThrottle.PerformanceThrottle();
-
-            for (int t = 0; t < Search.Length; t++)
+            if (LastBreedTile != mAgent.CurrentTile)
             {
-                if (Search[t] == null || Search[t].Blocked)
+                LastBreedTile = mAgent.CurrentTile;
+                SearchCache = DispersalDistance < 0 ? mAgent.Tileprint.GetAllPrintTiles(mAgent) : mAgent.Tileprint.GetBorderingTiles(mAgent, true, DispersalDistance);
+            }
+
+            Delay = Random.Range((int)0, (int)3);
+            NumberOffspring = 0;
+
+            for (int t = 0; t < SearchCache.Length; t++)
+            {
+                if (SearchCache[t] == null || SearchCache[t].Blocked || SearchCache[t].FreeCapacity < OffspringRequiredSpace)
                 {
                     continue;
                 }
@@ -227,13 +252,9 @@ public class UrbBreeder : UrbBehaviour
                     continue;
                 }
 
-                int OffspringChoice = Random.Range(0, OffspringObjects.Length);
+                yield return BehaviourThrottle.PerformanceThrottle();
 
-                GameObject OffspringTemplate = OffspringObjects[OffspringChoice];
-
-                GameObject OffspringObject;
-
-                if (UrbAgentSpawner.SpawnAgent(OffspringTemplate, Search[t], out OffspringObject, OffspringData[OffspringChoice]))
+                if (UrbAgentSpawner.SpawnAgent(OffspringTemplate, SearchCache[t], out OffspringObject, OffspringData[OffspringChoice]))
                 {
                     SetOffspringData(OffspringObject);
 
@@ -248,6 +269,9 @@ public class UrbBreeder : UrbBehaviour
                             mAgent.Metabolism.SpendEnergy(OffspringAgent.Mass);
                         }
                     }
+
+                    SetOffspringTemplate(Random.Range(0, OffspringObjects.Length));
+
                 }
 
                 if (OffspringCount <= NumberOffspring || mAgent.Body.BodyComposition.ContainsLessThan(GestationRecipe))
@@ -257,7 +281,7 @@ public class UrbBreeder : UrbBehaviour
                 }
                 else
                 {
-                    yield return new WaitForSeconds(Interval);
+                    yield return new WaitForSeconds(Interval* mAgent.TimeMultiplier);
                 }
             }
             Gestating = false;
@@ -276,6 +300,7 @@ public class UrbBreeder : UrbBehaviour
             new UrbFieldData{ Name = "MateRequirement", Value = MateRequirement},
             new UrbFieldData{ Name = "MateCrowding", Value = MateCrowding},
             new UrbFieldData{ Name = "OffspringCount", Value = OffspringCount},
+            new UrbFieldData{ Name = "OffspringRequiredSpace", Value = OffspringRequiredSpace},
             new UrbFieldData{ Name = "DispersalDistance", Value = DispersalDistance},
             new UrbFieldData{ Name = "Gestation", Value = Gestation},
             new UrbFieldData{ Name = "Gestating", Value = (Gestating)? 1 : 0},
@@ -308,6 +333,7 @@ public class UrbBreeder : UrbBehaviour
         MateRequirement = (int)UrbEncoder.GetField("MateRequirement", Data);
         MateCrowding = (int)UrbEncoder.GetField("MateCrowding", Data);
         OffspringCount = (int)UrbEncoder.GetField("OffspringCount", Data);
+        OffspringRequiredSpace = UrbEncoder.GetField("OffspringRequiredSpace", Data);
 
         DispersalDistance = (int)UrbEncoder.GetField("DispersalDistance", Data);
         Gestation = UrbEncoder.GetField("Gestation", Data);

@@ -9,6 +9,9 @@ public class UrbSmellSource : UrbBehaviour
     public UrbScentTag[] SmellTag;
     public float SmellStrength = 1.0f;
 
+    protected UrbTile[] TileCache = null;
+    protected UrbTile LastSmellTile = null;
+
     override public IEnumerator FunctionalCoroutine()
     {
         if(mAgent.Body != null && mAgent.Body.BodyComposition != null)
@@ -16,22 +19,28 @@ public class UrbSmellSource : UrbBehaviour
             SmellTag = mAgent.Body.BodyComposition.GetScent();
             //SmellStrength = mAgent.Mass;
         }
-        UrbTile[] Tiles = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
-        float DiffusedSmell = SmellStrength / Tiles.Length;
-        for(int s = 0; s < Tiles.Length; s++)
+
+        if (LastSmellTile != mAgent.CurrentTile)
         {
-            if (Tiles[s] == null)
+            TileCache = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
+        }
+
+        for(int s = 0; s < TileCache.Length; s++)
+        {
+            if (TileCache[s] == null)
             {
                 continue;
             }
             for (int t = 0; t < SmellTag.Length; t++)
             {
-                Tiles[s].AddScent(SmellTag[t], DiffusedSmell);
+                TileCache[s].AddScent(SmellTag[t], SmellStrength / TileCache.Length);
             }
         }
 
-        yield return null;
-
+        if (Interval < UrbScent.ScentInterval)
+        {
+            yield return new WaitForSeconds(UrbScent.ScentInterval - Interval);
+        }
     }
 
     override public UrbComponentData GetComponentData()

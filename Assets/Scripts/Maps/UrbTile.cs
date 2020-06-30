@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class UrbTile
 {
+    public const int MaximumOccupants = 4;
     public const float TileCapacity = 1000;
     public const int MaxSize = 3;
     public const int MaxTerrain = (int)UrbPathTerrain.MaxPathTerrain;
@@ -111,18 +112,22 @@ public class UrbTile
 
                 for (int i = 0; i < OrderedOccupants.Count; i++)
                 {
-                    
-                        float X = Mathf.Sin(Turn);
-                        float Y = Mathf.Cos(Turn);
-                        LocationOffset = new Vector3(X, Y, 0) * Radius * this.OwningMap.TileSize;
-                        if (OrderedOccupants[i].Shuffle)
-                        {
-                            OrderedOccupants[i].Location = Center + LocationOffset + new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x);
-                        }
-                        Turn += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) * TurnAdjust;
-                        TurnAdjust *= 0.85f;
-                        Radius += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) / RadiusAdjust;
-                        RadiusAdjust += 5f;
+                    if(i > MaximumOccupants)
+                    {
+                        OrderedOccupants[i].Remove();
+                        continue;
+                    }
+                    float X = Mathf.Sin(Turn);
+                    float Y = Mathf.Cos(Turn);
+                    LocationOffset = new Vector3(X, Y, 0) * Radius * this.OwningMap.TileSize;
+                    if (OrderedOccupants[i].Shuffle)
+                    {
+                        OrderedOccupants[i].Location = Center + LocationOffset + new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x);
+                    }
+                    Turn += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) * TurnAdjust;
+                    TurnAdjust *= 0.85f;
+                    Radius += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) / RadiusAdjust;
+                    RadiusAdjust += 5f;
                     
                 }
 
@@ -515,7 +520,7 @@ public class UrbTile
 
     public void ClearTile()
     {
-        if(Content == null )
+        if(Contents == null || Contents.Count == 0)
         {
             return;
         }

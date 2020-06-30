@@ -146,7 +146,7 @@ public class UrbBehaviour : UrbBase
                 yield return FunctionalCoroutine();
             }
 
-            yield return new WaitForSeconds(Interval);
+            yield return new WaitForSeconds(Interval * mAgent.TimeMultiplier);
         }
     }
 

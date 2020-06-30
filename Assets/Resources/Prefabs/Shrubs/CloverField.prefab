@@ -176,9 +176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d2d170163064e42bda7b740df8716e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BodyRecipe:
-  - Substance: 3
-    SubstanceAmount: 0
+  BodyRecipe: []
   SkinRecipe: 
   CriticalBodyPartAmounts:
   - Substance: 13
@@ -261,6 +259,7 @@ MonoBehaviour:
   MateRequirement: 0
   MateCrowding: 8
   OffspringCount: 8
+  OffspringRequiredSpace: 1000
   Gestation: 2
   DispersalDistance: 1
   BreedType: 0

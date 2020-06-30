@@ -89,9 +89,7 @@ public class UrbMetabolism : UrbBehaviour
     public override IEnumerator FunctionalCoroutine()
     {
         SpendEnergy(mAgent.Body.BodyComposition.Mass);
-        BehaviourThrottle.PerformanceThrottle();
         BuildReserves();
-        BehaviourThrottle.PerformanceThrottle();
 
         if (EnergyDebt > 0)
         {

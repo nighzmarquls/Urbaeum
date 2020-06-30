@@ -276,7 +276,7 @@ public class UrbDisplay : UrbBase
 
     public void QueueEffectDisplay(UrbAction Input, Vector3 Position, bool Immediate = false)
     {
-        if(EffectDisplay == null)
+        if(EffectDisplay == null || EffectQueue == null || EffectPositionQueue == null)
         {
             return;
         }

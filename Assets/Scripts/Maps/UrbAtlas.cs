@@ -10,12 +10,18 @@ public class UrbAtlas : MonoBehaviour
     public int AtlasY = 64;
 
     public int SkySizeFactor = 2;
-
+    
 
     private UrbMap LandMap;
     private UrbMap SkyMap;
 
     // Start is called before the first frame update
+
+    public float TimeMultiplier {
+        set {
+
+        }
+    }
     void Start()
     {
         if(AtlasX <= 0 && AtlasY <= 0)

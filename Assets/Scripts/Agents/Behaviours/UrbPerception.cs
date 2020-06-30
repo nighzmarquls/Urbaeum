@@ -93,10 +93,16 @@ public class UrbPerception : UrbBehaviour
         ContactList.Clear();
     }
 
+    UrbTile[] ContactSearchCache;
+    UrbTile LastContactTile = null;
+    float Evaluation;
     protected IEnumerator ContactCheck()
     {
-        UrbTile[] Search = (ContactPrint == null) ? GetSearchTiles(true) : ContactPrint.GetAllPrintTiles(mAgent);
- 
+        if (LastContactTile != mAgent.CurrentTile)
+        {
+            LastContactTile = mAgent.CurrentTile;
+            ContactSearchCache = (ContactPrint == null) ? GetSearchTiles(true) : ContactPrint.GetAllPrintTiles(mAgent);
+        }
         for(int b = 0; b < ContactBehaviours.Length; b++)
         {
             ContactBehaviours[b].ClearBehaviour();
@@ -104,24 +110,31 @@ public class UrbPerception : UrbBehaviour
 
         yield return BehaviourThrottle;
 
-        for (int i = 0; i < Search.Length; i++)
+        for (int i = 0; i < ContactSearchCache.Length; i++)
         {
             for(int b = 0; b < ContactBehaviours.Length; b++)
             {
-                float Evaluation = ContactBehaviours[b].TileEvaluateCheck(Search[i], true);
+                Evaluation = ContactBehaviours[b].TileEvaluateCheck(ContactSearchCache[i], true);
                 if (Evaluation > float.Epsilon)
                 {
-                    ContactBehaviours[b].RegisterTileForBehaviour(Evaluation, Search[i], i);
+                    ContactBehaviours[b].RegisterTileForBehaviour(Evaluation, ContactSearchCache[i], i);
                 }
             }
         }
     }
+
+    UrbTile[] SenseSearchCache;
+    UrbTile LastSenseTile = null;
     protected IEnumerator SenseCheck()
     {
         if (SensePrint == null)
             yield break;
 
-        UrbTile[] Search = SensePrint.GetAllPrintTiles(mAgent);
+        if (LastSenseTile != mAgent.CurrentTile)
+        {
+            LastSenseTile = mAgent.CurrentTile;
+            SenseSearchCache = SensePrint.GetAllPrintTiles(mAgent);
+        }
 
         for (int b = 0; b < SenseBehaviours.Length; b++)
         {
@@ -130,14 +143,14 @@ public class UrbPerception : UrbBehaviour
 
         yield return BehaviourThrottle;
 
-        for (int i = 0; i < Search.Length; i++)
+        for (int i = 0; i < SenseSearchCache.Length; i++)
         {
             for (int b = 0; b < SenseBehaviours.Length; b++)
             {
-                float Evaluation = SenseBehaviours[b].TileEvaluateCheck(Search[i], true);
+                float Evaluation = SenseBehaviours[b].TileEvaluateCheck(SenseSearchCache[i], true);
                 if (Evaluation > float.Epsilon)
                 {
-                    SenseBehaviours[b].RegisterTileForBehaviour(Evaluation, Search[i], i);
+                    SenseBehaviours[b].RegisterTileForBehaviour(Evaluation, SenseSearchCache[i], i);
                 }
             }
         }

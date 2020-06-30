@@ -5,9 +5,11 @@ using UnityEngine;
 public class UrbInvestigatorTool : UrbUserAction
 {
     public override string Name => "Investigate Tool";
+    public override Color IconColor => DetectionColor;
     public override string MapDisplayAssetPath => "Sprites/UI/Examine";
-    public UrbScentTag DisplayScentTag = UrbScentTag.Plant;
-    public float Sensitivity = 0.5f;
+
+    public virtual Color DetectionColor { get; set; } = Color.black;
+    public virtual float Sensitivity { get; set; }  = 0.5f;
     protected bool Uninitialized = true;
 
     protected const string InvestigationDisplayPath = "Sprites/blank";
@@ -71,24 +73,11 @@ public class UrbInvestigatorTool : UrbUserAction
 
     public virtual Color GetColorFromTile(UrbTile Tile)
     {
-        Color TileColor = Color.black;
+        Color TileColor = DetectionColor;
 
-        if (Tile.TerrainFilter[0][2][UrbScentTag.Plant] > 0)
-        {
-            TileColor = (Color.magenta * (Tile.TerrainFilter[0][2][DisplayScentTag] * Sensitivity));
-        }
-        else if (Tile.TerrainFilter[0][1][UrbScentTag.Plant] > 0)
-        {
-            TileColor = (Color.blue * (Tile.TerrainFilter[0][1][DisplayScentTag] * Sensitivity));
-        }
-        else if (Tile.TerrainFilter[0][0][UrbScentTag.Plant] > 0)
-        {
-            TileColor = (Color.cyan * (Tile.TerrainFilter[0][0][DisplayScentTag] * Sensitivity));
-        }
+        TileColor.a = 1 - (Tile.FreeCapacity/UrbTile.TileCapacity);
 
-        TileColor.a = 0;
-
-        return Color.white - TileColor;
+        return TileColor;
     }
 
     public override void MouseOver(UrbTile input)

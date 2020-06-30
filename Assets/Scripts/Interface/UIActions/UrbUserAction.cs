@@ -6,6 +6,7 @@ using UnityEngine;
 public class UrbUserAction
 {
     public virtual Sprite Icon { get; set; } = null;
+    public virtual Color IconColor { get; set; } = Color.white;
     public virtual string Name { get; set; } = "";
     public virtual string Description { get; set; } = "";
     public virtual string MapDisplayAssetPath { get; set; } = "Sprites/blank";
@@ -31,7 +32,7 @@ public class UrbUserAction
         }
     }
 
-    protected virtual void UninitializeOverlaySprites()
+    protected virtual void UninitializeMapDisplaySprites()
     {
         if (MapDisplay != null)
         {
@@ -48,7 +49,7 @@ public class UrbUserAction
     }
 
     public virtual void UnselectAction() {
-        UninitializeOverlaySprites();
+        UninitializeMapDisplaySprites();
     }
 
     public virtual void MouseClick(UrbTile currentCursorTile) { }

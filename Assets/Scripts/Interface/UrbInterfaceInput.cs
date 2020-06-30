@@ -13,23 +13,27 @@ public class UrbInterfaceInput : MonoBehaviour
     protected Button mButton;
     protected ButtonAnimator mButtonAnimator;
 
-    public void SetIcon(Sprite Input)
+    public Sprite GetIcon()
     {
-        if(Icon == null)
+        if (this.Icon == null)
+        {
+            return null;
+        }
+
+        return this.Icon.sprite;
+    }
+
+    public void SetIcon(Sprite Icon, Color IconColor)
+    {
+        if(this.Icon == null)
         {
             return;
         }
 
         
-        if(Input == null)
-        {
-            Icon.color = Color.clear;
-        }
-        else
-        {
-            Icon.sprite = Input;
-            Icon.color = Color.white;
-        }
+        this.Icon.sprite = Icon;
+        this.Icon.color = IconColor;
+        
     }
 
     public void Start()

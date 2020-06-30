@@ -39,7 +39,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 7878978403681955576}
+  - {fileID: 7056411139508372456}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -107,7 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b2e0f7c83d69948a96dc66fccbac5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BirthTime: 44.207916
+  BirthTime: 17.271307
   CurrentMap: {fileID: 0}
   Shuffle: 1
   Interacting: 0
@@ -223,6 +223,7 @@ MonoBehaviour:
   MateRequirement: 0
   MateCrowding: 8
   OffspringCount: 8
+  OffspringRequiredSpace: 1000
   Gestation: 2
   DispersalDistance: 0
   BreedType: 0
@@ -249,7 +250,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Interval: 1
   MinimumMergeCount: 2
-  MinimumMass: 840
+  MinimumMass: 420
   MinimumTiles: 1
   MaximumTiles: 4
   MergeProduct: {fileID: 4574942228798516744, guid: 09781a599fc8cad4295eb5df370e8be2,
@@ -603,7 +604,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d87aa7449214aee4a9f2c5c0b1d3a5df, type: 3}
---- !u!4 &7878978403681955576 stripped
+--- !u!4 &7056411139508372456 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 917231937711402369, guid: d87aa7449214aee4a9f2c5c0b1d3a5df,
     type: 3}

@@ -42,8 +42,6 @@ public class UrbSubstanceProperty
 
 public class UrbSubstanceProperties
 {
-
-
     public static UrbSubstanceProperty Get(UrbSubstanceTag Tag) {
 
         if (Properties == null || !Properties.ContainsKey(Tag))

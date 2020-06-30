@@ -2,28 +2,36 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UrbCreateTool : UrbUserAction
+public class UrbSpawnMenu : UrbUserAction
 {
-    public override string Name => "Create Tool";
+    public override string Name => "Spawn Menu";
     public override string MapDisplayAssetPath => "";
 
     UrbSpawnAction[] Creatable = null;
 
     protected void InitializeCreatable()
     {
-        Creatable = new UrbSpawnAction[UrbSystemIO.Instance.AgentTypes.Count];
 
+        List<UrbSpawnAction> WorkingList = new List<UrbSpawnAction>();
         for(int i = 0; i < UrbSystemIO.Instance.AgentTypes.Count; i++)
         {
+            UrbBody TestBody = UrbSystemIO.Instance.AgentTypes[i].GetComponent<UrbBody>();
+
+            if(TestBody == null || TestBody.BodyRecipe == null || TestBody.BodyRecipe.Length == 0)
+            {
+                continue;
+            }
+
             UrbSpawnAction CreateAction = new UrbSpawnAction {
                 SpawnedTemplate = UrbSystemIO.Instance.AgentTypes[i].gameObject,
                 Icon = UrbSystemIO.Instance.AgentTypes[i].CurrentSprite,
                 Name = UrbSystemIO.Instance.AgentTypes[i].gameObject.name,
                 MapDisplaySprite = UrbSystemIO.Instance.AgentTypes[i].CurrentSprite
             };
-
-            Creatable[i] = CreateAction;
+            WorkingList.Add(CreateAction);
         }
+
+        Creatable = WorkingList.ToArray();
     }
 
     public override void SelectAction()

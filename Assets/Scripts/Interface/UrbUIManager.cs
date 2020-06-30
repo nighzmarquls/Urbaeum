@@ -196,3 +196,14 @@ public class UrbResumeAction : UrbUserAction
         base.SelectAction();
     }
 }
+
+public class UrbQuitAction : UrbUserAction
+{
+    public override string Name => "Quit";
+
+    public override void SelectAction()
+    {
+        Application.Quit();
+        base.SelectAction();
+    }
+}
