@@ -82,71 +82,69 @@ public class UrbTile
 
         Ordering = true;
         LocationOffset = Vector3.zero;
-        if (Occupants.Count > 0)
+        if (Occupants.Count <= 0)
         {
-            Vector3 Center = OwningMap.TileAddressToLocation(XAddress, YAddress);
-            UrbAgent Biggest = Occupants[0];
-            List<UrbAgent> OrderedOccupants = new List<UrbAgent>();
-            float BiggestMass = Biggest.MassPerTile;
-            for (int i = 0; i < Occupants.Count; i++)
+            return;
+        }
+        
+        Vector3 Center = OwningMap.TileAddressToLocation(XAddress, YAddress);
+        UrbAgent Biggest = Occupants[0];
+        List<UrbAgent> OrderedOccupants = new List<UrbAgent>();
+        float BiggestMass = Biggest.MassPerTile;
+        for (int i = 0; i < Occupants.Count; i++)
+        {
+            if(Occupants[i].MassPerTile > BiggestMass)
             {
-                if(Occupants[i].MassPerTile > BiggestMass)
-                {
-                    OrderedOccupants.Insert(0, Occupants[i]);
-                    Biggest = Occupants[i];
-                    BiggestMass = Occupants[i].MassPerTile;
-                }
-                else
-                {
-                    OrderedOccupants.Add(Occupants[i]);
-                }
-            }
-            if (Biggest != null)
-            {
-                float Turn = 0;
-                float TurnAdjust = (Mathf.PI);
-                float Radius = 0;
-                float RadiusAdjust = 3;
-
-                float TileCapacityOffset = TileCapacity / 4f;
-
-                for (int i = 0; i < OrderedOccupants.Count; i++)
-                {
-                    if(i > MaximumOccupants)
-                    {
-                        OrderedOccupants[i].Remove();
-                        continue;
-                    }
-                    float X = Mathf.Sin(Turn);
-                    float Y = Mathf.Cos(Turn);
-                    LocationOffset = new Vector3(X, Y, 0) * Radius * this.OwningMap.TileSize;
-                    if (OrderedOccupants[i].Shuffle)
-                    {
-                        OrderedOccupants[i].Location = Center + LocationOffset + new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x);
-                    }
-                    Turn += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) * TurnAdjust;
-                    TurnAdjust *= 0.85f;
-                    Radius += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) / RadiusAdjust;
-                    RadiusAdjust += 5f;
-                    
-                }
-
-            }
-
-            float Free = FreeCapacity / TileCapacity;
-            if (Free <= 0)
-            {
-                ScentDirty = false;
-                Blocked = true;
+                OrderedOccupants.Insert(0, Occupants[i]);
+                Biggest = Occupants[i];
+                BiggestMass = Occupants[i].MassPerTile;
             }
             else
             {
-                Blocked = false;
+                OrderedOccupants.Add(Occupants[i]);
             }
-
-            ScentDiffusion = UrbScent.ScentDiffusion * Free;
-            Occupants = OrderedOccupants;
         }
+        float Turn = 0;
+        float TurnAdjust = (Mathf.PI);
+        float Radius = 0;
+        float RadiusAdjust = 3;
+
+        float TileCapacityOffset = TileCapacity / 4f;
+
+        for (int i = 0; i < OrderedOccupants.Count; i++)
+        {
+            if(i > MaximumOccupants)
+            {
+                OrderedOccupants[i].Remove(false);
+                continue;
+            }
+            float X = Mathf.Sin(Turn);
+            float Y = Mathf.Cos(Turn);
+            LocationOffset = new Vector3(X, Y, 0) * (Radius * this.OwningMap.TileSize);
+            if (OrderedOccupants[i].Shuffle)
+            {
+                OrderedOccupants[i].Location = Center + LocationOffset + new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x);
+            }
+            Turn += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) * TurnAdjust;
+            TurnAdjust *= 0.85f;
+            Radius += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) / RadiusAdjust;
+            RadiusAdjust += 5f;
+                
+        }
+
+        float Free = FreeCapacity / TileCapacity;
+        if (Free <= 0)
+        {
+            ScentDirty = false;
+            Blocked = true;
+        }
+        else
+        {
+            Blocked = false;
+        }
+
+        ScentDiffusion = UrbScent.ScentDiffusion * Free;
+        Occupants = OrderedOccupants;
     }
 
     private void Constructor(UrbMap CreatingMap)
@@ -422,12 +420,15 @@ public class UrbTile
             ReorderContents();
     }
 
-    public void OnAgentLeave(UrbAgent input)
+    public void OnAgentLeave(UrbAgent input, bool reorder = true)
     {
-        Ordering = false;
+        Ordering = !reorder;
         Contents.Remove(input);
         input.Tileprint.DepartFromTile(this, input);
-        ReorderContents();
+        if (reorder)
+        {
+            ReorderContents();
+        }
     }
 
     public void ToggleLink(UrbTile input)

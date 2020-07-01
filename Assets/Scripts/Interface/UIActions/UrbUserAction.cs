@@ -52,6 +52,8 @@ public class UrbUserAction
         UninitializeMapDisplaySprites();
     }
 
+    public virtual void RecenterCameraAction() {} 
+    
     public virtual void MouseClick(UrbTile currentCursorTile) { }
 
     public virtual void MouseDown(UrbTile input) { }

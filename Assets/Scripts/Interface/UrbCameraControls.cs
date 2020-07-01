@@ -8,6 +8,7 @@ public class UrbCameraControls : MonoBehaviour
     public float CameraZoomSpeed = 1.0f;
     public float MinZoomSize = 1.25f;
 
+    public Vector3 CameraStartLocation;
     Camera mCamera;
 
     public Vector3 CursorWorldPosition {
@@ -27,12 +28,18 @@ public class UrbCameraControls : MonoBehaviour
         mCamera = GetComponent<Camera>();
         mCamera.orthographic = true;
         StartingSize = mCamera.orthographicSize;
+        CameraStartLocation = mCamera.transform.position;
     }
 
     void SynchronizeMousePosition()
     {
         ViewportPosition = mCamera.ScreenToViewportPoint(Input.mousePosition);
         WorldPosition = mCamera.ScreenToWorldPoint(Input.mousePosition);
+    }
+
+    void RecenterCamera()
+    {
+        mCamera.transform.position = CameraStartLocation;
     }
 
     Vector3 GetScreenPushInput()
@@ -83,7 +90,13 @@ public class UrbCameraControls : MonoBehaviour
         SynchronizeMousePosition();
         Vector3 CameraMoveInput = GetScreenPushInput() + GetKeyboardInput();
         mCamera.orthographicSize = GetZoomTarget();
-        this.transform.position += (CameraMoveInput*Time.deltaTime* AdjustedCameraSpeed);
+        this.transform.position += (CameraMoveInput * (Time.deltaTime * AdjustedCameraSpeed));
+        
+        //Temporary until we have non-ui shortcuts.
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            RecenterCamera();
+        }
     }
 }
     

@@ -119,6 +119,7 @@ public class UrbAgent : UrbBase
         }
     }
 
+    //TemplatesMatch tells us if these are the same type of entity or not. 
     public bool TemplatesMatch(UrbAgent input)
     {
         if(Removing)
@@ -227,7 +228,7 @@ public class UrbAgent : UrbBase
     }
 
     bool Removing = false;
-    public void Remove()
+    public void Remove(bool reorder = true)
     {
         if (Removing)
         {
@@ -237,10 +238,8 @@ public class UrbAgent : UrbBase
 
         UrbAgentManager.UnregisterAgent(this);
 
-        if (CurrentTile != null)
-        {
-            CurrentTile.OnAgentLeave(this);
-        }
+        CurrentTile?.OnAgentLeave(this, reorder);
+        
         CurrentMap = null;
         if(TotalAgents > 0)
         {

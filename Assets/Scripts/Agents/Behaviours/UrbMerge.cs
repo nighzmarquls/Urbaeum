@@ -32,6 +32,9 @@ public class UrbMerge : UrbBehaviour
         mAgent.Remove();
     }
 
+    //Contact is for saying what KIND of check - only when trying to do something that REQUIRES a contact
+    // A contact is done for checks that require sharing a tile with another entity
+    // "Roughly things that are roughly in-reach"
     public override float TileEvaluateCheck(UrbTile Target, bool Contact = false)
     {
         if (Target == null || Target.Occupants == null)
@@ -39,6 +42,8 @@ public class UrbMerge : UrbBehaviour
             return 0;
         }
 
+        //Evaluation tells us to what degree the current behavior of the entity cares
+        //about the Target tile.
         float Evaluation = 0;
       
         for (int c = 0; c < Target.Occupants.Count; c++)

@@ -6,8 +6,7 @@ public class UrbUIManager : MonoBehaviour
 {
     public static UrbUIManager Instance { get; protected set; }
 
-    [TextArea(0, 5)]
-    public string OverlayPrintString;
+    [TextArea(0, 5)] public string OverlayPrintString;
     public UrbTileprint OverlayPrint { get; protected set; }
 
     public UrbTile CurrentCursorTile { get; protected set; } = null;
@@ -17,16 +16,19 @@ public class UrbUIManager : MonoBehaviour
 
     public UrbAtlas Atlas;
 
-    static bool MapActionInvalid {  get { return Instance == null || Instance.Atlas == null || Instance.CurrentAction == null || Instance.CurrentCursorTile == null || Instance.IsPaused; } }
+    static bool MapActionInvalid
+    {
+        get { return Instance == null || Instance.Atlas == null || Instance.CurrentAction == null || Instance.CurrentCursorTile == null || Instance.IsPaused; }
+    }
 
     public static void SetCurrentAction(UrbUserAction Action)
     {
-        if(Instance == null)
+        if (Instance == null)
         {
             return;
         }
 
-        if(Instance.CurrentAction != null)
+        if (Instance.CurrentAction != null)
         {
             Instance.CurrentAction.UnselectAction();
         }
@@ -40,6 +42,7 @@ public class UrbUIManager : MonoBehaviour
         {
             return;
         }
+
         Instance.CurrentAction.MouseClick(Instance.CurrentCursorTile);
     }
 
@@ -49,6 +52,7 @@ public class UrbUIManager : MonoBehaviour
         {
             return;
         }
+
         Instance.CurrentAction.MouseDown(Instance.CurrentCursorTile);
     }
 
@@ -58,10 +62,10 @@ public class UrbUIManager : MonoBehaviour
         {
             return;
         }
+
         Instance.CurrentAction.MouseUp(Instance.CurrentCursorTile);
     }
-
-
+    
     public static void OnMapMouseOver()
     {
         if(MapActionInvalid)

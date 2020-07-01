@@ -80,6 +80,7 @@ public class UrbInterfaceInput : MonoBehaviour
             mButton.OnPointerDown(Data);
             mButtonAnimator.OnPointerDown(Data);
         }
+
         if(Input.GetKeyUp(Shortcut))
         {
             ShortcutActivation();

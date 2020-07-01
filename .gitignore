@@ -10,3 +10,5 @@ obj/*
 *.psd~
 Assets/FriendlyCleanUI/_raw/photoshop/source.psd
 Assets/FriendlyCleanUI/_raw/photoshop/source.psd.meta
+.idea/
+Temp/
