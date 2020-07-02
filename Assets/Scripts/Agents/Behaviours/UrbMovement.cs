@@ -114,11 +114,11 @@ public class UrbMovement : UrbBehaviour
                 UrbPathfinder Pathfinder = Instigator.GetComponent<UrbPathfinder>();
                 UrbMovement Movement = Instigator.GetComponent<UrbMovement>();
                 UrbTile Goal = null;
-                if (Pathfinder != null)
+                if (!Pathfinder.WasDestroyed && Pathfinder.isActiveAndEnabled)
                 {
                     Goal = Pathfinder.GetNextGoal();
                 }
-                if (Movement != null)
+                if (!Movement.WasDestroyed && Movement.isActiveAndEnabled)
                 {
                     if (Goal != null && Goal != Instigator.CurrentTile)
                     {
@@ -135,10 +135,9 @@ public class UrbMovement : UrbBehaviour
                 {
                     s_MoveAction_p_e.End();
                     s_MoveAction_p.End();
-                    Debug.LogWarning("Illegal Action: Move Action Called on " + Instigator.name + " this Agent has no UrbMovement Component");
+                    //Debug.LogWarning("Illegal Action: Move Action Called on " + Instigator.name + " this Agent has no UrbMovement Component");
                     return 0;
                 }
-                
             }
 
             s_MoveAction_p.End();

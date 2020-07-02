@@ -9,6 +9,8 @@ public class UrbAgent : UrbBase
 {
     public static int TotalAgents;
 
+    public bool HasPathfinder { get; protected set; } = false;
+
     const float LocationThreshold = 0.01f;
     UrbThinker Mind;
 
@@ -44,9 +46,9 @@ public class UrbAgent : UrbBase
         }
         set
         {
+            _currentMap = value;
             // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
             IsCurrentMapNull = _currentMap == null;
-            _currentMap = value;
         }
     }
 
@@ -409,7 +411,7 @@ public class UrbAgent : UrbBase
     }
     static ProfilerMarker s_UpdateUrbAgent_p = new ProfilerMarker("UrbAgent.Update");
 
-    bool IsCurrentMapNull;
+    bool IsCurrentMapNull = true;
     bool IsBodyNotNull;
 
     // Update is called once per frame

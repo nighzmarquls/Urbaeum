@@ -17,7 +17,23 @@ public enum UrbUrgeCategory
 [RequireComponent(typeof(UrbAgent))]
 public class UrbThinker : UrbBase
 {
-    protected UrbPerception mPerception;
+    bool perceptionExists = false;
+
+    UrbPerception _mPerception = null;
+
+    protected UrbPerception mPerception
+    {
+        get
+        {
+            return _mPerception;
+        }
+        set
+        {
+            _mPerception = value;
+            // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
+            perceptionExists = _mPerception != null;
+        }
+    }
 
     protected UrbBreeder mBreeder;
     public float BreedUrge { get; protected set; }
@@ -55,6 +71,8 @@ public class UrbThinker : UrbBase
         
         mAgent = GetComponent<UrbAgent>();
         mPathfinder = GetComponent<UrbPathfinder>();
+        
+        
         mMovement = GetComponent<UrbMovement>();
         mBody = mAgent.Body;
 
@@ -78,7 +96,7 @@ public class UrbThinker : UrbBase
     {
         s_ChooseBehaviour_p.Begin(this);
         
-        if(mPerception == null || mPerception.ContactBehaviours == null)
+        if(perceptionExists || mPerception.ContactBehaviours == null)
         {
             s_ChooseBehaviour_p.End();
             return;
@@ -96,9 +114,9 @@ public class UrbThinker : UrbBase
             }
         }
 
-        if (ChosenBehaviour == null)
+        if (!ChosenBehaviour.WasDestroyed)
         {
-            if(mMovement != null && mMovement.Movement == null)
+            if(!mMovement && mMovement.Movement == null)
             {
                 mMovement.ExecuteMove();
             }

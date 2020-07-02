@@ -21,10 +21,10 @@ public class UrbMerge : UrbBehaviour
     {
         mAgent.Body.BodyComposition.EmptyInto(Target.Body.BodyComposition);
         UrbEater AgentEater = Target.GetComponent<UrbEater>();
-        if (AgentEater != null)
+        if (!AgentEater.WasDestroyed && AgentEater.isActiveAndEnabled)
         {
             UrbEater mEater = GetComponent<UrbEater>();
-            if (mEater != null)
+            if (!mEater.WasDestroyed && mEater.isActiveAndEnabled)
             {
                 mEater.Stomach.EmptyInto(AgentEater.Stomach);
             }
@@ -73,6 +73,8 @@ public class UrbMerge : UrbBehaviour
 
             }
         }
+
+        s_UrbMergeTileEvalCheck_p.End();
         return Evaluation;
     }
 
@@ -83,13 +85,10 @@ public class UrbMerge : UrbBehaviour
             UrbMerge[] MergeComponents = Target.Occupants[c].GetComponents<UrbMerge>();
             for (int i = 0; i < MergeComponents.Length; i++)
             {
-                if (MergeComponents[i] != this)
+                if (MergeComponents[i] != this && mAgent.Mass >= Target.Occupants[c].Mass)
                 {
-                    if (mAgent.Mass >= Target.Occupants[c].Mass)
-                    {
-                        TotalMass += Target.Occupants[c].Mass;
-                        TotalCount += 1;
-                    }
+                    TotalMass += Target.Occupants[c].Mass;
+                    TotalCount += 1;
                 }
             }
         }
