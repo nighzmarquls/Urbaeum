@@ -17,6 +17,7 @@ public enum UrbTestCategory
 [System.Serializable]
 public class UrbAction
 {
+    
     protected Sprite CachedSprite = null;
     public Sprite ActionIcon    { get{
             if(string.IsNullOrEmpty(IconPath))
@@ -46,6 +47,12 @@ public class UrbAction
     protected static float MobilityTest(UrbBody TestBody)
     {
         float Result = 0.0f;
+
+        if (!TestBody.enabled)
+        {
+            return Result;
+        }
+            
         float Muscle = TestBody.BodyComposition[UrbSubstanceTag.Muscle];
         float Nerves = TestBody.BodyComposition[UrbSubstanceTag.Nerves];
         Result = Mathf.Min(Muscle, Nerves) * 2;
@@ -63,6 +70,11 @@ public class UrbAction
 
     public virtual float Execute(UrbAgent Instigator, UrbAgent Target, float Modifier = 0.0f)
     {
+        if (Instigator.WasDestroyed || Target.WasDestroyed)
+        {
+            return 0.0f;
+        }
+
         float Result = Modifier;
         Result += Test(Instigator, Modifier);
         Result = Instigator.Body.UtilizeBody(Result);

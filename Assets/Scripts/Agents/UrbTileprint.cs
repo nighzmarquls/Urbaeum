@@ -19,10 +19,7 @@ public class UrbTileprint
 
     int X, Y;
 
-    public Vector2 CenterOffset {
-        get {
-            return new Vector2(X / 2, Y / 2);
-        } }
+    public Vector2 CenterOffset => new Vector2(X / 2, Y / 2);
 
     public int TileCount { get; protected set; }
 
@@ -117,7 +114,7 @@ public class UrbTileprint
 
     public UrbTile[] GetBorderingTiles(UrbAgent Agent, bool GetLinked = false, int Distance = 0)
     {
-        if(Agent.CurrentMap == null || Agent.CurrentTile == null)
+        if(Agent.CurrentMap == null  || Agent.CurrentTile == null)
         {
             return new UrbTile[0];
         }
@@ -280,7 +277,7 @@ public class UrbTileprint
     }
 
 
-    protected void PrintAtTile(UrbTileprintFill Fill, UrbTile Tile, UrbAgent Agent)
+    protected static void PrintAtTile(UrbTileprintFill Fill, UrbTile Tile, UrbAgent Agent)
     {
         switch (Fill)
         {
@@ -316,8 +313,8 @@ public class UrbTileprint
                 if (Tile.Occupants.Contains(Agent))
                 {
                     Tile.Occupants.Remove(Agent);
-                    Tile.ReorderContents();
-                }
+                        Tile.ReorderContents();
+                    }
                 break;
             default:
                 break;

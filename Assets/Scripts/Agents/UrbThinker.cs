@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 
@@ -27,7 +28,7 @@ public class UrbThinker : UrbBase
     protected UrbMetabolism mMetabolism;
     public float RestUrge { get; protected set; }
 
-    public float SafetyUrge { get; protected set; }
+    public float SafetyUrge { get; protected set; } = 0.0f;
 
     protected UrbPathfinder mPathfinder;
     protected UrbMovement mMovement;
@@ -36,8 +37,13 @@ public class UrbThinker : UrbBase
 
     private void Start()
     {
-        Initialize();   
+        IsmMetabolismNull = mMetabolism == null;
+        IsmEaterNotNull = mEater != null;
+        IsmBreederNotNull = mBreeder != null;
+        Initialize();
     }
+
+    static ProfilerMarker s_Initialize_p = new ProfilerMarker("UrbThinker.Initialize");
 
     public override void Initialize()
     {
@@ -45,6 +51,8 @@ public class UrbThinker : UrbBase
         {
             return;
         }
+        s_Initialize_p.Begin();
+        
         mAgent = GetComponent<UrbAgent>();
         mPathfinder = GetComponent<UrbPathfinder>();
         mMovement = GetComponent<UrbMovement>();
@@ -61,12 +69,18 @@ public class UrbThinker : UrbBase
         SafetyUrge = 1;
 
         base.Initialize();
+        s_Initialize_p.End();
     }
+    static ProfilerMarker s_ChooseBehaviour_p = new ProfilerMarker("UrbThinker.ChooseBehaviour");
+    bool IsmBreederNotNull;
 
     public void ChooseBehaviour()
     {
+        s_ChooseBehaviour_p.Begin(this);
+        
         if(mPerception == null || mPerception.ContactBehaviours == null)
         {
+            s_ChooseBehaviour_p.End();
             return;
         }
 
@@ -93,88 +107,100 @@ public class UrbThinker : UrbBase
         { 
             ChosenBehaviour.ExecuteTileBehaviour();
         }
+
+        s_ChooseBehaviour_p.End();
     }
+    
+    static ProfilerMarker s_CheckUrges_p = new ProfilerMarker("UrbThinker.CheckUrges");
+    bool IsmEaterNotNull;
+    bool IsmMetabolismNull;
+
     public void CheckUrges()
     {
-        if(mBody.BodyComposition == null)
+        using (s_CheckUrges_p.Auto())
         {
-            return;
-        }
-        bool CanBreed = false;
-        bool CanEat = false;
-        if(mBreeder != null)
-        {
-            if (mBreeder.CanBreed)
+            if (mBody.BodyComposition == null)
             {
-                if (!mBreeder.Gestating)
+                return;
+            }
+
+            bool CanBreed = false;
+            bool CanEat = false;
+            if (IsmBreederNotNull)
+            {
+                if (mBreeder.CanBreed)
                 {
-                    BreedUrge = 1.0f;
-                    SafetyUrge = 0.25f;
-                    CanBreed = true;
+                    if (!mBreeder.Gestating)
+                    {
+                        BreedUrge = 1.0f;
+                        SafetyUrge = 0.25f;
+                        CanBreed = true;
+                    }
+                    else
+                    {
+                        SafetyUrge = 1.0f;
+                        BreedUrge = 0.0f;
+                    }
                 }
                 else
                 {
-                    SafetyUrge = 1.0f;
-                    BreedUrge = 0.0f;
+                    SafetyUrge = 0.5f;
+                    BreedUrge -= 0.1f;
                 }
             }
-            else
+
+            if (IsmEaterNotNull)
             {
-                SafetyUrge = 0.5f;
-                BreedUrge -= 0.1f;
+                float UrgeChange = 0.5f - mEater.Stomach.Fullness;
+                HungerUrge = UrgeChange;
+                CanEat = UrgeChange > 0.0f;
+                RestUrge = mEater.Stomach.Fullness;
             }
-        }
-        else
-        {
-            SafetyUrge = 0.0f;
-        }
 
-        if(mEater != null)
-        {
-            float UrgeChange = 0.5f - mEater.Stomach.Fullness;
-            HungerUrge = UrgeChange;
-            CanEat = UrgeChange > 0.0f;
-            RestUrge = mEater.Stomach.Fullness;
-        }
-
-        if(mMetabolism != null)
-        {
-            if(mMetabolism.Starving)
+            if (IsmMetabolismNull)
+            {
+                return;
+            }
+            if (mMetabolism.Starving)
             {
                 if (CanBreed)
                 {
                     BreedUrge -= 1.0f;
                 }
+
                 if (CanEat)
                 {
                     HungerUrge += 1.0f;
                 }
+
                 SafetyUrge -= 0.5f;
                 RestUrge = 0.0f;
             }
             else
             {
-                if(!CanEat)
+                if (!CanEat)
                 {
                     RestUrge = 1.0f;
                 }
             }
 
-            if(mMetabolism.Healing)
+            if (!mMetabolism.Healing)
             {
-                SafetyUrge += 1.0f;
+                return;
+            }
+            
+            SafetyUrge += 1.0f;
 
-                if (CanBreed)
-                {
-                    BreedUrge -= 1.0f;
-                }
-                if (!CanEat)
-                {
-                    RestUrge += 1.0f;
-                }
+            if (CanBreed)
+            {
+                BreedUrge -= 1.0f;
+            }
+
+            if (!CanEat)
+            {
+                RestUrge += 1.0f;
             }
         }
-
     }
 
     public float EvaluateTile(UrbTile Tile, int TerrainType, int Size)
@@ -244,13 +270,17 @@ public class UrbThinker : UrbBase
         return Evaluation;
     }
 
+    static ProfilerMarker s_PickAction_p = new ProfilerMarker("UrbThinker.PickAction");
+
     public UrbAction PickAction(UrbTestCategory Test, float Result = 0, UrbTestCategory Exclude = UrbTestCategory.None)
     {
-        if (mAgent.AvailableActions == null)
+        if (mAgent.AvailableActions == null || mAgent.AvailableActions.Length == 0)
         {
             return null;
         }
 
+        s_PickAction_p.Begin();
+        
         UrbAction ChosenAction = null;
         float BestCost = float.MaxValue;
 
@@ -258,18 +288,21 @@ public class UrbThinker : UrbBase
         {
             bool Valid = (Test & mAgent.AvailableActions[i].Category) == Test &&
                (Exclude == UrbTestCategory.None || (Exclude & mAgent.AvailableActions[i].Category) == 0);
-            if (Valid)
+            if (!Valid)
             {
-                float ActionCost = mAgent.AvailableActions[i].CostEstimate(mAgent);
+                continue;
+            }
+            
+            float ActionCost = mAgent.AvailableActions[i].CostEstimate(mAgent);
 
-                if(ActionCost > Result && ActionCost < BestCost)
-                {
-                    BestCost = ActionCost;
-                    ChosenAction = mAgent.AvailableActions[i];
-                }
+            if(ActionCost > Result && ActionCost < BestCost)
+            {
+                BestCost = ActionCost;
+                ChosenAction = mAgent.AvailableActions[i];
             }
         }
 
+        s_PickAction_p.End();
         return ChosenAction;
     }
 

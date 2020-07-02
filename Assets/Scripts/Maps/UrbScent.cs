@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 
@@ -63,8 +64,10 @@ public class UrbScent
         }
     }
 
+    static ProfilerMarker s_DecayScent_p = new ProfilerMarker("UrbScent.DecayScent");
     public IEnumerator DecayScent()
     {
+        s_DecayScent_p.Begin();
         for (int i = 0; i < MaxTag; i++)
         {
             if (DirtyTags[i])
@@ -79,25 +82,32 @@ public class UrbScent
                 }
                 
             }
-
         }
+        s_DecayScent_p.End();
         yield return ScentThrottle.PerformanceThrottle();
     }
 
     public static UrbUtility.UrbThrottle ScentThrottle = new UrbUtility.UrbThrottle(7);
 
+    static ProfilerMarker s_ReceiveScent_p = new ProfilerMarker("UrbScent.ReceiveScent");
+
     public IEnumerator ReceiveScent(UrbScent input, float Diffusion = 1.0f)
     {
+        s_ReceiveScent_p.Begin();
         for (int i = 0; i < MaxTag; i++)
         {
-            if (input.DirtyTags[i])
+            if (!input.DirtyTags[i])
             {
-                if (Tags[i] < input.Tags[i] * Diffusion)
-                {
-                    this[i] = input.Tags[i] * Diffusion;
-                }
+                continue;
+            }
+            
+            if (Tags[i] < input.Tags[i] * Diffusion)
+            {
+                this[i] = input.Tags[i] * Diffusion;
             }
         }
+
+        s_ReceiveScent_p.End();
         yield return ScentThrottle.PerformanceThrottle();
     }
 }

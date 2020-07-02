@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 [RequireComponent(typeof(UrbAgent))]
@@ -11,8 +12,7 @@ public class UrbEater : UrbBehaviour
     protected static UrbBiteAttack BiteAttack = new UrbBiteAttack();
 
     public UrbScentTag[] FoodScents { get; protected set; }
-
-
+    
     protected List<UrbBody> DetectedFood;
 
     public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Hunger;
@@ -38,12 +38,15 @@ public class UrbEater : UrbBehaviour
         mAgent.Body.BodyComposition.AddComposition(Stomach);
         mAgent.AddAction(BiteAttack);
     }
+    static ProfilerMarker s_TileEvaluateCheck_p = new ProfilerMarker("UrbEater.TileEvaluateCheck");
 
     public override float TileEvaluateCheck(UrbTile Target, bool Contact = false)
     {
+        
         if (Stomach == null || Target == null)
             return 0;
 
+        s_TileEvaluateCheck_p.Begin();
         float Evaluation = 0;
 
         for (int o = 0; o < Target.Occupants.Count; o++)
@@ -66,11 +69,15 @@ public class UrbEater : UrbBehaviour
                 }
             }
         }
+
+        s_TileEvaluateCheck_p.End();
         return Evaluation * Stomach.Emptiness;
     }
 
+    static ProfilerMarker s_RegisterTileForBehaviour_p = new ProfilerMarker("UrbEater.RegisterTileForBehaviour");
     public override void RegisterTileForBehaviour(float Evaluation, UrbTile Target, int Index)
     {
+        s_RegisterTileForBehaviour_p.Begin();
         for (int o = 0; o < Target.Occupants.Count; o++)
         {
             if (Target.Occupants[o] == mAgent)
@@ -96,6 +103,7 @@ public class UrbEater : UrbBehaviour
             }
         }
         base.RegisterTileForBehaviour(Evaluation, Target, Index);
+        s_RegisterTileForBehaviour_p.End();
     }
 
     public override void ClearBehaviour()
@@ -103,33 +111,36 @@ public class UrbEater : UrbBehaviour
         DetectedFood.Clear();
         base.ClearBehaviour();
     }
-
+    static ProfilerMarker s_ExecuteTileBehaviour = new ProfilerMarker("UrbEater.ExecuteTileBehaviour");
     public override void ExecuteTileBehaviour()
     {
-        float BiteSize = BiteAttack.Test(mAgent);
-        float Eaten = 0;
-        for (int d = 0; d < DetectedFood.Count; d++)
+        using (s_ExecuteTileBehaviour.Auto())
         {
-            float Result = BiteAttack.Execute(mAgent, DetectedFood[d].mAgent, -Eaten);
-            if (Result > 0)
+            float BiteSize = BiteAttack.Test(mAgent);
+            float Eaten = 0;
+            for (int d = 0; d < DetectedFood.Count; d++)
             {
-                for (int f = 0; f < FoodSubstances.Length; f++)
+                float Result = BiteAttack.Execute(mAgent, DetectedFood[d].mAgent, -Eaten);
+                if (Result > 0)
                 {
-                    Eaten += DetectedFood[d].BodyComposition.TransferTo(Stomach, FoodSubstances[f], Result);
-
-                    if (Eaten >= BiteSize)
+                    for (int f = 0; f < FoodSubstances.Length; f++)
                     {
-                        return;
-                    }
+                        Eaten += DetectedFood[d].BodyComposition.TransferTo(Stomach, FoodSubstances[f], Result);
 
+                        if (Eaten >= BiteSize)
+                        {
+                            return;
+                        }
+
+                    }
                 }
             }
-        }
 
-        base.ExecuteTileBehaviour();
+            base.ExecuteTileBehaviour();
+        }
     }
 
-    override public UrbComponentData GetComponentData()
+    public override UrbComponentData GetComponentData()
     {
         UrbComponentData Data = base.GetComponentData();
 
@@ -150,7 +161,7 @@ public class UrbEater : UrbBehaviour
         return Data;
     }
 
-    override public bool SetComponentData(UrbComponentData Data)
+    public override bool SetComponentData(UrbComponentData Data)
     {
         FoodSubstances = UrbEncoder.GetEnumArray<UrbSubstanceTag>("FoodSubstances", Data);
         FoodScents = UrbEncoder.GetEnumArray<UrbScentTag>("FoodScents", Data);

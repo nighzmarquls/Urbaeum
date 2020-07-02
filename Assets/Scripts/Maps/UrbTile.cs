@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 public class UrbTile
@@ -25,7 +26,6 @@ public class UrbTile
     public UrbPathTerrain[] TerrainTypes;
     public UrbScent[][] TerrainFilter;
 
-    protected UrbAgent Content;
     protected List<UrbAgent> Contents;
     public List<UrbAgent> Occupants; 
 
@@ -37,10 +37,10 @@ public class UrbTile
     protected bool mBlocked = false;
     public bool Blocked { get { return mBlocked; }
         set {
-            if(value != mBlocked)
+            if (value != mBlocked)
             {
                 mBlocked = value;
-                PropogateSizeLimit();
+                PropagateSizeLimit();
             }
         }
     }
@@ -50,7 +50,7 @@ public class UrbTile
     public float FreeCapacity {
         get {
             float Capacity = TileCapacity;
-            for(int o = 0; o < Occupants.Count; o++)
+            for (int o = 0; o < Occupants.Count; o++)
             {
                 Capacity -= Occupants[o].MassPerTile;
                 if (Capacity <= 0)
@@ -72,11 +72,16 @@ public class UrbTile
     public Vector3 Location { get { return OwningMap.TileAddressToLocation(XAddress, YAddress) + LocationOffset;} }
     public Vector3 RawLocation { get { return OwningMap.TileAddressToLocation(XAddress, YAddress); } }
 
+    static ProfilerMarker s_ReorderContents_p = new ProfilerMarker("UrbTile.ReorderContents.ToTileWithBiggestMass");
+    static ProfilerMarker s_ReorderContents_p2_p = new ProfilerMarker("UrbTile.ReorderContents.AfterTileWithBiggestMass");
+
     bool Ordering = false;
     public void ReorderContents()
     {
+        s_ReorderContents_p.Begin();
         if(Ordering)
         {
+            s_ReorderContents_p.End();
             return;
         }
 
@@ -84,26 +89,35 @@ public class UrbTile
         LocationOffset = Vector3.zero;
         if (Occupants.Count <= 0)
         {
+            s_ReorderContents_p.End();
             return;
         }
         
         Vector3 Center = OwningMap.TileAddressToLocation(XAddress, YAddress);
-        UrbAgent Biggest = Occupants[0];
-        List<UrbAgent> OrderedOccupants = new List<UrbAgent>();
-        float BiggestMass = Biggest.MassPerTile;
+        List<UrbAgent> OrderedOccupants = new List<UrbAgent>(Occupants.Count);
+        float BiggestMass = Occupants[0].MassPerTile;
         for (int i = 0; i < Occupants.Count; i++)
         {
-            if(Occupants[i].MassPerTile > BiggestMass)
+            var occupant = Occupants[i];
+            if (occupant.WasDestroyed || !occupant.isActiveAndEnabled)
             {
-                OrderedOccupants.Insert(0, Occupants[i]);
-                Biggest = Occupants[i];
-                BiggestMass = Occupants[i].MassPerTile;
+                continue;
+            }
+            
+            if(occupant.MassPerTile > BiggestMass)
+            {
+                OrderedOccupants.Insert(0, occupant);
+                BiggestMass = occupant.MassPerTile;
             }
             else
             {
-                OrderedOccupants.Add(Occupants[i]);
+                OrderedOccupants.Add(occupant);
             }
         }
+        
+        s_ReorderContents_p.End();
+        s_ReorderContents_p2_p.Begin();
+       
         float Turn = 0;
         float TurnAdjust = (Mathf.PI);
         float Radius = 0;
@@ -129,7 +143,6 @@ public class UrbTile
             TurnAdjust *= 0.85f;
             Radius += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) / RadiusAdjust;
             RadiusAdjust += 5f;
-                
         }
 
         float Free = FreeCapacity / TileCapacity;
@@ -145,9 +158,10 @@ public class UrbTile
 
         ScentDiffusion = UrbScent.ScentDiffusion * Free;
         Occupants = OrderedOccupants;
+        s_ReorderContents_p2_p.End();
     }
 
-    private void Constructor(UrbMap CreatingMap)
+    void Constructor(UrbMap CreatingMap)
     {
         Occupants = new List<UrbAgent>();
         Contents = new List<UrbAgent>();
@@ -161,7 +175,6 @@ public class UrbTile
             {
                 TerrainFilter[i][ii] = new UrbScent();
             }
-           
         }
         
         Environment = new UrbEnvironment(this);
@@ -172,7 +185,7 @@ public class UrbTile
         Constructor(CreatingMap);
         XAddress = CreatedX;
         YAddress = CreatedY;
-        Links = new UrbTile[] { };
+        Links = new UrbTile[] { null, null, null };
     }
 
     public UrbTile(UrbMap CreatingMap, int CreatedX, int CreatedY, UrbTile[] LinkedTiles)
@@ -187,7 +200,7 @@ public class UrbTile
     {
         Constructor(CreatingMap);
         OwningMap.LocationToTileAddress(MapLocation, out XAddress, out YAddress);
-        Links = new UrbTile[] { };
+        Links = new UrbTile[] { null, null, null };
     }
 
     public UrbTile(UrbMap CreatingMap, Vector2 MapLocation, UrbTile[] LinkedTiles)
@@ -242,13 +255,21 @@ public class UrbTile
         {
             output.Links = new UrbTileLinkData[Links.Length];
 
-            for(int i = 0; i < Links.Length; i++)
+            //I'm a lazy jerk. - Zoru
+            int curr = 0;
+            foreach (var link in Links)
             {
+                ++curr;
+                if (link == null)
+                {
+                    continue;
+                }
+                
                 UrbTileLinkData TempLink = new UrbTileLinkData();
-                TempLink.MapID = UrbSystemIO.GetMapID(Links[i].OwningMap);
-                TempLink.X = Links[i].XAddress;
-                TempLink.Y = Links[i].YAddress;
-                output.Links[i] = TempLink;
+                TempLink.MapID = UrbSystemIO.GetMapID(link.OwningMap);
+                TempLink.X = link.XAddress;
+                TempLink.Y = link.YAddress;
+                output.Links[curr] = TempLink;
             }
         }
         else
@@ -283,10 +304,16 @@ public class UrbTile
     {
         return Links;
     }
-
+    
+    static ProfilerMarker s_GetAdjacent_p = new ProfilerMarker("UrbTile.GetAdjacent");
     public UrbTile[] GetAdjacent(bool GetLinked = false, int xOffset = 1, int yOffset = 1)
     {
-        return OwningMap.GetAdjacent(XAddress, YAddress, GetLinked, xOffset, yOffset);
+        //Nominally, this GetAdjacent section would be using Auto, but
+        //Issues with `using` on ProfileMarkers seems to have blow
+        using (s_GetAdjacent_p.Auto())
+        {
+            return OwningMap.GetAdjacent(XAddress, YAddress, GetLinked, xOffset, yOffset);
+        }
     }
 
     public UrbTile GetRelativeTile(int Xdistance, int Ydistance)
@@ -299,7 +326,7 @@ public class UrbTile
 
     }
 
-    protected void PropogateSizeLimit()
+    protected void PropagateSizeLimit()
     {
         UrbTile[] Adjacent = OwningMap.GetAdjacent(XAddress, YAddress);
         EvaluateSizeLimit();
@@ -408,115 +435,134 @@ public class UrbTile
             return Contents.ToArray();
         }
     }
+    static ProfilerMarker s_OnAgentArrive_p = new ProfilerMarker("UrbTile.OnAgentArrive");
 
     public void OnAgentArrive(UrbAgent input)
     {
-            Ordering = false;
-            Contents.Add(input);
-            input.Tileprint.ArriveAtTile(this, input);
-            input.CurrentTile = this;
-            input.CurrentMap = this.OwningMap;
-            input.transform.localScale = new Vector3(this.OwningMap.TileSize, this.OwningMap.TileSize, this.OwningMap.TileSize)*input.SizeOffset;
-            ReorderContents();
+        s_OnAgentArrive_p.Begin(input);
+        Ordering = false;
+        Contents.Add(input);
+        input.Tileprint.ArriveAtTile(this, input);
+        input.CurrentTile = this;
+
+        //TODO: What is a map, and why are we assigning it so frequently
+        //I can only find OwningMap being set once, at game initialization...
+        //Can we move CurrentMap to object initialization?
+        input.CurrentMap = OwningMap;
+        
+        input.transform.localScale = new Vector3(this.OwningMap.TileSize, this.OwningMap.TileSize, this.OwningMap.TileSize)*input.SizeOffset;
+        ReorderContents();
+        s_OnAgentArrive_p.End();
     }
 
+    static ProfilerMarker s_OnAgentLeave_p = new ProfilerMarker("UrbTile.OnAgentLeave");
     public void OnAgentLeave(UrbAgent input, bool reorder = true)
     {
         Ordering = !reorder;
         Contents.Remove(input);
+        
+        s_OnAgentLeave_p.Begin();
         input.Tileprint.DepartFromTile(this, input);
         if (reorder)
         {
             ReorderContents();
         }
+
+        s_OnAgentLeave_p.End();
     }
 
     public void ToggleLink(UrbTile input)
     {
-        List<UrbTile> ListofLinks = new List<UrbTile>(Links);
-
-        if(ListofLinks.Contains(input))
-        {
-            input.RemoveLink(this);
-            RemoveLink(input);
-        }
-        else
+        bool containedLink = RemoveLink(input);
+        
+        if (!containedLink)
         {
             AddLink(input);
         }
-
-        ScentDirty = true;
-        LinksDirty = true;
-        Environment.MakeDirty();
     }
 
-    public void AddLink(UrbTile input)
+    public void AddLink(UrbTile input, bool firstCall =true)
     {
-        foreach(UrbTile link in Links)
+        var linkIdx = GetLinkIndex(input);
+        
+        //sanity check that the link doesn't already exist.
+        if (linkIdx != -1)
         {
-            if(link == input)
-            {
-                Debug.Log("Already Linked");
-                return;
-            }
-        }
-        UrbTile[] temp = new UrbTile[Links.Length + 1];
-        Links.CopyTo(temp, 0);
-        temp[Links.Length] = input;
-        Links = temp;
-
-        ScentDirty = true;
-        LinksDirty = true;
-        Environment.MakeDirty();
-
-        foreach (UrbTile link in input.Links)
-        {
-            if (link == input)
-            {
-                Debug.Log("Already Linked");
-                return;
-            }
-        }
-        temp = new UrbTile[input.Links.Length + 1];
-        input.Links.CopyTo(temp, 0);
-        temp[input.Links.Length] = this;
-        input.Links = temp;
-
-        input.ScentDirty = true;
-        input.LinksDirty = true;
-        input.Environment.MakeDirty();
-    }
-
-    public void RemoveLink(UrbTile input)
-    {
-        UrbTile linked = null;
-        foreach (UrbTile link in Links)
-        {
-            if (link == input)
-            {
-                linked = link;
-                break;
-            }
-        }
-        if(linked == null)
-        {
-            Debug.Log("Not Linked");
+            //handle the edge-case where we have a link to
+            //input, but input has no link to us
+            input.AddLink(this, false);
             return;
         }
 
-        List<UrbTile> ListofLinks = new List<UrbTile>(Links);
+        var emptySlot = GetLinkIndex(null);
+        if (emptySlot == -1)
+        {
+            emptySlot = Links.Length;
+            //Far too fancy, but shorthand syntax for saying that we already know that the list will grow a bit
+            //so let's allocate a couple new object refs to the array for future reuse.
+            Links = (new List<UrbTile>(Links) {null, null, null}).ToArray();
+        }
 
-        ListofLinks.Remove(input);
-
-        Links = ListofLinks.ToArray();
+        Links[emptySlot] = input;
 
         ScentDirty = true;
         LinksDirty = true;
         Environment.MakeDirty();
 
-        input.ScentDirty = true;
-        input.LinksDirty = true;
-        input.Environment.MakeDirty();
+        if (firstCall)
+        {
+            input.AddLink(this, false);
+        }
+    }
+
+    public int GetLinkIndex(UrbTile toCheck)
+    {
+        UrbTile link;
+        for (int i = 0; i < Links.Length; i++)
+        {
+            link = Links[i];
+            if (link != toCheck)
+            {
+                continue;
+            }
+            
+            if(Debug.developerConsoleVisible || Debug.isDebugBuild)
+            {
+                Debug.Log("Already Linked");
+            }
+                
+            return i;
+        }
+        
+        if(Debug.developerConsoleVisible || Debug.isDebugBuild)
+        {
+
+            Debug.Log("Not Linked");
+        }
+
+        return -1;
+    }
+
+    public bool RemoveLink(UrbTile input, bool firstCall = true)
+    {
+        var idx = GetLinkIndex(input);
+        if (idx == -1)
+        {
+            return false;
+        }
+
+        Links[idx] = null;
+
+        ScentDirty = true;
+        LinksDirty = true;
+        Environment.MakeDirty();
+
+        if (firstCall)
+        {
+            input.RemoveLink(this, false);
+        }
+
+        return true;
     }
 
     public void ClearTile()
@@ -525,12 +571,10 @@ public class UrbTile
         {
             return;
         }
-        else
+        
+        for (int i = 0; i < Contents.Count; i++)
         {
-            for (int i = 0; i < Contents.Count; i++)
-            {
-                Contents[i].Remove();
-            }
+            Contents[i].Remove();
         }
     }
 
@@ -538,82 +582,95 @@ public class UrbTile
     {
         while(true)
         {
+            yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
             Ordering = false;
-            if (UrbSystemIO.Instance == null || UrbSystemIO.Instance.Loading)
+            
+            if (!UrbSystemIO.HasInstance || UrbSystemIO.Instance.Loading)
             {
-                ///continue;
+                continue;
             }
-            else if (ScentDirty)
-            {
 
-                for (int t = 0; t < TerrainTypes.Length; t++)
+            if (!ScentDirty)
+            {
+                continue;
+            }
+            
+            for (int t = 0; t < TerrainTypes.Length; t++)
+            {
+                for (int s = 0; s < SizeLimit; s++)
                 {
-                    for (int s = 0; s < SizeLimit; s++)
+                    var terrainType = (int)TerrainTypes[t];
+                    var terrainFilter = TerrainFilter[terrainType][s];
+                    if(terrainFilter == null)
                     {
-                        if(TerrainFilter[(int)TerrainTypes[t]][s] == null)
+                        continue;
+                    }
+
+                    if (terrainFilter.dirty)
+                    {
+                        terrainFilter.dirty = false;
+                        yield return terrainFilter.DecayScent();
+                        if (ScentDirty)
                         {
                             continue;
                         }
 
-                        if (TerrainFilter[(int)TerrainTypes[t]][s].dirty)
-                        {
-                            TerrainFilter[(int)TerrainTypes[t]][s].dirty = false;
-                            yield return TerrainFilter[(int)TerrainTypes[t]][s].DecayScent();
-                            ScentDirty = (TerrainFilter[(int)TerrainTypes[t]][s].dirty)? true : ScentDirty;
-                        }
+                        //Want to use the terrainFilter var above, but 
+                        //I need to make sure that's not going to change what happens
+                        //here for this ScentDirty.
+                        ScentDirty = TerrainFilter[(int)TerrainTypes[t]][s].dirty || ScentDirty;
                     }
-
-                    
                 }
-
-                if (ScentDirty)
-                {
-                    yield return DiffuseScent();
-                    ScentDirty = false;
-                }
-
             }
-            else
+
+            if (!ScentDirty)
             {
-                yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
+                continue;
             }
-
-            yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
             
+            yield return DiffuseScent();
+            ScentDirty = false;
         }
     }
 
+    static ProfilerMarker s_PropagateScent_p = new ProfilerMarker("UrbTile.PropagateScent");
     //TODO: Optimize this
-    public void PropogateScent()
+    public void PropagateScent()
     {
-        List<UrbTile> ToDiffuse = new List<UrbTile>();
-
-        ToDiffuse.Add(this);
-
-        List<UrbTile> ToAdd = new List<UrbTile>();
-        ToAdd.AddRange(OwningMap.GetAdjacent(XAddress, YAddress));
+        s_PropagateScent_p.Begin();
+        //The array-copying here seems non-performant.
+        var ToAdd = new List<UrbTile>(OwningMap.GetAdjacent(XAddress, YAddress));
+        var ToDiffuse = new List<UrbTile>(ToAdd.Count);
+        
         while (ToAdd.Count > 0)
         {
-            if(ToAdd[0] == null || ToAdd[0].Blocked || ToDiffuse.Contains(ToAdd[0]))
+            var scent = ToAdd[0];
+            if(scent == null || scent.Blocked || ToDiffuse.Contains(scent))
             {
                 ToAdd.RemoveAt(0);
+                continue; 
             }
-            else
-            {
-                ToDiffuse.Add(ToAdd[0]);
-                ToAdd.AddRange(OwningMap.GetAdjacent(ToAdd[0].XAddress, ToAdd[0].YAddress));
-                ToAdd.RemoveAt(0);
-            }
+            
+            ToDiffuse.Add(ToAdd[0]);
+            ToAdd.AddRange(OwningMap.GetAdjacent(ToAdd[0].XAddress, ToAdd[0].YAddress));
+            ToAdd.RemoveAt(0);
         }
 
         foreach(UrbTile Tile in ToDiffuse)
         {
+            // ReSharper disable once IteratorMethodResultIsIgnored
             Tile.DiffuseScent();
         }
+
+        s_PropagateScent_p.End();
     }
+
+    
+    static ProfilerMarker s_DiffuseScent_p = new ProfilerMarker("UrbTile.DiffuseScent");
 
     IEnumerator DiffuseScent()
     {
+        s_DiffuseScent_p.Begin();
         if (LinksDirty)
         {
             Adjacent = OwningMap.GetAdjacent(XAddress, YAddress, true);
@@ -625,23 +682,33 @@ public class UrbTile
 
             for(int t = 0; t < Adjacent.Length; t++)
             {
-                if (Adjacent[t] == null || Adjacent[t].Blocked)
+                var adj = Adjacent[t];
+                if (adj == null || adj.Blocked)
                 {
                     continue;
                 }
 
                 for (int check = 0; check < Adjacent[t].TerrainTypes.Length; check++)
                 {
-                    if (check != (int)TerrainTypes[i])
+                    var terrainType = (int) TerrainTypes[i];
+                    
+                    if (check != terrainType)
                         continue;
 
-                    Adjacent[t].ScentDirty = true;
-                    for(int s = 0; s < Adjacent[t].SizeLimit; s++)
+                    adj.ScentDirty = true;
+                    for(int s = 0; s < adj.SizeLimit; s++)
                     {
-                        yield return Adjacent[t].TerrainFilter[(int)TerrainTypes[i]][s].ReceiveScent(TerrainFilter[(int)TerrainTypes[i]][s], ScentDiffusion);
+                        var filter = adj.TerrainFilter[terrainType][s];
+                        var scent = filter.ReceiveScent(TerrainFilter[terrainType][s], ScentDiffusion);
+                        s_DiffuseScent_p.End();
+                        
+                        yield return scent;
+                        s_DiffuseScent_p.Begin();
                     }
-                }                   
+                }     
             }
         }
+
+        s_DiffuseScent_p.End();
     }
 }

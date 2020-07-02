@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -56,11 +57,18 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
             }
         }
         targetMap.RefreshAllPathableSize();
+        
+        if (Debug.isDebugBuild || Debug.developerConsoleVisible)
+        {
+            Debug.LogWarning("EnvironmentDebug Display, Destroying exemplar");
+        }
         Destroy(Exemplar);
     }
 
+    static ProfilerMarker s_UrbEnvironmentDebugDisplay_p = new ProfilerMarker("UrbEnvDbgDisp.SpawnAgent");
     public void SpawnAgent(GameObject input, int xPoint, int yPoint)
     {
+        s_UrbEnvironmentDebugDisplay_p.Begin(this);
         UrbTile Tile = targetMap.GetTile(xPoint, yPoint);
 
         GameObject spawned;
@@ -77,6 +85,8 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
                 Occupant.Remove();
             }
         }
+
+        s_UrbEnvironmentDebugDisplay_p.End();
     }
 
     public void HandleButton(int slot)

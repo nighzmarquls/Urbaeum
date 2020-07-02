@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 public enum UrbEnvironmentCondition
@@ -93,6 +94,7 @@ public class UrbEnvironment
     }
 
     UrbUtility.UrbThrottle EnvironmentThrottle = new UrbUtility.UrbThrottle();
+    static ProfilerMarker s_EnvironmentCoroutine_p = new ProfilerMarker("UrbEnvironment.PerformEnvironmentFlow");
 
     public IEnumerator EnvironmentCoroutine()
     {
@@ -100,12 +102,13 @@ public class UrbEnvironment
         {
             if (Dirty)
             {
-
                 yield return EnvironmentThrottle.PerformanceThrottle();
                
                 Dirty = false;
+                s_EnvironmentCoroutine_p.Begin();
                 PerformEnvironmentFlow();
-                
+                s_EnvironmentCoroutine_p.End();
+
             }
             yield return new WaitForSeconds(EnvironmentInterval*OwningTile.TimeMultiplier);
         }
@@ -153,15 +156,18 @@ public class UrbEnvironment
             this[targetCond] += Push;
         }
     }
+    static ProfilerMarker s_PerformEnvironmentFlow_p = new ProfilerMarker("UrbEnvironment.PerformEnvironmentFlowImplement");
 
     void PerformEnvironmentFlow()
     {
+        s_PerformEnvironmentFlow_p.Begin();
         UrbTile[] Adjacency = OwningTile.GetAdjacent(true);
  
         for(int i = 0; i < MaxCond; i++)
         {
             PerformConditionFlow(i, Adjacency);
         }
-
+        
+        s_PerformEnvironmentFlow_p.End();
     }
 }

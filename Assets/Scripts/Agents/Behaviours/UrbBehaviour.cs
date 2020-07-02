@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 [RequireComponent(typeof(UrbAgent))]
@@ -31,7 +32,7 @@ public class UrbBehaviour : UrbBase
         StartCoroutine(mCoroutine);
     }
 
-    override public void Initialize()
+    public override void Initialize()
     {
         if (bInitialized)
         {
@@ -50,7 +51,7 @@ public class UrbBehaviour : UrbBase
     UrbTile LastOriginTile = null;
     UrbTile[] CachedSearchTile = null;
 
-    virtual protected UrbTile[] GetSearchTiles(bool GetLinked)
+    protected UrbTile[] GetSearchTiles(bool GetLinked)
     {
         if (LastOriginTile == null || LastOriginTile != mAgent.CurrentTile)
         {
@@ -72,20 +73,22 @@ public class UrbBehaviour : UrbBase
 
     protected UrbTile[] RegisteredTiles;
 
-    virtual public float TileEvaluateCheck(UrbTile Target, bool Contact = false)
+    public virtual float TileEvaluateCheck(UrbTile Target, bool Contact = false)
     {
         return -1f;
     }
-
+    
     protected void ExpandRegisteredTiles(int Index)
     {
         UrbTile[] ExpandedArray = new UrbTile[Index + 1];
         RegisteredTiles.CopyTo(ExpandedArray, 0);
         RegisteredTiles = ExpandedArray;
     }
-
-    virtual public void RegisterTileForBehaviour(float Evaluation ,UrbTile Target, int Index)
+    
+    static ProfilerMarker s_RegisterTileBehaviour_p = new ProfilerMarker("UrbBehavior.RegisterTileBehaviour");
+    public virtual void RegisterTileForBehaviour(float Evaluation ,UrbTile Target, int Index)
     {
+        s_RegisterTileBehaviour_p.Begin();
         if(RegisteredTiles == null)
         {
             RegisteredTiles = new UrbTile[Index+1];
@@ -98,21 +101,23 @@ public class UrbBehaviour : UrbBase
 
         RegisteredTiles[Index] = Target;
         BehaviourEvaluation += Evaluation;
+        
+        s_RegisterTileBehaviour_p.End();
+
     }
 
+    static ProfilerMarker s_ClearBehavior_p = new ProfilerMarker("UrbBehavior.ClearBehaviour");
+
     UrbTile LastBehaviourOrigin = null;
-    virtual public void ClearBehaviour()
+    public virtual void ClearBehaviour()
     {
+        s_ClearBehavior_p.Begin();
         if(LastBehaviourOrigin == null || LastBehaviourOrigin != mAgent.CurrentTile)
         {
             if (RegisteredTiles != null)
             {
                 for (int t = 0; t < RegisteredTiles.Length; t++)
                 {
-                    if (RegisteredTiles[t] == null)
-                    {
-                        continue;
-                    }
                     RegisteredTiles[t] = null;
                 }
             }
@@ -120,42 +125,47 @@ public class UrbBehaviour : UrbBase
          
         }
         BehaviourEvaluation = 0;
+        s_ClearBehavior_p.End();
     }
 
     public virtual float BehaviourEvaluation { get; protected set; }
 
-    virtual public void ExecuteTileBehaviour()
+    public virtual void ExecuteTileBehaviour()
     {
         ClearBehaviour();
     }
 
-    virtual protected bool ValidToInterval()
+    protected virtual bool ValidToInterval()
     {
-        return mAgent != null && mAgent.CurrentMap != null;
+        return !mAgent.WasDestroyed && mAgent.isActiveAndEnabled && mAgent.CurrentMap != null;
     }
 
     protected UrbUtility.UrbThrottle BehaviourThrottle = new UrbUtility.UrbThrottle();
 
+    static ProfilerMarker s_IntervalCoroutine_p = new ProfilerMarker("UrbBehavior.FunctionalCoroutine");
+
     public IEnumerator IntervalCoroutine()
     {
+        IEnumerator retVal;
         while (true)
         {
-            if (ValidToInterval() && mAgent != null)
+            if (ValidToInterval())
             {
                 yield return BehaviourThrottle.PerformanceThrottle();
-                yield return FunctionalCoroutine();
+                
+                //The profiler has a tendency to freak out w/ yields between marked points 
+                s_IntervalCoroutine_p.Begin();
+                retVal = FunctionalCoroutine();
+                s_IntervalCoroutine_p.End();
+                yield return retVal;
             }
 
             yield return new WaitForSeconds(Interval * mAgent.TimeMultiplier);
         }
     }
 
-    virtual public IEnumerator FunctionalCoroutine()
+    public virtual IEnumerator FunctionalCoroutine()
     {
         yield return null;
-    }
-    override public UrbComponentData GetComponentData()
-    {
-        return base.GetComponentData();
     }
 }

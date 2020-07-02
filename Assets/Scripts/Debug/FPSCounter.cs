@@ -6,10 +6,14 @@ using UnityEngine.UI;
 public class FPSCounter : MonoBehaviour
 {
     Text mText;
+
+    bool IsmTextNull;
+
     // Start is called before the first frame update
     void Start()
     {
         mText = GetComponent<Text>();
+        IsmTextNull = mText == null;
         StartCoroutine(CountCoroutine());
     }
 
@@ -17,12 +21,11 @@ public class FPSCounter : MonoBehaviour
     {
         while (true)
         {
-
-            if (mText == null)
+            if (IsmTextNull)
             {
                 yield return null;
             }
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSecondsRealtime(0.08f);
             float FPS = Mathf.Round( (1 / Time.deltaTime));
  
             if (FPS > 60)

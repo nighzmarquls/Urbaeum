@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class UrbSystemIO : MonoBehaviour
 {
+    public static bool HasInstance;
     public static UrbSystemIO Instance { get; protected set; }
 
     public List<UrbAgent> AgentTypes;
@@ -50,10 +51,12 @@ public class UrbSystemIO : MonoBehaviour
         if(Maps == null || Maps.Count <= 0)
         {
             Debug.LogError("Missing Reference to UrbMap, Cannot collect Game Data");
+            return;
         }
         if(AgentTypes == null || AgentTypes.Count <= 0)
         {
             Debug.LogError("Missing UrbAgent Prefab Key, Cannot collect Game Data");
+            return;
         }
 
         GameData = new UrbSave
@@ -71,15 +74,16 @@ public class UrbSystemIO : MonoBehaviour
     public void AssignGameData()
     {
         Loading = true;
-
-
+        
         if (Maps == null || Maps.Count <= 0)
         {
             Debug.LogError("Missing Reference to UrbMap, Cannot assign Game Data");
+            return;
         }
         if (AgentTypes == null || AgentTypes.Count <= 0)
         {
             Debug.LogError("Missing UrbAgent Prefab Key, Cannot assign Game Data");
+            return;
         }
 
         for (int i = 0; i < Maps.Count; i++)
@@ -111,7 +115,7 @@ public class UrbSystemIO : MonoBehaviour
 
     public static int GetMapID(UrbMap input)
     {
-        if(Instance == null)
+        if(!HasInstance)
         {
             return -1;
         }
@@ -120,7 +124,7 @@ public class UrbSystemIO : MonoBehaviour
 
     public static UrbMap GetMapFromID(int ID)
     {
-        if (ID < 0 || Instance == null || ID >= Instance.Maps.Count)
+        if (ID < 0 || !HasInstance || ID >= Instance.Maps.Count)
         {
             return null;
         }
@@ -131,7 +135,7 @@ public class UrbSystemIO : MonoBehaviour
 
     public static int GetAgentID(UrbAgent input)
     {
-        if (Instance == null)
+        if (!HasInstance)
         {
             return -1;
         }
@@ -149,39 +153,41 @@ public class UrbSystemIO : MonoBehaviour
 
     public static UrbAgent LoadAgentFromID(int ID, UrbTile Tile, UrbObjectData Data)
     {
-        if (ID < 0 || Instance == null || ID >= Instance.AgentTypes.Count)
+        if (ID < 0 || !HasInstance || ID >= Instance.AgentTypes.Count)
         {
             return null;
         }
-        GameObject AgentObject;
-        if (UrbAgentSpawner.SpawnAgent(Instance.AgentTypes[ID].gameObject, Tile, out AgentObject, Data))
+
+        if (!UrbAgentSpawner.SpawnAgent(Instance.AgentTypes[ID].gameObject, Tile, out var AgentObject, Data))
         {
-            UrbAgent LoadedAgent = AgentObject.GetComponent<UrbAgent>();
-            return LoadedAgent;
+            return null;
         }
-        return null;
+        
+        UrbAgent LoadedAgent = AgentObject.GetComponent<UrbAgent>();
+        return LoadedAgent;
     }
 
     private void OnEnable()
     {
         if (Instance == null)
         {
+           HasInstance = true;
            Instance = this;
            UrbSubstances.RegisterSubstanceProperties();
-
+           return; 
         }
-        else
+        
+        if (Debug.isDebugBuild || Debug.developerConsoleVisible)
         {
-            Destroy(this);
+            Debug.LogWarning("OnEnable self-destruct");
         }
+        Destroy(this);
     }
 
     private void OnDisable()
     {
-        if(Instance == this)
-        {
-            Instance = null;
-        }
+        Instance = null;
+        HasInstance = false;
     }
 }
 

@@ -22,6 +22,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Camera = Camera.main;
         targetMap = GetComponent<UrbMap>();
 
     }
@@ -50,6 +51,12 @@ public class UrbCritterDebugDisplay : MonoBehaviour
             }
         }
         targetMap.RefreshAllPathableSize();
+
+        if (Debug.isDebugBuild || Debug.developerConsoleVisible)
+        {
+            Debug.LogWarning("Destroying exemplar");
+        }
+
         Destroy(Exemplar);
     }
 
@@ -64,6 +71,11 @@ public class UrbCritterDebugDisplay : MonoBehaviour
         }
         else
         {
+            if (Debug.isDebugBuild || Debug.developerConsoleVisible)
+            {
+                Debug.Log("Destroying tileCurrent after agent spawn returned false");
+            }
+
             Destroy(Tile.CurrentContent.gameObject);
         }
     }
@@ -106,6 +118,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
         {
             if(tile.CurrentContent != null)
             {
+                Debug.Log("Post-Click Destroy");
                 Destroy(tile.CurrentContent.gameObject);
             }
 
@@ -113,7 +126,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
         }
     }
 
-    void HandleLink()
+    static void HandleLink()
     {
         if (linkA != null && linkB != null)
         {
@@ -132,6 +145,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
     static UrbTile linkA = null;
     static UrbTile linkB = null;
     bool paused = false;
+    Camera Camera;
 
     void SetPause(bool input)
     {
@@ -170,7 +184,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
         {
             SetPause(paused);
         }
-        Ray mouseray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray mouseray = Camera.ScreenPointToRay(Input.mousePosition);
         Vector3 Location = mouseray.origin + (mouseray.direction * (Vector3.Distance(mouseray.origin, transform.position)));
         int xPoint, yPoint;
 

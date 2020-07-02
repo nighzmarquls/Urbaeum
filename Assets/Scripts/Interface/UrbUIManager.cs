@@ -116,6 +116,10 @@ public class UrbUIManager : MonoBehaviour
         }
         else
         {
+            if (Debug.isDebugBuild || Debug.developerConsoleVisible)
+            {
+                Debug.LogWarning("UrbUI Manager OnEnable self-destruct");
+            }
             Destroy(this);
         }
     }

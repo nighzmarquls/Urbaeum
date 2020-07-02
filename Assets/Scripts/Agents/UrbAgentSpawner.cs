@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using Unity.Profiling;
 public class UrbAgentSpawner 
 {
+    static ProfilerMarker s_SpawnAgent_prof = new ProfilerMarker("AgentSpawner.SpawnAgent");
     public static bool SpawnAgent(GameObject Template, UrbTile Tile, out GameObject spawned, UrbObjectData Data = null)
     {
+        s_SpawnAgent_prof.Begin();
+        
         UrbAgent TestAgent = Template.GetComponent<UrbAgent>();
 
         spawned = null;
@@ -39,6 +42,8 @@ public class UrbAgentSpawner
 
         Tile.OnAgentArrive(Agent);
         UrbAgent.TotalAgents++; 
+        
+        s_SpawnAgent_prof.End();
         return true;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 public enum UrbBreedTag
@@ -70,14 +71,16 @@ public class UrbBreeder : UrbBehaviour
     protected void SetOffspringData(GameObject Offspring)
     {
         UrbBreeder OffspringBreeder = Offspring.GetComponent<UrbBreeder>();
-        if (OffspringBreeder)
+        if (!OffspringBreeder)
         {
-            UrbObjectData[] ChildOffspringData = new UrbObjectData[OffspringData.Length];
-
-            OffspringData.CopyTo(ChildOffspringData, 0);
-
-            OffspringBreeder.OffspringData = ChildOffspringData;
+            return;
         }
+        
+        UrbObjectData[] ChildOffspringData = new UrbObjectData[OffspringData.Length];
+
+        OffspringData.CopyTo(ChildOffspringData, 0);
+
+        OffspringBreeder.OffspringData = ChildOffspringData;
     }
 
     protected void EncodeOffspringData()
@@ -87,8 +90,6 @@ public class UrbBreeder : UrbBehaviour
         {
             OffspringData[o] = UrbEncoder.Read(OffspringObjects[o]);
         }
-
-
     }
 
     protected override bool ValidToInterval()
@@ -96,31 +97,44 @@ public class UrbBreeder : UrbBehaviour
         return base.ValidToInterval() && mAgent.CurrentTile != null && OffspringData != null && OffspringData.Length > 0 && mAgent.Body != null;
     }
 
+    static ProfilerMarker s_TileEvaluateCheck_p = new ProfilerMarker("UrbBreeder.TileEvaluateCheck");
+
     public override float TileEvaluateCheck(UrbTile Target , bool Contact = false)
     {
-        if (Gestating || Target == null || Target.Occupants == null || Crowd > MateCrowding)
+        //"Temporary" using for now
+        using (s_TileEvaluateCheck_p.Auto())
         {
-            return 0;
-        }
-
-        float Evaluation = (MateRequirement == 0)? mAgent.Mass : 0;
-
-        for (int c = 0; c < Target.Occupants.Count; c++)
-        {
-            UrbBreeder MateCandidate = Target.Occupants[c].GetComponent<UrbBreeder>();
-
-            if (MateCandidate != null && MateCandidate != this && MateCandidate.BreedType == BreedType)
-            {
-                Crowd++;
-                Evaluation += Target.Occupants[c].Mass;
-            }
-
-            if(Crowd >= MateCrowding)
+            if (Gestating || Target?.Occupants == null || Crowd > MateCrowding)
             {
                 return 0;
             }
+
+            float Evaluation = (MateRequirement == 0)? mAgent.Mass : 0;
+
+            for (int c = 0; c < Target.Occupants.Count; c++)
+            {
+                var occupant = Target.Occupants[c];
+                if (occupant.WasDestroyed || !occupant.isActiveAndEnabled)
+                {
+                    Target.Occupants.Remove(occupant);
+                    continue;
+                }
+                
+                UrbBreeder MateCandidate = Target.Occupants[c].GetComponent<UrbBreeder>();
+
+                if (MateCandidate != null && MateCandidate != this && MateCandidate.BreedType == BreedType)
+                {
+                    Crowd++;
+                    Evaluation += Target.Occupants[c].Mass;
+                }
+
+                if(Crowd >= MateCrowding)
+                {
+                    return 0;
+                }
+            }
+            return Evaluation;
         }
-        return Evaluation;
     }
 
     public override float BehaviourEvaluation { get {
@@ -145,56 +159,61 @@ public class UrbBreeder : UrbBehaviour
         base.ClearBehaviour();
     }
 
+    static ProfilerMarker executeTileBehaviour = new ProfilerMarker("UrbBreeder.ExecuteTileBehaviour");
+
     public override void ExecuteTileBehaviour()
     {
-        if(MateRequirement == 0)
+        using (executeTileBehaviour.Auto())
         {
-            Gestating = true;
-            base.ExecuteTileBehaviour();
-            return;
-        }
-
-        int MateCount = 0;
-       
-        for (int i = 0; i < RegisteredTiles.Length; i++)
-        {
-            if (RegisteredTiles[i] == null)
-                continue;
-            if (RegisteredTiles[i].Occupants == null)
-                continue;
-
-            for (int o = 0; o < RegisteredTiles[i].Occupants.Count; o++)
+            if (MateRequirement == 0)
             {
-                UrbBreeder PossibleMate = RegisteredTiles[i].Occupants[o].GetComponent<UrbBreeder>();
-                if (PossibleMate == null || PossibleMate == this)
-                {
+                Gestating = true;
+                base.ExecuteTileBehaviour();
+                return;
+            }
+
+            int MateCount = 0;
+
+            for (int i = 0; i < RegisteredTiles.Length; i++)
+            {
+                if (RegisteredTiles[i] == null)
                     continue;
-                }
+                if (RegisteredTiles[i].Occupants == null)
+                    continue;
 
-                if (PossibleMate.BreedType == this.BreedType)
+                for (int o = 0; o < RegisteredTiles[i].Occupants.Count; o++)
                 {
-
-                    float Result = LoveAction.Execute(mAgent, PossibleMate.mAgent, 0);
-                    if (Result > 0)
+                    UrbBreeder PossibleMate = RegisteredTiles[i].Occupants[o].GetComponent<UrbBreeder>();
+                    if (PossibleMate == null || PossibleMate == this)
                     {
-                        Result = LoveAction.Execute(PossibleMate.mAgent, mAgent, 0);
-
-                        if (Result > 0)
-                        {
-                            MateCount++;
-                        }
+                        continue;
                     }
 
+                    if (PossibleMate.BreedType == this.BreedType)
+                    {
+
+                        float Result = LoveAction.Execute(mAgent, PossibleMate.mAgent, 0);
+                        if (Result > 0)
+                        {
+                            Result = LoveAction.Execute(PossibleMate.mAgent, mAgent, 0);
+
+                            if (Result > 0)
+                            {
+                                MateCount++;
+                            }
+                        }
+
+                    }
                 }
             }
-        }
 
-        if (MateCount >= MateRequirement)
-        {
-            Gestating = true;
-        }
+            if (MateCount >= MateRequirement)
+            {
+                Gestating = true;
+            }
 
-        base.ExecuteTileBehaviour();
+            base.ExecuteTileBehaviour();
+        }
     }
 
     // Cached Values for Functional Coroutine;
@@ -216,76 +235,82 @@ public class UrbBreeder : UrbBehaviour
         }
     }
 
-    override public IEnumerator FunctionalCoroutine()
+    public override IEnumerator FunctionalCoroutine()
     {
         if (!ValidToInterval())
-            yield break;
-
-        if (Gestating && CanBreed)
         {
-            yield return new WaitForSeconds(Gestation * mAgent.TimeMultiplier);
-
-            if (!ValidToInterval())
-                yield break;
-
-            SetOffspringTemplate(Random.Range(0, OffspringObjects.Length));
-
-            if (LastBreedTile != mAgent.CurrentTile)
-            {
-                LastBreedTile = mAgent.CurrentTile;
-                SearchCache = DispersalDistance < 0 ? mAgent.Tileprint.GetAllPrintTiles(mAgent) : mAgent.Tileprint.GetBorderingTiles(mAgent, true, DispersalDistance);
-            }
-
-            Delay = Random.Range((int)0, (int)3);
-            NumberOffspring = 0;
-
-            for (int t = 0; t < SearchCache.Length; t++)
-            {
-                if (SearchCache[t] == null || SearchCache[t].Blocked || SearchCache[t].FreeCapacity < OffspringRequiredSpace)
-                {
-                    continue;
-                }
-
-                if (Delay > 0)
-                {
-                    Delay--;
-                    continue;
-                }
-
-                yield return BehaviourThrottle.PerformanceThrottle();
-
-                if (UrbAgentSpawner.SpawnAgent(OffspringTemplate, SearchCache[t], out OffspringObject, OffspringData[OffspringChoice]))
-                {
-                    SetOffspringData(OffspringObject);
-
-                    Delay = Random.Range((int)0, (int)2);
-                    NumberOffspring++;
-                    mAgent.Body.BodyComposition.RemoveRecipe(GestationRecipe);
-                    if(mAgent.Metabolism != null)
-                    {
-                        UrbAgent OffspringAgent = OffspringObject.GetComponent<UrbAgent>();
-                        if (OffspringAgent != null)
-                        {
-                            mAgent.Metabolism.SpendEnergy(OffspringAgent.Mass);
-                        }
-                    }
-
-                    SetOffspringTemplate(Random.Range(0, OffspringObjects.Length));
-
-                }
-
-                if (OffspringCount <= NumberOffspring || mAgent.Body.BodyComposition.ContainsLessThan(GestationRecipe))
-                {
-                    Gestating = false;
-                    yield break;
-                }
-                else
-                {
-                    yield return new WaitForSeconds(Interval* mAgent.TimeMultiplier);
-                }
-            }
-            Gestating = false;
+            yield break;
         }
+
+        if (!Gestating || !CanBreed)
+        {
+            yield break;
+        }
+        
+        yield return new WaitForSeconds(Gestation * mAgent.TimeMultiplier);
+
+        if (!ValidToInterval())
+        {
+            yield break;
+        }
+
+        SetOffspringTemplate(Random.Range(0, OffspringObjects.Length));
+
+        if (LastBreedTile != mAgent.CurrentTile)
+        {
+            LastBreedTile = mAgent.CurrentTile;
+            SearchCache = DispersalDistance < 0 ? mAgent.Tileprint.GetAllPrintTiles(mAgent) : mAgent.Tileprint.GetBorderingTiles(mAgent, true, DispersalDistance);
+        }
+
+        Delay = Random.Range((int)0, (int)3);
+        NumberOffspring = 0;
+
+        for (int t = 0; t < SearchCache.Length; t++)
+        {
+            if (SearchCache[t] == null || SearchCache[t].Blocked || SearchCache[t].FreeCapacity < OffspringRequiredSpace)
+            {
+                continue;
+            }
+
+            if (Delay > 0)
+            {
+                Delay--;
+                continue;
+            }
+
+            yield return BehaviourThrottle.PerformanceThrottle();
+
+            if (UrbAgentSpawner.SpawnAgent(OffspringTemplate, SearchCache[t], out OffspringObject, OffspringData[OffspringChoice]))
+            {
+                SetOffspringData(OffspringObject);
+
+                Delay = Random.Range((int)0, (int)2);
+                NumberOffspring++;
+                mAgent.Body.BodyComposition.RemoveRecipe(GestationRecipe);
+                if(mAgent.Metabolism != null)
+                {
+                    UrbAgent OffspringAgent = OffspringObject.GetComponent<UrbAgent>();
+                    if (OffspringAgent != null)
+                    {
+                        mAgent.Metabolism.SpendEnergy(OffspringAgent.Mass);
+                    }
+                }
+
+                SetOffspringTemplate(Random.Range(0, OffspringObjects.Length));
+
+            }
+
+            if (OffspringCount <= NumberOffspring || mAgent.Body.BodyComposition.ContainsLessThan(GestationRecipe))
+            {
+                Gestating = false;
+                yield break;
+            }
+            else
+            {
+                yield return new WaitForSeconds(Interval* mAgent.TimeMultiplier);
+            }
+        }
+        Gestating = false;
     }
 
     override public UrbComponentData GetComponentData()

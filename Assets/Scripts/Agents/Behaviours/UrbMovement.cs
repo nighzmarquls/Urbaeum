@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 [RequireComponent(typeof(UrbAgent))]
@@ -19,8 +20,11 @@ public class UrbMovement : UrbBehaviour
         mAgent.AddAction(MoveAction);
     }
 
+    static ProfilerMarker s_Moving_p = new ProfilerMarker("UrbMovement.Moving");
+
     public IEnumerator Moving(UrbTile Goal)
     {
+        s_Moving_p.Begin();
         Vector3 StartingPosition = transform.position;
         float Complete = 0;
 
@@ -30,14 +34,7 @@ public class UrbMovement : UrbBehaviour
             {
                 Vector3 Direction = Goal.Location - StartingPosition;
 
-                if (Direction.x > 0)
-                {
-                    mAgent.Display.Flip = true;
-                }
-                else
-                {
-                    mAgent.Display.Flip = false;
-                }
+                mAgent.Display.Flip = Direction.x > 0;
             }
 
             if (mAgent.CurrentTile != null)
@@ -59,18 +56,24 @@ public class UrbMovement : UrbBehaviour
             Vector3 ArrivalLocation = Goal.Location;
             while (Complete < 1.0f)
             {
+                //This is absolutely atrocious but I'm not sure how else to manage this
+                s_Moving_p.End();
                 yield return new WaitForEndOfFrame();
+                s_Moving_p.Begin();
                 mAgent.transform.position = Vector3.Lerp(StartingPosition, ArrivalLocation, Complete);
                 Complete = (Time.time - StartTime) / TravelTime;
             }
         }
         Movement = null;
-          
+        s_Moving_p.End();
     }
 
+    static ProfilerMarker s_ExecuteMove_p = new ProfilerMarker("UrbMovement.ExecuteMove");
     public void ExecuteMove()
     {
+        s_ExecuteMove_p.Begin();
         MoveAction.Execute(mAgent,null);
+        s_ExecuteMove_p.End();
     }
 
     public void MoveTo(UrbTile Goal)
@@ -83,6 +86,7 @@ public class UrbMovement : UrbBehaviour
 
     public class UrbMoveAction : UrbAction
     {
+
         protected override string IconPath => IconDiretory + "Dodge";
         public override UrbTestCategory Category => UrbTestCategory.Mobility | UrbTestCategory.Defense;
 
@@ -96,12 +100,17 @@ public class UrbMovement : UrbBehaviour
             return Test(Instigator) * Instigator.Mass * Instigator.Mass;
         }
 
+        static ProfilerMarker s_MoveAction_p = new ProfilerMarker("UrbMoveAction.Execute");
+
+        static ProfilerMarker s_MoveAction_p_e = new ProfilerMarker("UrbMoveAction.Execute.Pathfinder");
         public override float Execute(UrbAgent Instigator, UrbAgent Target, float Modifier = 0)
         {
+            s_MoveAction_p.Begin(Instigator);
             float Result = Test(Instigator, Modifier);
 
             if (Result > 0)
             {
+                s_MoveAction_p_e.Begin();
                 UrbPathfinder Pathfinder = Instigator.GetComponent<UrbPathfinder>();
                 UrbMovement Movement = Instigator.GetComponent<UrbMovement>();
                 UrbTile Goal = null;
@@ -119,14 +128,20 @@ public class UrbMovement : UrbBehaviour
                         Movement.EnergyCost = AdjustedResult;
                         Movement.MoveTo(Goal);
                     }
+                    
+                    s_MoveAction_p_e.End();
                 }
                 else
                 {
+                    s_MoveAction_p_e.End();
+                    s_MoveAction_p.End();
                     Debug.LogWarning("Illegal Action: Move Action Called on " + Instigator.name + " this Agent has no UrbMovement Component");
                     return 0;
                 }
+                
             }
 
+            s_MoveAction_p.End();
             return Result;
         }
     }

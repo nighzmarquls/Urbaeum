@@ -37,6 +37,11 @@ public class UrbMapDebugDisplay : MonoBehaviour
             }
         }
         targetMap.RefreshAllPathableSize();
+        if (Debug.isDebugBuild || Debug.developerConsoleVisible)
+        {
+            Debug.LogWarning("UrbMapDebugDisplay, Destroying exemplar");
+        }
+        
         Destroy(Exemplar);
     }
 
@@ -97,7 +102,7 @@ public class UrbMapDebugDisplay : MonoBehaviour
             tile = targetMap.GetTile(xTarget, yTarget);
             targetMap.RefreshAllScent();
             tile.AddScent(UrbScentTag.Goal, 1.0f);
-            tile.PropogateScent();
+            tile.PropagateScent();
             
             for (int i = 0; i < targetMap.Xsize; i++)
             {

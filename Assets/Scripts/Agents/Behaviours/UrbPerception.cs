@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 public class UrbPerception : UrbBehaviour
@@ -93,6 +94,8 @@ public class UrbPerception : UrbBehaviour
         ContactList.Clear();
     }
 
+    static ProfilerMarker s_ContactCheck_p = new ProfilerMarker("UrbPerception.ContactCheck_afterThrottle");
+
     UrbTile[] ContactSearchCache;
     UrbTile LastContactTile = null;
     float Evaluation;
@@ -110,6 +113,7 @@ public class UrbPerception : UrbBehaviour
 
         yield return BehaviourThrottle;
 
+        s_ContactCheck_p.Begin();
         for (int i = 0; i < ContactSearchCache.Length; i++)
         {
             for(int b = 0; b < ContactBehaviours.Length; b++)
@@ -121,6 +125,8 @@ public class UrbPerception : UrbBehaviour
                 }
             }
         }
+
+        s_ContactCheck_p.End();
     }
 
     UrbTile[] SenseSearchCache;
@@ -166,7 +172,7 @@ public class UrbPerception : UrbBehaviour
 
 
 
-    override public UrbComponentData GetComponentData()
+    public override UrbComponentData GetComponentData()
     {
         UrbComponentData Data = new UrbComponentData
         {
@@ -181,7 +187,7 @@ public class UrbPerception : UrbBehaviour
         return Data;
     }
 
-    override public bool SetComponentData(UrbComponentData Data)
+    public override bool SetComponentData(UrbComponentData Data)
     {
         PerceptionPrintString = UrbEncoder.GetString("PerceptionPrintString", Data);
         ContactPrintString = UrbEncoder.GetString("ContactPrintString", Data);
