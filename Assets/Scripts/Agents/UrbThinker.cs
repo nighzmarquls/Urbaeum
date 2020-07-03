@@ -123,7 +123,7 @@ public class UrbThinker : UrbBase
             }
         }
 
-        if (!behaviorChosen || !ChosenBehaviour.WasDestroyed)
+        if (!behaviorChosen || ChosenBehaviour.WasDestroyed)
         {
             if(mMovement && mMovement.Movement == null)
             {

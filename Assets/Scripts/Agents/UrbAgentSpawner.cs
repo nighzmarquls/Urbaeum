@@ -15,6 +15,7 @@ public class UrbAgentSpawner
         if (TestAgent == null)
         {
             Debug.Log("Failed to spawn agent because TestAgent was null for template", Template);
+            s_SpawnAgent_prof.End();
             return false;
         }
 
@@ -23,6 +24,7 @@ public class UrbAgentSpawner
         if(TestPrint.TilePrintCollisionCheck(Tile))
         {
             Debug.Log("Failed to spawn agent because of TestPrint check on Tile", Template);
+            s_SpawnAgent_prof.End();
             return false;
         }
 

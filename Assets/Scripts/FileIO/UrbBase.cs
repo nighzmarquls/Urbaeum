@@ -1,19 +1,19 @@
-﻿
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Profiling;
+﻿using Unity.Profiling;
 using UnityEngine;
 using UrbUtility;
 
 public class UrbBase : MonoBehaviour
 {
-    protected UrbLogger logger = new UrbLogger(UnityEngine.Debug.unityLogger.logHandler);
+    protected readonly UrbLogger logger = new UrbLogger(UnityEngine.Debug.unityLogger.logHandler);
+
+    public UrbEater Eater { get; protected set; }
+
+    public bool IsEater { get; protected set; }
 
     //This Logging bool shit sucks
     //We can do better by removing LogAgent bool and
     //rely on logger.logEnabled.
-    public bool LogMe;
+    public bool LogMe = false;
     
     public virtual void Update()
     {
@@ -22,7 +22,7 @@ public class UrbBase : MonoBehaviour
             Initialize();
         }
         
-        if (LogMe != logger.logEnabled)
+        if (LogMe != logger.shouldBeLogging)
         {
             logger.ToggleDebug();
         }
@@ -61,7 +61,12 @@ public class UrbBase : MonoBehaviour
     }
     public virtual void Initialize()
     {
+        Eater = GetComponent<UrbEater>();
+        IsEater = Eater != null;
+
+        LogMe = false;
         logger.logEnabled = false;
+        
         WasDestroyed = false;
         bInitialized = true;
         enabled = true;

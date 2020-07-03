@@ -10,7 +10,7 @@ public class UrbBehaviour : UrbBase
     protected float Interval = 1.0f;
     private IEnumerator mCoroutine;
     protected UrbAgent mAgent;
-
+    
     public virtual bool ShouldInterval { get { return true; } }
     public virtual UrbUrgeCategory UrgeSatisfied { get { return UrbUrgeCategory.None; } }
     public virtual bool ContactBehaviour { get { return true; } }
@@ -38,8 +38,11 @@ public class UrbBehaviour : UrbBase
         {
             return;
         }
+        
         mAgent = GetComponent<UrbAgent>();
         mCoroutine = IntervalCoroutine();
+        Eater = GetComponent<UrbEater>();
+        IsEater = Eater != null;
         
         base.Initialize();
         if (ShouldInterval && isActiveAndEnabled)

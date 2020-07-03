@@ -16,26 +16,17 @@ public class UrbMerge : UrbBehaviour
     float TotalMass = 0;
     int TotalTiles = 0;
     int TotalCount = 0;
-
-    public virtual void Start()
-    {
-        if (MinimumTiles == 4 && !logger.logEnabled)
-        {
-           logger.ToggleDebug(); 
-        }
-    }
-
+    
     protected void MergeIntoTarget(UrbAgent Target)
     {
         logger.Log("Attempting to merge", Target);
         mAgent.Body.BodyComposition.EmptyInto(Target.Body.BodyComposition);
-        UrbEater AgentEater = Target.GetComponent<UrbEater>();
-        if (!AgentEater.WasDestroyed && AgentEater.isActiveAndEnabled)
+        
+        if (Target.IsEater && !Target.Eater.WasDestroyed)
         {
-            UrbEater mEater = GetComponent<UrbEater>();
-            if (!mEater.WasDestroyed && mEater.isActiveAndEnabled)
+            if (IsEater && !Eater.WasDestroyed )
             {
-                mEater.Stomach.EmptyInto(AgentEater.Stomach);
+                Eater.Stomach.EmptyInto(Target.Eater.Stomach);
             }
         }
 
@@ -94,6 +85,7 @@ public class UrbMerge : UrbBehaviour
 
     public override void RegisterTileForBehaviour(float Evaluation, UrbTile Target, int Index)
     {
+        //Get all the merges 
         for (int c = 0; c < Target.Occupants.Count; c++)
         {
             UrbMerge[] MergeComponents = Target.Occupants[c].GetComponents<UrbMerge>();

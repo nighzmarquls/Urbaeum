@@ -19,6 +19,11 @@ public class UrbAgent : UrbBase
     SpriteRenderer mSpriteRenderer;
     public float BirthTime;
 
+    [NonSerialized]
+    public UrbMerge[] UrbMerges = null;
+
+    public bool IsMergeable { get; private set; } = false;
+
     UrbDisplay _display = null; 
     public UrbDisplay Display
     {
@@ -62,13 +67,24 @@ public class UrbAgent : UrbBase
     protected override void OnDestroy()
     {
         CurrentTile.Occupants.Remove(this);
+        //generally we don't actually care if 
+        //the underlying objects are non-null
+        //only if it's null and we don't know about it
+        IsCurrentMapNull = true;
+        IsBodyNotNull = false;
+        IsMindNull = true;
+        CurrentMap = null;
         UrbAgentManager.UnregisterAgent(this);
         base.OnDestroy();
     }
 
     public float TimeMultiplier {
         get {
-            return IsCurrentMapNull ? 0 : CurrentMap.TimeMultiplier;
+            if (CurrentMap == null)
+            {
+                return 0;
+            }
+            return CurrentMap.TimeMultiplier;
         }
     }
 
@@ -168,7 +184,7 @@ public class UrbAgent : UrbBase
         
         if (!templatesMatch)
         {
-            logger.Log("Local Name: " + AgentLocalName + " doesn't match input name: " + input.AgentLocalName);
+            logger.Log("Local Name: " + AgentLocalName + " doesn't match input name: " + input.AgentLocalName, this);
         }
 
         return templatesMatch;
@@ -262,7 +278,7 @@ public class UrbAgent : UrbBase
         BirthTime = Time.time;
         Body = GetComponent<UrbBody>();
         IsBodyNotNull = Body != null;
-        
+
         Metabolism = GetComponent<UrbMetabolism>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
         Camera = Camera.main;
@@ -271,10 +287,17 @@ public class UrbAgent : UrbBase
 
         Mind = GetComponent<UrbThinker>();
         BodyDisplay = GetComponent<UrbBodyDisplay>();
-
         IsMindNull = Mind == null;
         LastCheckedMass = 0;
 
+        UrbMerges = GetComponents<UrbMerge>();
+
+        if (UrbMerges != null && UrbMerges.Length > 0)
+        {
+            IsMergeable = true;
+        }
+        
+        
         UrbAgentManager.RegisterAgent(this);
         IsPaused = UrbAgentManager.IsPaused;
         base.Initialize();
@@ -282,11 +305,10 @@ public class UrbAgent : UrbBase
         if (gameObject.name.Contains("("))
         {
             AgentLocalName = gameObject.name.Split('(')[0];
+            return;
         }
-        else
-        {
-            AgentLocalName = gameObject.name;
-        }
+
+        AgentLocalName = gameObject.name;
     }
 
     bool Removing = false;
