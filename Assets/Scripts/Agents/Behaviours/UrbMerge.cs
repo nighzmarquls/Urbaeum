@@ -62,8 +62,7 @@ public class UrbMerge : UrbBehaviour
             for (int i = 0; i < MergeComponents.Length; i++)
             {
                 var mergeComp = MergeComponents[i];
-                if (mergeComp.WasDestroyed || mergeComp.isActiveAndEnabled == this)
-                { 
+                if (mergeComp.WasDestroyed || mergeComp == this) { 
                     logger.Log("A potential mergeComponent", this);
                     continue;
                 }
