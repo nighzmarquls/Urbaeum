@@ -13,7 +13,7 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
 
     public UrbAgent[] AgentPallete = null;
 
-    GameObject currentAgent = null;
+    UrbAgent currentAgent = null;
 
     GameObject[][] debugTiles;
     public List<IEnumerator> scentRoutines;
@@ -66,7 +66,7 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
     }
 
     static ProfilerMarker s_UrbEnvironmentDebugDisplay_p = new ProfilerMarker("UrbEnvDbgDisp.SpawnAgent");
-    public void SpawnAgent(GameObject input, int xPoint, int yPoint)
+    public void SpawnAgent(UrbAgent input, int xPoint, int yPoint)
     {
         s_UrbEnvironmentDebugDisplay_p.Begin(this);
         UrbTile Tile = targetMap.GetTile(xPoint, yPoint);
@@ -97,7 +97,7 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
         {
             DisplayOption.color = Color.white;
             DisplayOption.sprite = AgentPallete[slot].CurrentSprite;
-            currentAgent = AgentPallete[slot].gameObject;
+            currentAgent = AgentPallete[slot];
         }
         else
         {

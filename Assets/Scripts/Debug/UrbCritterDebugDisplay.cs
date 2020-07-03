@@ -12,7 +12,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
 
     public UrbAgent[] AgentPallete = null;
 
-    GameObject currentAgent = null;
+    UrbAgent currentAgent = null;
 
     GameObject[][] debugTiles;
     public List<IEnumerator> scentRoutines;
@@ -60,7 +60,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
         Destroy(Exemplar);
     }
 
-    public void SpawnAgent(GameObject input, int xPoint, int yPoint)
+    public void SpawnAgent(UrbAgent input, int xPoint, int yPoint)
     {
         UrbTile Tile = targetMap.GetTile(xPoint, yPoint);
 
@@ -88,7 +88,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
         {
             DisplayOption.color = Color.white;
             DisplayOption.sprite = AgentPallete[slot].CurrentSprite;
-            currentAgent = AgentPallete[slot].gameObject;
+            currentAgent = AgentPallete[slot];
         }
         else
         {

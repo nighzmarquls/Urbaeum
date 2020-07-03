@@ -158,7 +158,7 @@ public class UrbSystemIO : MonoBehaviour
             return null;
         }
 
-        if (!UrbAgentSpawner.SpawnAgent(Instance.AgentTypes[ID].gameObject, Tile, out var AgentObject, Data))
+        if (!UrbAgentSpawner.SpawnAgent(Instance.AgentTypes[ID], Tile, out var AgentObject, Data))
         {
             return null;
         }

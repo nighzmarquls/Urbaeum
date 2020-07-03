@@ -130,7 +130,7 @@ public class UrbMerge : UrbBehaviour
         logger.Log("Met conditions for merging on tile, attempting to merge", this);
 
         GameObject Spawned = null;
-        if (!UrbAgentSpawner.SpawnAgent(MergeProduct.gameObject, mAgent.CurrentTile, out Spawned))
+        if (!UrbAgentSpawner.SpawnAgent(MergeProduct, mAgent.CurrentTile, out Spawned))
         {
             logger.Log("Spawning agent failed during merge event", this);
         }

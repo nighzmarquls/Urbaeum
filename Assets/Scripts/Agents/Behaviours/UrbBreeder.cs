@@ -68,10 +68,10 @@ public class UrbBreeder : UrbBehaviour
 
     }
 
-    protected void SetOffspringData(GameObject Offspring)
+    protected void SetOffspringData(UrbAgent Offspring)
     {
-        UrbBreeder OffspringBreeder = Offspring.GetComponent<UrbBreeder>();
-        if (!OffspringBreeder)
+        var OffspringBreeder = Offspring.Breeder;
+        if (!Offspring.IsBreeder || !OffspringBreeder)
         {
             return;
         }
@@ -120,9 +120,16 @@ public class UrbBreeder : UrbBehaviour
                     continue;
                 }
                 
-                UrbBreeder MateCandidate = Target.Occupants[c].GetComponent<UrbBreeder>();
+                UrbAgent MateCandidate = Target.Occupants[c];
 
-                if (MateCandidate != null && MateCandidate != this && MateCandidate.BreedType == BreedType)
+                if (!MateCandidate || MateCandidate.WasDestroyed || !MateCandidate.IsBreeder)
+                {
+                    continue;
+                }
+
+                var BreedCandidate = MateCandidate.Breeder;
+                
+                if (!BreedCandidate.WasDestroyed && BreedCandidate != this && BreedCandidate.BreedType == BreedType)
                 {
                     Crowd++;
                     Evaluation += Target.Occupants[c].Mass;
@@ -178,13 +185,14 @@ public class UrbBreeder : UrbBehaviour
             {
                 if (RegisteredTiles[i] == null)
                     continue;
+                
                 if (RegisteredTiles[i].Occupants == null)
                     continue;
 
                 for (int o = 0; o < RegisteredTiles[i].Occupants.Count; o++)
                 {
                     UrbBreeder PossibleMate = RegisteredTiles[i].Occupants[o].GetComponent<UrbBreeder>();
-                    if (PossibleMate == null || PossibleMate == this)
+                    if (PossibleMate.WasDestroyed || PossibleMate == this)
                     {
                         continue;
                     }
@@ -220,6 +228,7 @@ public class UrbBreeder : UrbBehaviour
     private UrbTile LastBreedTile = null;
     private UrbTile[] SearchCache;
     private GameObject OffspringTemplate;
+    private UrbAgent OffspringAgent;
     private GameObject OffspringObject;
 
     private int Delay;
@@ -232,6 +241,7 @@ public class UrbBreeder : UrbBehaviour
         {
             OffspringChoice = Choice;
             OffspringTemplate = OffspringObjects[OffspringChoice];
+            OffspringAgent = OffspringTemplate.GetComponent<UrbAgent>();
         }
     }
 
@@ -280,16 +290,15 @@ public class UrbBreeder : UrbBehaviour
 
             yield return BehaviourThrottle.PerformanceThrottle();
 
-            if (UrbAgentSpawner.SpawnAgent(OffspringTemplate, SearchCache[t], out OffspringObject, OffspringData[OffspringChoice]))
+            if (UrbAgentSpawner.SpawnAgent(OffspringAgent, SearchCache[t], out OffspringObject, OffspringData[OffspringChoice]))
             {
-                SetOffspringData(OffspringObject);
+                SetOffspringData(OffspringObject.GetComponent<UrbAgent>());
 
                 Delay = Random.Range((int)0, (int)2);
                 NumberOffspring++;
                 mAgent.Body.BodyComposition.RemoveRecipe(GestationRecipe);
                 if(mAgent.Metabolism != null)
                 {
-                    UrbAgent OffspringAgent = OffspringObject.GetComponent<UrbAgent>();
                     if (OffspringAgent != null)
                     {
                         mAgent.Metabolism.SpendEnergy(OffspringAgent.Mass);
@@ -313,7 +322,7 @@ public class UrbBreeder : UrbBehaviour
         Gestating = false;
     }
 
-    override public UrbComponentData GetComponentData()
+    public override UrbComponentData GetComponentData()
     {
         UrbComponentData Data = new UrbComponentData
         {
@@ -353,7 +362,7 @@ public class UrbBreeder : UrbBehaviour
 
 
 
-    override public bool SetComponentData(UrbComponentData Data)
+    public override bool SetComponentData(UrbComponentData Data)
     {
         MateRequirement = (int)UrbEncoder.GetField("MateRequirement", Data);
         MateCrowding = (int)UrbEncoder.GetField("MateCrowding", Data);

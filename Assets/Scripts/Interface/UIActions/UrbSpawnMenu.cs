@@ -23,7 +23,7 @@ public class UrbSpawnMenu : UrbUserAction
             }
 
             UrbSpawnAction CreateAction = new UrbSpawnAction {
-                SpawnedTemplate = UrbSystemIO.Instance.AgentTypes[i].gameObject,
+                AgentTemplate = UrbSystemIO.Instance.AgentTypes[i],
                 Icon = UrbSystemIO.Instance.AgentTypes[i].CurrentSprite,
                 Name = UrbSystemIO.Instance.AgentTypes[i].gameObject.name,
                 MapDisplaySprite = UrbSystemIO.Instance.AgentTypes[i].CurrentSprite

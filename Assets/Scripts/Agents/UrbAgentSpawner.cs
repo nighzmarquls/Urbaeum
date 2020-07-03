@@ -1,20 +1,18 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Profiling;
 public class UrbAgentSpawner 
 {
     static ProfilerMarker s_SpawnAgent_prof = new ProfilerMarker("AgentSpawner.SpawnAgent");
-    public static bool SpawnAgent(GameObject Template, UrbTile Tile, out GameObject spawned, UrbObjectData Data = null)
+    public static bool SpawnAgent(UrbAgent TestAgent, UrbTile Tile, out GameObject spawned, UrbObjectData Data = null)
     {
         s_SpawnAgent_prof.Begin();
+
+        var Template = TestAgent.gameObject;
         
-        UrbAgent TestAgent = Template.GetComponent<UrbAgent>();
-
-        spawned = null;
-
-        if (TestAgent == null)
+        if (TestAgent.WasDestroyed)
         {
-            Debug.Log("Failed to spawn agent because TestAgent was null for template", Template);
+            spawned = null;
+            Debug.Log("Failed to spawn agent because TestAgent was null", TestAgent);
             s_SpawnAgent_prof.End();
             return false;
         }
@@ -23,6 +21,7 @@ public class UrbAgentSpawner
         
         if(TestPrint.TilePrintCollisionCheck(Tile))
         {
+            spawned = null;
             Debug.Log("Failed to spawn agent because of TestPrint check on Tile", Template);
             s_SpawnAgent_prof.End();
             return false;
@@ -49,18 +48,16 @@ public class UrbAgentSpawner
         
         s_SpawnAgent_prof.End();
         return true;
-    }
+    } 
 }
 
 public class UrbSpawnAction : UrbUserAction
 {
-    public GameObject SpawnedTemplate;
-
+    public UrbAgent AgentTemplate;
     public override void MouseClick(UrbTile currentCursorTile)
     {
-   
         GameObject SpawnedObject;
-        if(!UrbAgentSpawner.SpawnAgent(SpawnedTemplate,currentCursorTile ,out SpawnedObject))
+        if(!UrbAgentSpawner.SpawnAgent(AgentTemplate,currentCursorTile, out SpawnedObject))
         {
             UnityEngine.Debug.LogWarning("Failed to spawn agent from click");
         }

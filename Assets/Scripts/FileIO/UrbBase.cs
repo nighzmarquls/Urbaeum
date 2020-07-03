@@ -6,13 +6,13 @@ public class UrbBase : MonoBehaviour
 {
     protected readonly UrbLogger logger = new UrbLogger(UnityEngine.Debug.unityLogger.logHandler);
 
+    //Optional Urb Components which may find themselves on a given UrbAgent 
     public UrbEater Eater { get; protected set; }
-
+    public UrbBreeder Breeder { get; protected set; }
+    
+    public bool IsBreeder { get; protected set; }
     public bool IsEater { get; protected set; }
-
-    //This Logging bool shit sucks
-    //We can do better by removing LogAgent bool and
-    //rely on logger.logEnabled.
+    
     public bool LogMe = false;
     
     public virtual void Update()
@@ -64,6 +64,9 @@ public class UrbBase : MonoBehaviour
         Eater = GetComponent<UrbEater>();
         IsEater = Eater != null;
 
+        Breeder = GetComponent<UrbBreeder>();
+        IsBreeder = Breeder != null;
+        
         LogMe = false;
         logger.logEnabled = false;
         
