@@ -84,7 +84,7 @@ public class UrbThinker : UrbBase
         HungerUrge = 0;
         mMetabolism = GetComponent<UrbMetabolism>();
         RestUrge = 0;
-        SafetyUrge = 1;
+        SafetyUrge = 0;
 
         base.Initialize();
         s_Initialize_p.End();
@@ -184,6 +184,7 @@ public class UrbThinker : UrbBase
                 RestUrge = mEater.Stomach.Fullness;
             }
 
+           
             if (IsmMetabolismNull)
             {
                 return;
@@ -213,10 +214,11 @@ public class UrbThinker : UrbBase
 
             if (!mMetabolism.Healing)
             {
+                SafetyUrge = Mathf.Max(0.0f,SafetyUrge);
                 return;
             }
             
-            SafetyUrge += 1.0f;
+            SafetyUrge = 1.0f;
 
             if (CanBreed)
             {
