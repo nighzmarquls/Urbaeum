@@ -14,7 +14,6 @@ public class UrbTile
     int XAddress;
     int YAddress;
 
-
     public bool LinksDirty = true;
     UrbTile[] Links;
     public UrbTile[] CachedAdjacent { get { return Adjacent; } }
@@ -30,7 +29,6 @@ public class UrbTile
     public List<UrbAgent> Occupants; 
 
     public UrbEnvironment Environment;
-    public float cost;
 
     protected int PathableSize = 0;
 
@@ -129,6 +127,10 @@ public class UrbTile
         {
             if(i > MaximumOccupants)
             {
+                if (Debug.developerConsoleVisible || Debug.isDebugBuild)
+                {
+                    Debug.Log("Max entities on a tile have been reached forcibly removing.");
+                }
                 OrderedOccupants[i].Remove(false);
                 continue;
             }
@@ -526,20 +528,12 @@ public class UrbTile
                 continue;
             }
             
-            if(Debug.developerConsoleVisible || Debug.isDebugBuild)
-            {
-                Debug.Log("Already Linked");
-            }
+            //LOG.Log("Already Linked");
                 
             return i;
         }
         
-        if(Debug.developerConsoleVisible || Debug.isDebugBuild)
-        {
-
-            Debug.Log("Not Linked");
-        }
-
+        //Debug.Log("Not Linked");
         return -1;
     }
 
@@ -638,7 +632,7 @@ public class UrbTile
     public void PropagateScent()
     {
         s_PropagateScent_p.Begin();
-        //The array-copying here seems non-performant.
+        //TODO: The array-copying here seems non-performant.
         var ToAdd = new List<UrbTile>(OwningMap.GetAdjacent(XAddress, YAddress));
         var ToDiffuse = new List<UrbTile>(ToAdd.Count);
         
@@ -679,7 +673,6 @@ public class UrbTile
 
         for (int i = 0; i < TerrainTypes.Length; i++)
         {
-
             for(int t = 0; t < Adjacent.Length; t++)
             {
                 var adj = Adjacent[t];

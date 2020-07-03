@@ -14,6 +14,7 @@ public class UrbAgentSpawner
 
         if (TestAgent == null)
         {
+            Debug.Log("Failed to spawn agent because TestAgent was null for template", Template);
             return false;
         }
 
@@ -21,11 +22,12 @@ public class UrbAgentSpawner
         
         if(TestPrint.TilePrintCollisionCheck(Tile))
         {
+            Debug.Log("Failed to spawn agent because of TestPrint check on Tile", Template);
             return false;
         }
 
         Vector3 SpawnLocation = Tile.Location;
-        spawned = GameObject.Instantiate(Template, SpawnLocation, Quaternion.identity);
+        spawned = Object.Instantiate(Template, SpawnLocation, Quaternion.identity);
         UrbAgent Agent = spawned.GetComponent<UrbAgent>();
 
         if (Data != null)
@@ -56,13 +58,9 @@ public class UrbSpawnAction : UrbUserAction
     {
    
         GameObject SpawnedObject;
-        if(UrbAgentSpawner.SpawnAgent(SpawnedTemplate,currentCursorTile ,out SpawnedObject))
+        if(!UrbAgentSpawner.SpawnAgent(SpawnedTemplate,currentCursorTile ,out SpawnedObject))
         {
-       
-        }
-        else
-        {
-          
+            UnityEngine.Debug.LogWarning("Failed to spawn agent from click");
         }
     }
 

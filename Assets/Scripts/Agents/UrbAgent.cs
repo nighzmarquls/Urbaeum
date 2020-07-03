@@ -4,13 +4,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
+using UrbUtility;
 
 public class UrbAgent : UrbBase
 {
     public static int TotalAgents;
-
+    
     public bool HasPathfinder { get; protected set; } = false;
-
     const float LocationThreshold = 0.01f;
     UrbThinker Mind;
 
@@ -27,16 +27,14 @@ public class UrbAgent : UrbBase
         {
             _display = value;
             // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
-            if (value != null)
-            {
-                HasDisplay = true;
-            }
-
-            HasDisplay = false;
+            
+            HasDisplay = _display != null;
         }
     }
     public bool HasDisplay { get; private set; }
 
+    public bool IsCurrentMapNull = true;
+    bool IsBodyNotNull;
     UrbMap _currentMap;
     public UrbMap CurrentMap
     {
@@ -247,9 +245,9 @@ public class UrbAgent : UrbBase
 
         Display = GetComponentInChildren<UrbDisplay>();
         
-        if (Debug.isDebugBuild && Display == null)
+        if (!HasDisplay)
         {
-            Debug.LogError("No DisplayObject Present: Make sure a Display Object is attached to " + gameObject.name);
+            logger.LogError("No DisplayObject Present: Make sure a Display Object is attached!", gameObject);
         }
 
         BirthTime = Time.time;
@@ -264,15 +262,11 @@ public class UrbAgent : UrbBase
         BodyDisplay = GetComponent<UrbBodyDisplay>();
 
         IsMindNull = Mind == null;
-        
-
-        
         LastCheckedMass = 0;
 
         UrbAgentManager.RegisterAgent(this);
         IsPaused = UrbAgentManager.IsPaused;
         base.Initialize();
-
     }
 
     bool Removing = false;
@@ -280,6 +274,7 @@ public class UrbAgent : UrbBase
     {
         if (Removing)
         {
+            logger.Log("Attempting to remove an object already being removed");
             return;
         }
         Removing = true;
@@ -294,9 +289,9 @@ public class UrbAgent : UrbBase
             TotalAgents--;
         }
 
-        if (Debug.isDebugBuild || Debug.developerConsoleVisible)
+        if (Debug.developerConsoleVisible)
         {
-            Debug.Log("Remove entity, destroying game object");
+            logger.Log(LogType.Log, "Remove entity, destroying game object", context:this);
         }
         Destroy(gameObject);
     }
@@ -351,7 +346,7 @@ public class UrbAgent : UrbBase
 
         if (IsCurrentMapNull)
         {
-            Debug.Log(gameObject.name + " Is missing a map!");
+            logger.Log("missing a map!", gameObject);
             // s_TickToMind_p.End();
             // Destroy(gameObject);
             // return;
@@ -410,10 +405,7 @@ public class UrbAgent : UrbBase
         s_TickToDisplay_p.End();
     }
     static ProfilerMarker s_UpdateUrbAgent_p = new ProfilerMarker("UrbAgent.Update");
-
-    bool IsCurrentMapNull = true;
-    bool IsBodyNotNull;
-
+    
     // Update is called once per frame
     void Update()
     {

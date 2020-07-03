@@ -2,6 +2,7 @@ Library/*
 Packages/manifest.json
 Urbaeum.sln
 UserSettings/EditorUserSettings.asset
+ProjectSettings/PackageManagerSettings.asset
 Assembly-CSharp-Editor.csproj
 Assembly-CSharp-Editor.csproj
 Assembly-CSharp.csproj

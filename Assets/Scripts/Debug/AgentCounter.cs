@@ -1,8 +1,8 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Text))]
 public class AgentCounter : MonoBehaviour
 {
     Text mText;
@@ -17,15 +17,8 @@ public class AgentCounter : MonoBehaviour
     {
         while (true)
         {
-            if (mText == null)
-            {
-                yield return null;
-            }
-
             yield return new WaitForEndOfFrame();
-            mText.text = "AGENTS " + UrbAgentManager.AgentCount.ToString();
-
-
+            mText.text = "AGENTS " + UrbAgentManager.AgentCount;
         }
     }
 }

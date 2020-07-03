@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,6 +17,7 @@ public class DisplayModification
 
     }
 
+    [Flags]
     public enum ColorCategory
     {
         None =          0b_0000_0000,
@@ -124,7 +126,29 @@ public class UrbBodyDisplay : UrbBase
     public DisplayModification[] Modifications;
 
     UrbAgent mAgent;
-    UrbDisplay mDisplay;
+
+    UrbDisplay _disp; 
+    UrbDisplay Display {
+        get
+        {
+            return _disp;
+        }
+        set
+        {
+            _disp = value;
+            IsDisplayNull = _disp == null;
+        }
+    }
+    
+    Camera View;
+    bool IsViewNotNull = false;
+    bool IsDisplayNull = true;
+
+    void Start()
+    {
+        View = Camera.main;
+        IsViewNotNull = View != null;
+    }
 
     public override void Initialize()
     {
@@ -144,30 +168,28 @@ public class UrbBodyDisplay : UrbBase
             return;
         }
 
-        if (mDisplay == null)
+        if (IsDisplayNull && mAgent.WasDestroyed == false)
         {
-            mDisplay = mAgent.Display;
+            Display = mAgent.Display;
+            return;
         }
-        else
+
+        if (Display.Invisible)
         {
-            if (mDisplay.Invisible)
-            {
-                mDisplay.Significance = 0;
-            }
-
-            Camera View = Camera.main;
-            if (View != null && mAgent.CurrentMap != null)
-            { 
-                float Significance = (mDisplay.BodySize / View.orthographicSize)*mAgent.CurrentMap.TileSize;
-                mDisplay.Significance = Significance;
-            }
-
-            for (int s = 0; s < Modifications.Length; s++)
-            {
-                Modifications[s].ApplyModification(mDisplay, input);
-            }
+            Display.Significance = 0;
         }
-        
+
+        if (IsViewNotNull && !mAgent.IsCurrentMapNull)
+        { 
+            float Significance = (Display.BodySize / View.orthographicSize)*mAgent.CurrentMap.TileSize;
+            Display.Significance = Significance;
+        }
+
+        for (int s = 0; s < Modifications.Length; s++)
+        {
+            Modifications[s].ApplyModification(Display, input);
+        }
+
     }
 
     public override UrbComponentData GetComponentData()

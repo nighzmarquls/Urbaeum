@@ -4,9 +4,45 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
+using UrbUtility;
 
 public class UrbBase : MonoBehaviour
 {
+    protected readonly UrbLogger logger = new UrbLogger(UnityEngine.Debug.unityLogger.logHandler);
+
+    //This Logging bool shit sucks
+    //We can do better by removing LogAgent bool and
+    //rely on logger.logEnabled.
+    public bool LogMe;
+    
+    bool _loggingAgent;
+    public bool LogAgent
+    {
+        get
+        {
+            return _loggingAgent;
+        }
+
+        set
+        {
+            if (value != logger.logEnabled)
+            {
+                //This is absolutely horrid, I know
+                logger.ToggleDebug();
+                _loggingAgent = logger.logEnabled;
+            }
+        }
+    }
+    
+    public virtual void Update()
+    {
+        if (LogMe != LogAgent)
+        {
+            LogAgent = LogMe;
+        }
+    }
+    
+    
     public bool WasDestroyed { get; protected set;  } = false;
     protected bool bInitialized { get; private set; } = false;
     

@@ -15,7 +15,7 @@ public class UrbInterfaceInput : MonoBehaviour
 
     public Sprite GetIcon()
     {
-        if (this.Icon == null)
+        if (Icon == null)
         {
             return null;
         }
@@ -33,7 +33,6 @@ public class UrbInterfaceInput : MonoBehaviour
         
         this.Icon.sprite = Icon;
         this.Icon.color = IconColor;
-        
     }
 
     public void Start()
@@ -48,17 +47,11 @@ public class UrbInterfaceInput : MonoBehaviour
         {
             Icon = Child.GetComponent<Image>();
         }
-     
     }
 
     public void ButtonActivation()
     {
-        if (UserAction == null)
-        {
-            return;
-        }
-
-        UserAction.SelectAction();
+        UserAction?.SelectAction();
     }
 
     public void ShortcutActivation()

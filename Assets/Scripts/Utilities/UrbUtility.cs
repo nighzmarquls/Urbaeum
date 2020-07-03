@@ -1,35 +1,49 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace UrbUtility
 {
-    public class UrbThrottle{
-        protected int SkipCount = 0;
-        protected int MaxSkips;
-        const float MaxDelay =  0.0005f;
+    public struct UrbThrottle
+    {
+        int SkipCount;
+        
+        readonly int MaxSkips;
+
+        //For some reason, Structs do not call constructors if params are missing
+        const int HardMaxSkips = 60;
+        const float MilliSeconds = (1.0f / 1000.0f);
+        const float MaxDelay =  2.0f * MilliSeconds;
         const float MinTime =   0.0035047f;
-        const float MaxTime = MaxDelay + MinTime;
+        const float MaxWaitTime = MaxDelay + MinTime;
 
-        public UrbThrottle(int DefaultMaxSkips = 60)
+        public UrbThrottle(int maxSkips = 60)
         {
-            MaxSkips = DefaultMaxSkips;
+            SkipCount = 0;
+            MaxSkips = maxSkips;
         }
-
+        
         public IEnumerator PerformanceThrottle()
         {
-            while (Time.deltaTime > MaxTime)
+            if (SkipCount == 0)
             {
-                if (SkipCount > MaxSkips)
-                {
-                    yield break;
-                }
-
-                SkipCount++;
-
-                yield return new WaitForSeconds(MaxDelay*(MaxSkips/SkipCount));
+                ++SkipCount;
+                yield return new WaitForFixedUpdate();
             }
-            SkipCount = 0;
+            
+            if (Time.deltaTime < MinTime || SkipCount > MaxSkips || SkipCount > HardMaxSkips)
+            {
+                SkipCount = 0;
+                yield break;
+            }
+            
+            if (Time.deltaTime > MaxWaitTime)
+            {
+                ++SkipCount;
+                //We use the 
+                yield return new WaitForFixedUpdate();
+            }
         }
     }
 }

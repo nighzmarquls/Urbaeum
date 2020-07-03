@@ -35,45 +35,43 @@ public class UrbPathfinder : UrbBehaviour
         int TerrainType = (int)PassableTerrain;
         float bestValue = (mThinker == null)? currentTile.TerrainFilter[TerrainType][Size][GoalTag] : mThinker.EvaluateTile(currentTile, TerrainType, Size);
 
-        if (Adjacent != null)
+        if (Adjacent == null) return goalTile;
+        for(int t = 0; t < Adjacent.Length; t++)
         {
-            for(int t = 0; t < Adjacent.Length; t++)
+            if (Adjacent[t] == null)
             {
-                if (Adjacent[t] == null)
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                if(Adjacent[t].Blocked)
-                {
-                    continue;
-                }
+            if(Adjacent[t].Blocked)
+            {
+                continue;
+            }
 
-                if(Adjacent[t].FreeCapacity < mAgent.MassPerTile)
-                {
-                    continue;
-                }
+            if(Adjacent[t].FreeCapacity < mAgent.MassPerTile)
+            {
+                continue;
+            }
 
-                float currentValue = (mThinker == null) ? Adjacent[t].TerrainFilter[TerrainType][Size][GoalTag] : mThinker.EvaluateTile(Adjacent[t], TerrainType, Size);
+            float currentValue = (mThinker == null) ? Adjacent[t].TerrainFilter[TerrainType][Size][GoalTag] : mThinker.EvaluateTile(Adjacent[t], TerrainType, Size);
 
-                if (currentValue <= 0)
-                {
-                    continue;
-                }
+            if (currentValue <= 0)
+            {
+                continue;
+            }
 
                 
-                if (currentValue >= bestValue)
-                {
-                    bestValue = currentValue;
-                    goalTile = Adjacent[t];
-                }
-
+            if (currentValue >= bestValue)
+            {
+                bestValue = currentValue;
+                goalTile = Adjacent[t];
             }
+
         }
         return goalTile;
     }
 
-    override public UrbComponentData GetComponentData()
+    public override UrbComponentData GetComponentData()
     {
         UrbComponentData Data = base.GetComponentData();
 
@@ -90,7 +88,7 @@ public class UrbPathfinder : UrbBehaviour
         return Data;
     }
 
-    override public bool SetComponentData(UrbComponentData Data)
+    public override bool SetComponentData(UrbComponentData Data)
     {
         GoalTag = UrbEncoder.GetEnum<UrbScentTag>("GoalTag", Data);
         PassableTerrain = UrbEncoder.GetEnum<UrbPathTerrain>("PassableTerrain", Data);

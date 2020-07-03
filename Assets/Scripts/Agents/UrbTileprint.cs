@@ -104,7 +104,7 @@ public class UrbTileprint
 
     public UrbTile[] GetAdjacentPrintTiles(UrbAgent Agent, bool GetLinked = false)
     {
-        if (Agent.CurrentMap == null || Agent.CurrentTile == null)
+        if (Agent.IsCurrentMapNull || Agent.CurrentTile == null)
         {
             return new UrbTile[0];
         }
@@ -114,7 +114,7 @@ public class UrbTileprint
 
     public UrbTile[] GetBorderingTiles(UrbAgent Agent, bool GetLinked = false, int Distance = 0)
     {
-        if(Agent.CurrentMap == null  || Agent.CurrentTile == null)
+        if(Agent.IsCurrentMapNull  || Agent.CurrentTile == null)
         {
             return new UrbTile[0];
         }
@@ -198,7 +198,7 @@ public class UrbTileprint
 
     public UrbTile[] GetAllPrintTiles(UrbAgent Agent)
     {
-        if (Agent.CurrentMap == null || Agent.CurrentTile == null)
+        if (Agent.IsCurrentMapNull || Agent.CurrentTile == null)
         {
             return new UrbTile[0];
         }

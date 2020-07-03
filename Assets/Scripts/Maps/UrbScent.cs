@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
+using UrbUtility;
 
 
 public enum UrbScentTag
@@ -87,7 +88,7 @@ public class UrbScent
         yield return ScentThrottle.PerformanceThrottle();
     }
 
-    public static UrbUtility.UrbThrottle ScentThrottle = new UrbUtility.UrbThrottle(7);
+    public static UrbThrottle ScentThrottle = new UrbThrottle(7);
 
     static ProfilerMarker s_ReceiveScent_p = new ProfilerMarker("UrbScent.ReceiveScent");
 
