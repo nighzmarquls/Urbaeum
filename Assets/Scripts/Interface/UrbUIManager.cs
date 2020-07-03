@@ -184,6 +184,7 @@ public class UrbUIManager : MonoBehaviour
 public class UrbPauseAction : UrbUserAction
 {
     public override string Name => "Pause";
+    public override string MapDisplayAssetPath => "";
 
     public override void SelectAction()
     {
@@ -196,6 +197,7 @@ public class UrbPauseAction : UrbUserAction
 public class UrbResumeAction : UrbUserAction
 {
     public override string Name => "Resume";
+    public override string MapDisplayAssetPath => "";
 
     public override void SelectAction()
     {
@@ -208,6 +210,7 @@ public class UrbResumeAction : UrbUserAction
 public class UrbQuitAction : UrbUserAction
 {
     public override string Name => "Quit";
+    public override string MapDisplayAssetPath => "";
 
     public override void SelectAction()
     {

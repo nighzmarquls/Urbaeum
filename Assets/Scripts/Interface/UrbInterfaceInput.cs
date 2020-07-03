@@ -9,6 +9,7 @@ public class UrbInterfaceInput : MonoBehaviour
 {
     public KeyCode Shortcut = KeyCode.None;
     public UrbUserAction UserAction;
+    public bool Disabled = false;
     protected Image Icon;
     protected Button mButton;
     protected ButtonAnimator mButtonAnimator;
@@ -66,7 +67,12 @@ public class UrbInterfaceInput : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(Shortcut))
+        if (Disabled)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(Shortcut))
         {
             PointerEventData Data = new PointerEventData(EventSystem.current);
             Data.position = mButton.transform.position;
