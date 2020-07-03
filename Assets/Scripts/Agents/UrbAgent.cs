@@ -33,6 +33,7 @@ public class UrbAgent : UrbBase
     }
     public bool HasDisplay { get; private set; }
 
+    protected string AgentLocalName;
     public bool IsCurrentMapNull = true;
     bool IsBodyNotNull;
     UrbMap _currentMap;
@@ -57,12 +58,6 @@ public class UrbAgent : UrbBase
     public bool Moving { get; protected set; } = false;
 
     protected Vector3 TargetLocation;
-
-    void Start()
-    {
-        IsCurrentMapNull = CurrentMap == null;
-        IsBodyNotNull = Body != null;
-    }
     
     protected override void OnDestroy()
     {
@@ -160,14 +155,23 @@ public class UrbAgent : UrbBase
     {
         if(Removing || WasDestroyed || input.WasDestroyed)
         {
-            logger.Log("Cannot merge component because ");
+            logger.Log("Cannot merge component because Agent was removing/Destroyed or input was destroyed", this);
             return false;
         }
-        
-        string LocalName = gameObject.name.Split('(')[0];
-        string InputName = input.gameObject.name.Split('(')[0];
 
-        return string.Compare(LocalName, InputName, true) == 0;
+        if (string.IsNullOrWhiteSpace(AgentLocalName))
+        {
+            AgentLocalName = gameObject.name.Split('(')[0];
+        }
+        
+        var templatesMatch = string.Compare(AgentLocalName, input.AgentLocalName, true) == 0;
+        
+        if (!templatesMatch)
+        {
+            logger.Log("Local Name: " + AgentLocalName + " doesn't match input name: " + input.AgentLocalName);
+        }
+
+        return templatesMatch;
     }
 
     public virtual void AddAction(UrbAction Action)
@@ -177,7 +181,7 @@ public class UrbAgent : UrbBase
             AvailableActions = new []{ Action };
             return;
         }
-
+        
         UrbAction[] newActions = new UrbAction[AvailableActions.Length + 1];
         AvailableActions.CopyTo(newActions, 1);
         newActions[0] = Action;
@@ -186,7 +190,7 @@ public class UrbAgent : UrbBase
 
     public virtual void RemoveAction(UrbAction Action)
     {
-        if (AvailableActions == null)
+        if (AvailableActions == null || AvailableActions.Length == 0)
         {
             return;
         }
@@ -209,16 +213,19 @@ public class UrbAgent : UrbBase
         {
             if (Removing)
             {
+                logger.Log("Chose not to pick an action because removing", this);
                 return null;
             }
 
             if (!IsMindNull)
             {
+                logger.Log("Trying to pick an action");
                 return Mind.PickAction(Test, Result, Exclude);
             }
 
             if (AvailableActions == null)
             {
+                logger.Log("No actions available!", this);
                 return null;
             }
 
@@ -233,6 +240,7 @@ public class UrbAgent : UrbBase
                 }
             }
 
+            Debug.unityLogger.Log("PickAction", "Could not find any actions to pick!", this);
             return null;
         }
     }
@@ -245,7 +253,7 @@ public class UrbAgent : UrbBase
         }
 
         Display = GetComponentInChildren<UrbDisplay>();
-        
+
         if (!HasDisplay)
         {
             logger.LogError("No DisplayObject Present: Make sure a Display Object is attached!", gameObject);
@@ -253,6 +261,8 @@ public class UrbAgent : UrbBase
 
         BirthTime = Time.time;
         Body = GetComponent<UrbBody>();
+        IsBodyNotNull = Body != null;
+        
         Metabolism = GetComponent<UrbMetabolism>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
         Camera = Camera.main;
@@ -268,6 +278,15 @@ public class UrbAgent : UrbBase
         UrbAgentManager.RegisterAgent(this);
         IsPaused = UrbAgentManager.IsPaused;
         base.Initialize();
+
+        if (gameObject.name.Contains("("))
+        {
+            AgentLocalName = gameObject.name.Split('(')[0];
+        }
+        else
+        {
+            AgentLocalName = gameObject.name;
+        }
     }
 
     bool Removing = false;

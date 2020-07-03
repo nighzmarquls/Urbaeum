@@ -8,7 +8,7 @@ using UrbUtility;
 
 public class UrbBase : MonoBehaviour
 {
-    protected readonly UrbLogger logger = new UrbLogger(UnityEngine.Debug.unityLogger.logHandler);
+    protected UrbLogger logger = new UrbLogger(UnityEngine.Debug.unityLogger.logHandler);
 
     //This Logging bool shit sucks
     //We can do better by removing LogAgent bool and
@@ -17,12 +17,17 @@ public class UrbBase : MonoBehaviour
     
     public virtual void Update()
     {
+        if (!bInitialized)
+        {
+            Initialize();
+        }
+        
         if (LogMe != logger.logEnabled)
         {
             logger.ToggleDebug();
         }
     }
-
+    
     public bool WasDestroyed { get; protected set;  } = false;
     protected bool bInitialized { get; private set; } = false;
     
@@ -56,6 +61,7 @@ public class UrbBase : MonoBehaviour
     }
     public virtual void Initialize()
     {
+        logger.logEnabled = false;
         WasDestroyed = false;
         bInitialized = true;
         enabled = true;

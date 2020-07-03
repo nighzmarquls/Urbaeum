@@ -426,7 +426,6 @@ public class UrbDisplay : UrbBase
         
        
         base.Initialize();
-
     }
 
     public void Express(UrbDisplayFace.Expression Expression)
@@ -506,9 +505,12 @@ public class UrbDisplay : UrbBase
         }
     }
 
-    private void Start()
+    void Start()
     {
-        Initialize();
+        if (!bInitialized)
+        {
+            Initialize();
+        }
     }
 
     public override void Update()
