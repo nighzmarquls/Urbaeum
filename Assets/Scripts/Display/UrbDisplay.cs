@@ -511,9 +511,10 @@ public class UrbDisplay : UrbBase
         Initialize();
     }
 
-    private void Update()
+    public override void Update()
     {
         UpdateEffectDisplay();
+        base.Update();
     }
 
     protected UrbDisplayFeature CreateFeature(string FeatureSprite,Transform AttachmentPoint, float offset = 0.0f)

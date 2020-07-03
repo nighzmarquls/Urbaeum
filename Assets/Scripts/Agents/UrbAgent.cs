@@ -407,7 +407,7 @@ public class UrbAgent : UrbBase
     static ProfilerMarker s_UpdateUrbAgent_p = new ProfilerMarker("UrbAgent.Update");
     
     // Update is called once per frame
-    void Update()
+    public override void Update()
     {
         s_UpdateUrbAgent_p.Begin(this);
         Tick();
