@@ -96,13 +96,14 @@ public class UrbThinker : UrbBase
     {
         s_ChooseBehaviour_p.Begin(this);
         
-        if(perceptionExists || mPerception.ContactBehaviours == null)
+        if(!perceptionExists || mPerception.ContactBehaviours == null)
         {
             s_ChooseBehaviour_p.End();
             return;
         }
 
         UrbBehaviour ChosenBehaviour = null;
+        bool NoBehaviourChosen = true;
         float BestEvaluation = 0;
         for(int i = 0; i < mPerception.ContactBehaviours.Length; i++)
         {
@@ -111,12 +112,13 @@ public class UrbThinker : UrbBase
             {
                 ChosenBehaviour = mPerception.ContactBehaviours[i];
                 BestEvaluation = Evaluation;
+                NoBehaviourChosen = false;
             }
         }
 
-        if (!ChosenBehaviour.WasDestroyed)
+        if (NoBehaviourChosen || ChosenBehaviour.WasDestroyed)
         {
-            if(!mMovement && mMovement.Movement == null)
+            if(mMovement && mMovement.Movement == null)
             {
                 mMovement.ExecuteMove();
             }
