@@ -15,34 +15,14 @@ public class UrbBase : MonoBehaviour
     //rely on logger.logEnabled.
     public bool LogMe;
     
-    bool _loggingAgent;
-    public bool LogAgent
-    {
-        get
-        {
-            return _loggingAgent;
-        }
-
-        set
-        {
-            if (value != logger.logEnabled)
-            {
-                //This is absolutely horrid, I know
-                logger.ToggleDebug();
-                _loggingAgent = logger.logEnabled;
-            }
-        }
-    }
-    
     public virtual void Update()
     {
-        if (LogMe != LogAgent)
+        if (LogMe != logger.logEnabled)
         {
-            LogAgent = LogMe;
+            logger.ToggleDebug();
         }
     }
-    
-    
+
     public bool WasDestroyed { get; protected set;  } = false;
     protected bool bInitialized { get; private set; } = false;
     
@@ -80,5 +60,4 @@ public class UrbBase : MonoBehaviour
         bInitialized = true;
         enabled = true;
     }
-
 }

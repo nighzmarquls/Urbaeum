@@ -16,7 +16,15 @@ public class UrbMerge : UrbBehaviour
     float TotalMass = 0;
     int TotalTiles = 0;
     int TotalCount = 0;
-    
+
+    public virtual void Start()
+    {
+        if (MinimumTiles == 4 && !logger.logEnabled)
+        {
+           logger.ToggleDebug(); 
+        }
+    }
+
     protected void MergeIntoTarget(UrbAgent Target)
     {
         logger.Log("Attempting to merge", Target);
@@ -62,12 +70,12 @@ public class UrbMerge : UrbBehaviour
             for (int i = 0; i < MergeComponents.Length; i++)
             {
                 var mergeComp = MergeComponents[i];
-                if (mergeComp.WasDestroyed || mergeComp == this) { 
-                    logger.Log("A potential mergeComponent", this);
+                if (mergeComp.WasDestroyed) {
+                    logger.Log("A potential mergeComponent was destroyed", this);
                     continue;
                 }
 
-                if (!MergeProduct.TemplatesMatch(mergeComp.MergeProduct))
+                if ( mergeComp == this || !MergeProduct.TemplatesMatch(mergeComp.MergeProduct))
                 {
                     continue;
                 }

@@ -160,6 +160,7 @@ public class UrbAgent : UrbBase
     {
         if(Removing || WasDestroyed || input.WasDestroyed)
         {
+            logger.Log("Cannot merge component because ");
             return false;
         }
         

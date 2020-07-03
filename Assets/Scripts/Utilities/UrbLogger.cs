@@ -69,15 +69,20 @@ namespace UrbUtility
         public UrbLogger(ILogHandler logHandler) : base(logHandler)
         {
         }
-
+        
+        [Conditional("DEBUG")]
         public void ToggleDebug()
         {
             logEnabled = !logEnabled;
         }
 
+        [Conditional("DEBUG")]
         public void Log(string message, Object context)
         {
-            logHandler.LogFormat(LogType.Log, context, message);
+            if (logEnabled)
+            {
+                logHandler.LogFormat(LogType.Log, context, message);
+            }
         }
         
         public void Error(string message, Object context)
