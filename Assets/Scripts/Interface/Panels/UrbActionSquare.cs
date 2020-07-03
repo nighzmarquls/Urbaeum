@@ -14,7 +14,7 @@ public class UrbActionSquare : UrbUIPanel
         InterfaceInputs[3].UserAction = new UrbInvestigatorMenu { Icon = InterfaceInputs[3].GetIcon()};
         InterfaceInputs[4].UserAction = new UrbSaveAction();
         InterfaceInputs[5].UserAction = new UrbLoadAction();
-
+        InterfaceInputs[6].UserAction = new UrbGetAgentDetails();
         InterfaceInputs[8].UserAction = new UrbQuitAction();
     }
 }

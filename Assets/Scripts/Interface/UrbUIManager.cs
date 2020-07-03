@@ -14,6 +14,10 @@ public class UrbUIManager : MonoBehaviour
     public UrbToolBar Toolbar;
     public UrbActionSquare ActionSquare;
 
+    public UrbWindowManager WindowManager;
+
+    public UrbAgentDetailWindow AgentDisplayPrefab;
+
     public UrbAtlas Atlas;
 
     static bool MapActionInvalid
