@@ -47,6 +47,7 @@ public class UrbBody : UrbBase
         {
             return false;
         }
+
         for(int i = 0; i < CriticalBodyPartAmounts.Length; i++)
         {
             if(BodyComposition[CriticalBodyPartAmounts[i].Substance] < CriticalBodyPartAmounts[i].SubstanceAmount)

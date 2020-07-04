@@ -90,7 +90,7 @@ public class UrbMetabolism : UrbBehaviour
     {
         //SpendEnergy(mAgent.Body.BodyComposition.Mass);
         BuildReserves();
-        GrowBody();
+        GrowBody(GrowthRate);
 
         if (EnergyDebt > 0)
         {
@@ -159,7 +159,7 @@ public class UrbMetabolism : UrbBehaviour
         return Growth;
     }
 
-    protected float GrowBody()
+    public float GrowBody(float Amount = 0)
     {
         float Growth = 0.0f;
 
@@ -173,7 +173,7 @@ public class UrbMetabolism : UrbBehaviour
 
         for (int g = 0; g < BodyGrowthRecipe.Length; g++)
         {
-            if(Growth > GrowthRate)
+            if(Growth > Amount)
             {
                 break;
             }
@@ -182,11 +182,11 @@ public class UrbMetabolism : UrbBehaviour
             {
                 if (BodyEnergyReserveStorage == UrbSubstanceTag.None)
                 {
-                    Growth += mAgent.Body.BodyComposition.AddSubstance(BodyGrowthRecipe[g].Substance, GrowthRate);
+                    Growth += mAgent.Body.BodyComposition.AddSubstance(BodyGrowthRecipe[g].Substance, Amount);
                 }
                 else
                 {
-                    Growth += mAgent.Body.BodyComposition.MixRecipe(ReserveToGrowth[g], GrowthRate);
+                    Growth += mAgent.Body.BodyComposition.MixRecipe(ReserveToGrowth[g], Amount);
                     SpendEnergy(Growth);
                 }
             }

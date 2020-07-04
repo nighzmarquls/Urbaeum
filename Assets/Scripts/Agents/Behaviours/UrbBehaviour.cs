@@ -10,11 +10,14 @@ public class UrbBehaviour : UrbBase
     protected float Interval = 1.0f;
     private IEnumerator mCoroutine;
     protected UrbAgent mAgent;
-    
-    public virtual bool ShouldInterval { get { return true; } }
+
     public virtual UrbUrgeCategory UrgeSatisfied { get { return UrbUrgeCategory.None; } }
+
+    public virtual bool ShouldInterval { get { return true; } }
+
     public virtual bool ContactBehaviour { get { return true; } }
     public virtual bool SenseBehaviour { get { return false; } }
+    public virtual bool DeathBehaviour { get { return false; } }
 
     public void PauseBehaviour()
     {
@@ -48,6 +51,10 @@ public class UrbBehaviour : UrbBase
         if (ShouldInterval && isActiveAndEnabled)
         {
             StartCoroutine(mCoroutine);
+        }
+        if(DeathBehaviour)
+        {
+            mAgent.AddDeathBehaviour(this);
         }
     }
 

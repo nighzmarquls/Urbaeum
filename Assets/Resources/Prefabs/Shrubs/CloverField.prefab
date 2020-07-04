@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: -1458677331220286460}
   - component: {fileID: -5655706275276601426}
   - component: {fileID: 6921185187161276568}
+  - component: {fileID: -2160317644161739066}
   m_Layer: 0
   m_Name: CloverField
   m_TagString: Untagged
@@ -286,6 +287,29 @@ MonoBehaviour:
     SubstanceAmount: 20
   OffspringObjects:
   - {fileID: 4574942228798516750, guid: 8a1e98e476944c14695684e9eefa86a9, type: 3}
+--- !u!114 &-2160317644161739066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4574942228798516750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374d2cd86a4aa5049851bbd69f35cb94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LogMe: 0
+  Interval: 1
+  PossibleProducts:
+  - ProductRequiredMass: 410
+    RequiredSpace: 0
+    ProductAgent: {fileID: 4574942228798516744, guid: 09781a599fc8cad4295eb5df370e8be2,
+      type: 3}
+  - ProductRequiredMass: 40
+    RequiredSpace: 0
+    ProductAgent: {fileID: 4574942228798516744, guid: 8a1e98e476944c14695684e9eefa86a9,
+      type: 3}
 --- !u!1001 &4782546513096451304
 PrefabInstance:
   m_ObjectHideFlags: 0

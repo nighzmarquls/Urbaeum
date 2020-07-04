@@ -56,7 +56,20 @@ public class UrbAgent : UrbBase
         }
     }
 
-    public UrbTile CurrentTile;
+    protected UrbTile LastTile;
+    public UrbTile[] OccupiedTiles { get; protected set; }
+
+    public UrbTile CurrentTile { get { return LastTile; }
+        set {
+            if (value == LastTile)
+            {
+                return;
+            }
+            LastTile = value;
+            OccupiedTiles = Tileprint.GetAllPrintTiles(this);
+        }
+    }
+
     public bool Shuffle = true;
     
     public float SizeOffset = 1.0f;
@@ -131,6 +144,7 @@ public class UrbAgent : UrbBase
             return tileprint;
         }
     }
+
 
     public UrbBody Body { get; private set; }
     public UrbMetabolism Metabolism { get; private set; }
@@ -221,6 +235,38 @@ public class UrbAgent : UrbBase
     }
 
     public UrbAction[] AvailableActions { get; private set; }
+
+    public virtual void AddDeathBehaviour(UrbBehaviour Behaviour)
+    {
+        if (DeathBehaviours == null)
+        {
+            DeathBehaviours = new[] { Behaviour };
+            return;
+        }
+
+        UrbBehaviour[] newBehaviours = new UrbBehaviour[DeathBehaviours.Length + 1];
+        DeathBehaviours.CopyTo(newBehaviours, 1);
+        newBehaviours[0] = Behaviour;
+
+    }
+
+    public virtual void RemoveDeathBehaviour(UrbBehaviour Behaviour)
+    {
+        if (DeathBehaviours == null || DeathBehaviours.Length == 0)
+        {
+            return;
+        }
+
+        List<UrbBehaviour> TempList = new List<UrbBehaviour>(DeathBehaviours);
+
+        if (TempList.Contains(Behaviour))
+        {
+            TempList.Remove(Behaviour);
+            DeathBehaviours = TempList.ToArray();
+        }
+    }
+
+    public UrbBehaviour[] DeathBehaviours { get; private set; }
 
     static ProfilerMarker s_PickAction_p = new ProfilerMarker("UrbAgent.PickAction");
     public UrbAction PickAction(UrbTestCategory Test, float Result = 0, UrbTestCategory Exclude = UrbTestCategory.None)
@@ -374,6 +420,18 @@ public class UrbAgent : UrbBase
     bool IsMindNull;
     Camera Camera;
 
+    public void Die()
+    {
+        if (DeathBehaviours != null)
+        {
+            for (int d = 0; d < DeathBehaviours.Length; d++)
+            {
+                DeathBehaviours[d].ExecuteTileBehaviour();
+            }
+        }
+        Remove();
+    }
+
     static ProfilerMarker s_TickToMind_p = new ProfilerMarker("UrbAgent.TickToMind");
     static ProfilerMarker s_TickToBody_p = new ProfilerMarker("UrbAgent.TickToBody");
     static ProfilerMarker s_TickToDisplay_p = new ProfilerMarker("UrbAgent.TickDisplay");
@@ -406,7 +464,7 @@ public class UrbAgent : UrbBase
         {
             if(Body.BodyCritical())
             {
-                Remove();
+                Die();
             }
             if (BodyDisplay != null)
             {
