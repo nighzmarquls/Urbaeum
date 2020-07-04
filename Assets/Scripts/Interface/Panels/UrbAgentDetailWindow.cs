@@ -15,6 +15,11 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
     {
         if(AgentAssigned)
         {
+            if(mAgent.WasDestroyed)
+            {
+                DisplayText.text = "Dead";
+                TargetAgent = null;
+            }
             if(DisplayText != null)
             {
                 DisplayText.text = TextSummary();
@@ -25,7 +30,9 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
 
     string TextSummary()
     {
- 
+        if (mAgent.WasDestroyed)
+            return "Dead";
+
         string LocalName = mAgent.gameObject.name.Split('(')[0];
         string Age = Mathf.Round(Time.time - mAgent.BirthTime).ToString();
         UrbMetabolism Metabolism = mAgent.Metabolism;

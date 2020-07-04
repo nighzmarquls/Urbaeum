@@ -15,6 +15,7 @@ public class UrbActionSquare : UrbUIPanel
         InterfaceInputs[4].UserAction = new UrbSaveAction();
         InterfaceInputs[5].UserAction = new UrbLoadAction();
         InterfaceInputs[6].UserAction = new UrbGetAgentDetails();
+        InterfaceInputs[7].UserAction = new UrbKillAgent();
         InterfaceInputs[8].UserAction = new UrbQuitAction();
     }
 }

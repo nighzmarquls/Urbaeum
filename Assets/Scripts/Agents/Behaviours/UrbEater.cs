@@ -113,6 +113,7 @@ public class UrbEater : UrbBehaviour
     static ProfilerMarker s_ExecuteTileBehaviour = new ProfilerMarker("UrbEater.ExecuteTileBehaviour");
     public override void ExecuteTileBehaviour()
     {
+        
         using (s_ExecuteTileBehaviour.Auto())
         {
             float BiteSize = BiteAttack.Test(mAgent);

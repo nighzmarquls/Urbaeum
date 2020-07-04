@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(UrbBody))]
 public class UrbMetabolism : UrbBehaviour
 {
-    public const float EnergyConversionRatio = 1/100 ;
+    public const float EnergyConversionRatio = 0.00001f ;
     public UrbSubstance[] BodyGrowthRecipe;
     public UrbSubstanceTag BodyEnergyReserveStorage;
     public float GrowthRate = 10.0f;
@@ -88,32 +88,31 @@ public class UrbMetabolism : UrbBehaviour
 
     public override IEnumerator FunctionalCoroutine()
     {
-        SpendEnergy(mAgent.Body.BodyComposition.Mass);
+        //SpendEnergy(mAgent.Body.BodyComposition.Mass);
         BuildReserves();
+        GrowBody();
 
         if (EnergyDebt > 0)
         {
             Starving = false;
             float SpentCost = mAgent.Body.BodyComposition.RemoveSubstance(BodyEnergyReserveStorage, EnergyDebt);
 
-            if(SpentCost < EnergyDebt)
+            if (SpentCost < EnergyDebt)
             {
                 Starving = true;
                 float RemainingDebt = EnergyDebt - SpentCost;
-                for(int b = 0; b < BodyGrowthRecipe.Length; b++)
+                for (int b = 0; b < BodyGrowthRecipe.Length; b++)
                 {
                     RemainingDebt -= mAgent.Body.BodyComposition.RemoveSubstance(BodyGrowthRecipe[b].Substance, RemainingDebt);
-                    if(RemainingDebt <= 0)
+                    if (RemainingDebt <= 0)
                     {
                         EnergyDebt = 0;
                         break;
                     }
                 }
                 EnergyDebt = RemainingDebt;
-            }  
+            }
         }
-
-        GrowBody();
 
         yield return null;
     }
@@ -151,7 +150,6 @@ public class UrbMetabolism : UrbBehaviour
                     break;
                 }
             }
-            SpendEnergy(Growth);
         }
         else
         {

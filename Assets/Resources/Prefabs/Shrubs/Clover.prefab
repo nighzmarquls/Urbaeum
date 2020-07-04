@@ -107,10 +107,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b2e0f7c83d69948a96dc66fccbac5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BirthTime: 17.271307
-  CurrentMap: {fileID: 0}
+  LogMe: 0
+  BirthTime: 7.1027036
+  IsCurrentMapNull: 1
   Shuffle: 1
-  Interacting: 0
   SizeOffset: 1
   TileprintString: 1
 --- !u!114 &-601077773047966795
@@ -125,6 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d973e6a44621c2a4ba41b85a65aa5087, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Modifications:
   - DisplayDrivingSubstance: 13
     SubstanceSizeRatio: 1000
@@ -162,6 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b2f4988372b7c64a95866759bfbf429, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 0.5
   BodyGrowthRecipe:
   - Substance: 3
@@ -184,6 +186,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d2d170163064e42bda7b740df8716e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   BodyRecipe:
   - Substance: 2
     SubstanceAmount: 10
@@ -204,6 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abaab3ca621fbad4b92f163726cb68c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 1
   SmellTag: 01000000
   SmellStrength: 10
@@ -219,6 +223,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fb352cbb9e235d46a8e3c997f5983a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 1
   MateRequirement: 0
   MateCrowding: 8
@@ -248,9 +253,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e57e4b4dcd9f0a46b73d7ff26cab5e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 1
   MinimumMergeCount: 2
-  MinimumMass: 420
+  MinimumMass: 480
   MinimumTiles: 1
   MaximumTiles: 4
   MergeProduct: {fileID: 4574942228798516744, guid: 09781a599fc8cad4295eb5df370e8be2,
@@ -267,6 +273,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e57e4b4dcd9f0a46b73d7ff26cab5e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 10
   MinimumMergeCount: 2
   MinimumMass: 3780
@@ -286,6 +293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e57e4b4dcd9f0a46b73d7ff26cab5e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 10
   MinimumMergeCount: 2
   MinimumMass: 5250
@@ -305,6 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 595bc0b273ea0d64c9696083da17f405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 2
   PerceptionPrintString: 
   ContactPrintString: 
@@ -320,6 +329,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89760c5a60a1c48469e26698ab374520, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
 --- !u!1001 &7878978403681955433
 PrefabInstance:
   m_ObjectHideFlags: 0
