@@ -71,10 +71,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
         }
         else
         {
-            if (Debug.isDebugBuild || Debug.developerConsoleVisible)
-            {
-                Debug.Log("Destroying tileCurrent after agent spawn returned false");
-            }
+            Debug.Log("Destroying tileCurrent after agent spawn returned false");
 
             Destroy(Tile.CurrentContent.gameObject);
         }
@@ -103,7 +100,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
         UrbTile tile = targetMap.GetTile(xPoint, yPoint);
         if (!clickDown)
         {
-            setBlock = tile.Blocked ? false : true;
+            setBlock = !tile.Blocked;
             if (currentAgent == null)
             {
                 tile.Blocked = setBlock;
@@ -176,14 +173,8 @@ public class UrbCritterDebugDisplay : MonoBehaviour
             return;
         }
 
-        if(UrbSystemIO.Instance.Loading)
-        {
-            SetPause(true);
-        }
-        else
-        {
-            SetPause(paused);
-        }
+        SetPause(paused || UrbSystemIO.Instance.Loading);
+        
         Ray mouseray = Camera.ScreenPointToRay(Input.mousePosition);
         Vector3 Location = mouseray.origin + (mouseray.direction * (Vector3.Distance(mouseray.origin, transform.position)));
         int xPoint, yPoint;
@@ -233,59 +224,57 @@ public class UrbCritterDebugDisplay : MonoBehaviour
                 }
             }
         }
-
-        if (true)
+        
+        for (int i = 0; i < targetMap.Xsize; i++)
         {
-            for (int i = 0; i < targetMap.Xsize; i++)
+            for (int ii = 0; ii < targetMap.Ysize; ii++)
             {
-                for (int ii = 0; ii < targetMap.Ysize; ii++)
+                SpriteRenderer spriteRender = debugTiles[i][ii].GetComponent<SpriteRenderer>();
+                if (!spriteRender)
                 {
-                    SpriteRenderer spriteRender = debugTiles[i][ii].GetComponent<SpriteRenderer>();
-                    if (spriteRender)
-                    {
-                        tile = targetMap.GetTile(i, ii);
-
-                        if(tile == linkA)
-                        {
-                            spriteRender.color = Color.yellow;
-                        }
-                        else if (tile.Blocked)
-                        {
-                            spriteRender.color = Color.black;
-                        }
-                        else
-                        {
-
-                            Color tileColor = Color.black;
-
-                           if (tile.TerrainFilter[0][2][UrbScentTag.Plant] > 0)
-                            {
-                                tileColor = (Color.magenta * (tile.TerrainFilter[0][2][UrbScentTag.Plant]));
-                            }
-                            else if (tile.TerrainFilter[0][1][UrbScentTag.Plant] > 0)
-                            {
-                                tileColor = (Color.blue * (tile.TerrainFilter[0][1][UrbScentTag.Plant]));
-                            }
-                            else if (tile.TerrainFilter[0][0][UrbScentTag.Plant] > 0)
-                            {
-                                tileColor = (Color.cyan * (tile.TerrainFilter[0][0][UrbScentTag.Plant]));
-                            }
-
-                            if(tile.GetLinked().Length > 0)
-                            {
-                                tileColor += Color.red * 0.25f;
-                            }
-
-
-                            tileColor.a = 0.0f;
-
-                            spriteRender.color = Color.white - tileColor;
-                        }
-                    }
+                    continue;
                 }
+
+                tile = targetMap.GetTile(i, ii);
+
+                if (tile == linkA)
+                {
+                    spriteRender.color = Color.yellow;
+                    continue;
+                }
+
+                if (tile.Blocked)
+                {
+                    spriteRender.color = Color.black;
+                    continue;
+                }
+
+                Color tileColor = Color.black;
+
+                if (tile.TerrainFilter[0][2][UrbScentTag.Plant] > 0)
+                {
+                    tileColor = (Color.magenta * (tile.TerrainFilter[0][2][UrbScentTag.Plant]));
+                }
+                else if (tile.TerrainFilter[0][1][UrbScentTag.Plant] > 0)
+                {
+                    tileColor = (Color.blue * (tile.TerrainFilter[0][1][UrbScentTag.Plant]));
+                }
+                else if (tile.TerrainFilter[0][0][UrbScentTag.Plant] > 0)
+                {
+                    tileColor = (Color.cyan * (tile.TerrainFilter[0][0][UrbScentTag.Plant]));
+                }
+
+                if (tile.GetLinked().Length > 0)
+                {
+                    tileColor += Color.red * 0.25f;
+                }
+                
+                tileColor.a = 0.0f;
+
+                spriteRender.color = Color.white - tileColor;
             }
-            // */
         }
+        // */
 
     }
 }

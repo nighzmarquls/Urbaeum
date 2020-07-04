@@ -125,6 +125,7 @@ public class UrbMerge : UrbBehaviour
         {
             logger.Log("Not met conditions for merging on tile", this);
             ClearBehaviour();
+            return;
         }
 
         logger.Log("Met conditions for merging on tile, attempting to merge", this);
