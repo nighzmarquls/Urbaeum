@@ -230,16 +230,23 @@ public class UrbTile
     public bool LoadTileFromData(UrbTileData input)
     {
         LinksDirty = true;
-        Links = new UrbTile[input.Links.Length];
- 
-        for(int i = 0; i < Links.Length; i++)
+        if (input.Links.Length > 0)
         {
-            UrbMap LinkedMap = UrbSystemIO.GetMapFromID(input.Links[i].MapID);
-            if (LinkedMap != null)
+            Links = new UrbTile[input.Links.Length];
+
+            for (int i = 0; i < Links.Length; i++)
             {
-                UrbTile LinkedTile = LinkedMap.GetTile(input.Links[i].X, input.Links[i].Y);
-                Links[i] = LinkedTile;
+                UrbMap LinkedMap = UrbSystemIO.GetMapFromID(input.Links[i].MapID);
+                if (LinkedMap != null)
+                {
+                    UrbTile LinkedTile = LinkedMap.GetTile(input.Links[i].X, input.Links[i].Y);
+                    Links[i] = LinkedTile;
+                }
             }
+        }
+        else
+        {
+            Links = new UrbTile[0];
         }
 
         ClearTile();
@@ -270,13 +277,9 @@ public class UrbTile
 
         if(Links.Length > 0)
         {
-            output.Links = new UrbTileLinkData[Links.Length];
-
-            //I'm a lazy jerk. - Zoru
-            int curr = 0;
+            List<UrbTileLinkData> WorkingList = new List<UrbTileLinkData>();
             foreach (var link in Links)
             {
-                ++curr;
                 if (link == null)
                 {
                     continue;
@@ -286,8 +289,9 @@ public class UrbTile
                 TempLink.MapID = UrbSystemIO.GetMapID(link.OwningMap);
                 TempLink.X = link.XAddress;
                 TempLink.Y = link.YAddress;
-                output.Links[curr] = TempLink;
+                WorkingList.Add(TempLink);
             }
+            output.Links = WorkingList.ToArray();
         }
         else
         {

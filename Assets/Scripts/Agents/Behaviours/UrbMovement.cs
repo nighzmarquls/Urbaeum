@@ -108,6 +108,8 @@ public class UrbMovement : UrbBehaviour
             s_MoveAction_p.Begin(Instigator);
             float Result = Test(Instigator, Modifier);
 
+            Result = Instigator.Body.UtilizeBody(Result);
+
             if (Result > 0)
             {
                 s_MoveAction_p_e.Begin();

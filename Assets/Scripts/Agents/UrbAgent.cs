@@ -456,6 +456,10 @@ public class UrbAgent : UrbBase
             {
                 Die();
             }
+
+            //TODO: Move this into some other behaviour/into a different cadence.
+            Body.RecoverUtilization();
+
             if (BodyDisplay != null)
             {
                 BodyDisplay.UpdateDisplay(Body.BodyComposition);

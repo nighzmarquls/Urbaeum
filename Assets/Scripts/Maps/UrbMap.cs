@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class UrbMap : MonoBehaviour
 {
+    public bool DebugDisplay = false;
     public Color Color = Color.white;
     public float TileSize = 1.0f;
     public int Xsize = 0;
@@ -42,8 +43,9 @@ public class UrbMap : MonoBehaviour
         {
             for (int ii = 0; ii < Ysize; ii++)
             {
-                MapTiles[i][ii].ClearTile();
+                MapTiles[i][ii] = null; 
             }
+            MapTiles[i] = null;
         }
     }
 
@@ -173,7 +175,7 @@ public class UrbMap : MonoBehaviour
     //Will return Tile if address is valid. otherwise null
     public UrbTile GetTile(int Xaddress, int Yaddress)
     {
-        if(Xaddress > -1 && Xaddress < Xsize && Yaddress > -1 && Yaddress < Ysize)
+        if(MapTiles != null && Xaddress > -1 && Xaddress < Xsize && Yaddress > -1 && Yaddress < Ysize)
         {
             return MapTiles[Xaddress][Yaddress];
         }
