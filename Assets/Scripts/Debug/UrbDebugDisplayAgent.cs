@@ -32,9 +32,7 @@ public class UrbDebugDisplayAgent : MonoBehaviour
 
             if (NewAgent != null)
             {
-                
-                    DisplayAgent(NewAgent);
-                
+                DisplayAgent(NewAgent);
             }
             else if(currentAgent != null)
             {
