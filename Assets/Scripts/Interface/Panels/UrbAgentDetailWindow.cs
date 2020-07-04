@@ -144,20 +144,18 @@ public class UrbGetAgentDetails : UrbUserAction
         {
             Debug.Log("UrbGetAgentDetails failed because physics check is null");
             base.MouseClick(currentCursorTile);
+            return;
         }
-        
-        if (Result!= null)
+
+        UrbAgent SelectedAgent = Result.GetComponentInParent<UrbAgent>();
+        if(SelectedAgent != null)
         {
-            UrbAgent SelectedAgent = Result.GetComponentInParent<UrbAgent>();
-            if(SelectedAgent != null)
-            {
-                UrbAgentDetailWindow Window = Object.Instantiate(UrbUIManager.Instance.AgentDisplayPrefab, UrbUIManager.Instance.WindowManager.transform);
-                Window.TargetAgent = SelectedAgent;
-            }
-            else
-            {
-                Debug.Log("UrbGetAgentDetails failed because GetComponentInParent returned null");
-            }
+            UrbAgentDetailWindow Window = Object.Instantiate(UrbUIManager.Instance.AgentDisplayPrefab, UrbUIManager.Instance.WindowManager.transform);
+            Window.TargetAgent = SelectedAgent;
+        }
+        else
+        {
+            Debug.Log("UrbGetAgentDetails failed because GetComponentInParent returned null");
         }
 
         base.MouseClick(currentCursorTile);
