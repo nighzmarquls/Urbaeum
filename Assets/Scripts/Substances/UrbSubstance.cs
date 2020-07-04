@@ -18,6 +18,8 @@ public enum UrbSubstanceTag : int
     Nerves,
     Teeth,
     Claw,
+    //Testing our ability to manage different scents
+    TestScent = 250, 
     All
 }
 

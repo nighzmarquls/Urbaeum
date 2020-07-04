@@ -64,7 +64,8 @@ public class UrbMap : MonoBehaviour
             {
                 MapTiles[i][ii] = new UrbTile(this, i, ii);
                 MapTiles[i][ii].TerrainTypes = new UrbPathTerrain[] { DefaultTerrain };
-                CoroutineList.Add(MapTiles[i][ii].ScentCoroutine());
+                //Instead of the Coroutines, we're going to be using Unity Jobs.
+                // CoroutineList.Add(MapTiles[i][ii].ScentCoroutine());
                 CoroutineList.Add(MapTiles[i][ii].Environment.EnvironmentCoroutine());
             }
         }
