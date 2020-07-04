@@ -150,7 +150,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 917231937232593374}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -241,6 +241,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e806071a88ea0ef4581d36fb41fdea30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  SortingOrder: 0
   maxFaceRatio: 1.5
   minFaceRatio: 0.25
   featureOffset: 0.001
@@ -266,6 +268,9 @@ MonoBehaviour:
   SecondaryFaceFeatureSprites: []
   SecondaryForeFeatureSprites: []
   SecondaryBackFeatureSprites: []
+  DetailFaceFeatureSprites: []
+  DetailForeFeatureSprites: []
+  DetailBackFeatureSprites: []
   DisplayFace: {fileID: 3378781205364772116}
   FaceFeaturePoint: {fileID: 917231936721376684}
   ForeFeaturePoint: {fileID: 7106373403471298400}
@@ -274,6 +279,7 @@ MonoBehaviour:
   Face: {fileID: 6009775441014029705}
   BodyPivot: {fileID: 917231937232593375}
   FacePivot: {fileID: 917231936056925677}
+  EffectDisplay: {fileID: 0}
 --- !u!1 &992538525665502827
 GameObject:
   m_ObjectHideFlags: 0

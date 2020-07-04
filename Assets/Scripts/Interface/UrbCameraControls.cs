@@ -8,8 +8,13 @@ public class UrbCameraControls : MonoBehaviour
     public float CameraZoomSpeed = 1.0f;
     public float MinZoomSize = 1.25f;
 
+    public float ScreenPushPixelBuffer = 60;
+
     public Vector3 CameraStartLocation;
     Camera mCamera;
+
+    float FarViewportPadding = 0.9f;
+    float NearViewportPadding = 0.1f;
 
     public Vector3 CursorWorldPosition {
         get {
@@ -29,6 +34,10 @@ public class UrbCameraControls : MonoBehaviour
         mCamera.orthographic = true;
         StartingSize = mCamera.orthographicSize;
         CameraStartLocation = mCamera.transform.position;
+
+        float bufferSize = ScreenPushPixelBuffer / Screen.height;
+        FarViewportPadding = 1 - bufferSize;
+        NearViewportPadding = bufferSize;
     }
 
     void SynchronizeMousePosition()
@@ -48,8 +57,8 @@ public class UrbCameraControls : MonoBehaviour
 
         if (UrbUIManager.MouseOver)
         {
-            PushInput.x = ViewportPosition.x > 0.9f ? 1 : ViewportPosition.x < 0.1f ? -1 : 0;
-            PushInput.y = ViewportPosition.y > 0.9f ? 1 : ViewportPosition.y < 0.1f ? -1 : 0;
+            PushInput.x = ViewportPosition.x > FarViewportPadding ? 1 : ViewportPosition.x < NearViewportPadding ? -1 : 0;
+            PushInput.y = ViewportPosition.y > FarViewportPadding ? 1 : ViewportPosition.y < NearViewportPadding ? -1 : 0;
         }
 
         return PushInput ;

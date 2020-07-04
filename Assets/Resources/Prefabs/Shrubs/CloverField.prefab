@@ -105,10 +105,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b2e0f7c83d69948a96dc66fccbac5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   BirthTime: 0
-  CurrentMap: {fileID: 0}
+  IsCurrentMapNull: 1
   Shuffle: 0
-  Interacting: 0
   SizeOffset: 1
   TileprintString: '111
 
@@ -127,6 +127,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d973e6a44621c2a4ba41b85a65aa5087, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Modifications:
   - DisplayDrivingSubstance: 3
     SubstanceSizeRatio: 0
@@ -140,6 +141,12 @@ MonoBehaviour:
     ModificationType: 4
     ColorApplied: {r: 0, g: 0, b: 0, a: 0}
     SubstanceColorRatio: 0
+  - DisplayDrivingSubstance: 4
+    SubstanceSizeRatio: 0
+    ColorsEffected: 12
+    ModificationType: 1
+    ColorApplied: {r: 0.85882354, g: 0.4, b: 0.36078432, a: 1}
+    SubstanceColorRatio: 20
 --- !u!114 &2331400768363331401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,6 +159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b2f4988372b7c64a95866759bfbf429, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 1
   BodyGrowthRecipe:
   - Substance: 3
@@ -176,6 +184,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d2d170163064e42bda7b740df8716e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   BodyRecipe: []
   SkinRecipe: 
   CriticalBodyPartAmounts:
@@ -194,6 +203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abaab3ca621fbad4b92f163726cb68c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 10
   SmellTag: 01000000
   SmellStrength: 100
@@ -209,6 +219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e57e4b4dcd9f0a46b73d7ff26cab5e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 10
   MinimumMergeCount: 2
   MinimumMass: 5250
@@ -228,6 +239,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 595bc0b273ea0d64c9696083da17f405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 8
   PerceptionPrintString: 
   ContactPrintString: 
@@ -243,6 +255,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89760c5a60a1c48469e26698ab374520, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
 --- !u!114 &6921185187161276568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,6 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fb352cbb9e235d46a8e3c997f5983a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 9
   MateRequirement: 0
   MateCrowding: 8
@@ -387,7 +401,7 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: PrimaryFaceFeatureSprites.Array.size
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
@@ -462,32 +476,32 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.SecondaryColor.Line.r
-      value: 0.54785466
+      value: 0.8117647
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.SecondaryColor.Line.g
-      value: 0.7372549
+      value: 0.4509804
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.SecondaryColor.Line.b
-      value: 0.19215687
+      value: 0.22745098
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.SecondaryColor.Fill.r
-      value: 0.5655363
+      value: 0.8117647
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.SecondaryColor.Fill.g
-      value: 0.7372549
+      value: 0.4509804
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: mColors.SecondaryColor.Fill.b
-      value: 0.18431373
+      value: 0.22745098
       objectReference: {fileID: 0}
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
@@ -502,7 +516,47 @@ PrefabInstance:
     - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
         type: 3}
       propertyPath: SecondaryFaceFeatureSprites.Array.data[0]
-      value: Shrub/Features_Clover_Leaf
+      value: Shrub/Features_Clover_Flower
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
+        type: 3}
+      propertyPath: mColors.FaceColor.r
+      value: 0.43529412
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
+        type: 3}
+      propertyPath: mColors.FaceColor.g
+      value: 0.58431375
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
+        type: 3}
+      propertyPath: mColors.FaceColor.b
+      value: 0.2784314
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
+        type: 3}
+      propertyPath: mColors.FaceColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
+        type: 3}
+      propertyPath: mColors.HighlightColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
+        type: 3}
+      propertyPath: mColors.HighlightColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
+        type: 3}
+      propertyPath: mColors.HighlightColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1350997035409419008, guid: e4435d20873bd45429be3753ecabc76c,
+        type: 3}
+      propertyPath: mColors.HighlightColor.a
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e4435d20873bd45429be3753ecabc76c, type: 3}
