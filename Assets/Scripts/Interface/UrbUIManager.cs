@@ -22,7 +22,7 @@ public class UrbUIManager : MonoBehaviour
 
     static bool MapActionInvalid
     {
-        get { return Instance == null || Instance.Atlas == null || Instance.CurrentAction == null || Instance.CurrentCursorTile == null || Instance.IsPaused; }
+        get { return Instance == null || Instance.Atlas == null || Instance.CurrentAction == null || Instance.CurrentCursorTile == null; }//|| Instance.IsPaused; }
     }
 
     public static void SetCurrentAction(UrbUserAction Action)
