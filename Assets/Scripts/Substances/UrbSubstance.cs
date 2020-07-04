@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public enum UrbSubstanceTag
+public enum UrbSubstanceTag : int
 {
     None = 0,
     Seed,

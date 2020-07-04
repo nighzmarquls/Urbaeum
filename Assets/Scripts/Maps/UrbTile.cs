@@ -73,6 +73,7 @@ public class UrbTile
     static ProfilerMarker s_ReorderContents_p = new ProfilerMarker("UrbTile.ReorderContents.ToTileWithBiggestMass");
     static ProfilerMarker s_ReorderContents_p2_p = new ProfilerMarker("UrbTile.ReorderContents.AfterTileWithBiggestMass");
 
+    public int LinkCount { get; protected set; }
     bool Ordering = false;
     public void ReorderContents()
     {
@@ -175,7 +176,9 @@ public class UrbTile
             TerrainFilter[i] = new UrbScent[MaxSize];
             for (int ii = 0; ii < MaxSize; ii++)
             {
-                TerrainFilter[i][ii] = new UrbScent();
+                TerrainFilter[i][ii] = new UrbScent{
+                    Tags = new DirtyableTag[UrbScent.MaxTag],
+                };
             }
         }
         
@@ -188,6 +191,7 @@ public class UrbTile
         XAddress = CreatedX;
         YAddress = CreatedY;
         Links = new UrbTile[] { null, null, null };
+        LinkCount = 0;
     }
 
     public UrbTile(UrbMap CreatingMap, int CreatedX, int CreatedY, UrbTile[] LinkedTiles)
@@ -196,6 +200,17 @@ public class UrbTile
         XAddress = CreatedX;
         YAddress = CreatedY;
         Links = LinkedTiles;
+        LinkCount = 0;
+        
+        foreach (var tile in LinkedTiles)
+        {
+            if (tile != null)
+            {
+                ++LinkCount;
+            }
+
+        }
+        
     }
 
     public UrbTile(UrbMap CreatingMap, Vector2 MapLocation)
@@ -572,8 +587,11 @@ public class UrbTile
         }
     }
 
+    static ProfilerMarker s_TileScentCoroutine_p = new ProfilerMarker("UrbTile.ScentCoroutineTerrainLoop");
     public IEnumerator ScentCoroutine()
     {
+        Debug.Log("Initializing Scent coroutine in EnvDebugDisplay");
+
         while(true)
         {
             yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
@@ -581,6 +599,8 @@ public class UrbTile
             
             if (!UrbSystemIO.HasInstance || UrbSystemIO.Instance.Loading)
             {
+                //UrbSystemIO can take a second or two to load, so may as well make sure we give it the chance. 
+                //yield return new WaitForSeconds(0.2f);
                 continue;
             }
 
@@ -589,33 +609,32 @@ public class UrbTile
                 continue;
             }
             
+            s_TileScentCoroutine_p.Begin();
             for (int t = 0; t < TerrainTypes.Length; t++)
             {
                 for (int s = 0; s < SizeLimit; s++)
                 {
                     var terrainType = (int)TerrainTypes[t];
                     var terrainFilter = TerrainFilter[terrainType][s];
-                    if(terrainFilter == null)
+                    if (!terrainFilter.dirty)
+                    {
+                        continue;
+                    }
+                    
+                    terrainFilter.dirty = false;
+                    yield return terrainFilter.DecayScent();
+                    if (ScentDirty)
                     {
                         continue;
                     }
 
-                    if (terrainFilter.dirty)
-                    {
-                        terrainFilter.dirty = false;
-                        yield return terrainFilter.DecayScent();
-                        if (ScentDirty)
-                        {
-                            continue;
-                        }
-
-                        //Want to use the terrainFilter var above, but 
-                        //I need to make sure that's not going to change what happens
-                        //here for this ScentDirty.
-                        ScentDirty = TerrainFilter[(int)TerrainTypes[t]][s].dirty || ScentDirty;
-                    }
+                    //Want to use the terrainFilter var above, but 
+                    //I need to make sure that's not going to change what happens
+                    //here for this ScentDirty.
+                    ScentDirty = TerrainFilter[(int)TerrainTypes[t]][s].dirty || ScentDirty;
                 }
             }
+            s_TileScentCoroutine_p.End();
 
             if (!ScentDirty)
             {

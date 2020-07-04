@@ -36,6 +36,8 @@ public class UrbMap : MonoBehaviour
 
     void ClearMap()
     {
+        Debug.Log("running ClearMap");
+
         for (int i = 0; i < Xsize; i++)
         {
             for (int ii = 0; ii < Ysize; ii++)
@@ -47,6 +49,7 @@ public class UrbMap : MonoBehaviour
 
     void GenerateMap()
     {
+        Debug.Log("Running GenerateMap");
         Vector3 positionOffset = new Vector3(Xsize * TileSize * 0.5f, Ysize * TileSize * 0.5f);
         transform.position -= positionOffset;
         MapTiles = new UrbTile[Xsize][];

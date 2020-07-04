@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 public class UrbComposition
@@ -68,23 +69,17 @@ public class UrbComposition
             {
                 return UsedCapacity;
             }
-            else if (Substances.ContainsKey(Tag))
-            {
-                return Substances[Tag];
-            }
-            else
-            {
-                return 0.0f;
-            }
+
+            return Substances[(int)Tag];
         }
     }
 
-    protected Dictionary<UrbSubstanceTag, float> Substances;
+    protected float[] Substances;
     protected List<UrbComposition> Compositions;
 
     public virtual void Initialize()
     {
-        Substances = new Dictionary<UrbSubstanceTag, float>();
+        Substances = new float[(int)UrbSubstanceTag.All+1];
         Compositions = new List<UrbComposition>();
         Membrane = new UrbMembrane(this);
     }
@@ -100,14 +95,8 @@ public class UrbComposition
 
         for (int i = 0; i < CompositionRecipe.Length; i++)
         {
-            if (Substances.ContainsKey(CompositionRecipe[i].Substance))
-            {
-                Substances[CompositionRecipe[i].Substance] += CompositionRecipe[i].SubstanceAmount;
-            }
-            else
-            {
-                Substances.Add(CompositionRecipe[i].Substance, CompositionRecipe[i].SubstanceAmount);
-            }
+            Substances[(int)CompositionRecipe[i].Substance] += CompositionRecipe[i].SubstanceAmount;
+            
             UsedCapacity += CompositionRecipe[i].SubstanceAmount;
         }
     }
@@ -138,16 +127,15 @@ public class UrbComposition
 
     public UrbSubstance[] GetCompositionIngredients()
     {
-        UrbSubstance[] Ingredients = new UrbSubstance[Substances.Keys.Count];
+        UrbSubstance[] Ingredients = new UrbSubstance[Substances.Length];
 
-        int i = 0;
-        foreach(UrbSubstanceTag tag in Substances.Keys)
+        for(UrbSubstanceTag i = 0; i <= UrbSubstanceTag.All; i++)
         {
             UrbSubstance Ingredient = new UrbSubstance();
-            Ingredient.Substance = tag;
-            Ingredient.SubstanceAmount = Substances[tag];
+            Ingredient.Substance = i;
+            Ingredient.SubstanceAmount = Substances[(int)i];
 
-            Ingredients[i] = Ingredient;
+            Ingredients[(int)i] = Ingredient;
             i++;
         }
         return Ingredients;
@@ -199,19 +187,21 @@ public class UrbComposition
             }
             else*/
             {
-                foreach (UrbSubstanceTag tag in Substances.Keys)
+                for (UrbSubstanceTag tag = UrbSubstanceTag.None; tag <= UrbSubstanceTag.All; tag++)
                 {
-                    if (this[tag] > 0.0)
+                    if (!(this[tag] > 0.0))
                     {
-                        UrbScentTag[] Scents = UrbSubstances.Scent(tag);
-                        for (int s = 0; s < Scents.Length; s++)
+                        continue;
+                    }
+                    
+                    UrbScentTag[] Scents = UrbSubstances.Scent(tag);
+                    for (int s = 0; s < Scents.Length; s++)
+                    {
+                        if (ScentList.Contains(Scents[s]))
                         {
-                            if (ScentList.Contains(Scents[s]))
-                            {
-                                continue;
-                            }
-                            ScentList.Add(Scents[s]);
+                            continue;
                         }
+                        ScentList.Add(Scents[s]);
                     }
                 }
             }
@@ -252,13 +242,13 @@ public class UrbComposition
             TransferAmount -= CapacityAfter - MaxCapacity;
         }
 
-        if(Substances.ContainsKey(Tag))
+        if(Substances[(int)Tag] > 0.0f)
         {
-            Substances[Tag] += TransferAmount;
+            Substances[(int)Tag] += TransferAmount;
         }
         else
         {
-            Substances.Add(Tag, TransferAmount);
+            Substances[(int)Tag] = TransferAmount;
             Dirty = true;
         }
         
@@ -302,25 +292,21 @@ public class UrbComposition
             TransferAmount += CapacityAfter;
         }
         //Debug.Log("After Capacity Check Transfer " + TransferAmount);
-
-        if (Substances.ContainsKey(Tag))
+        if (Substances[(int) Tag] <= 0.0f)
         {
-            if (Substances[Tag] >= TransferAmount)
-            {
-                Substances[Tag] -= TransferAmount;
-            }
-            else
-            {
-                TransferAmount += Substances[Tag] - TransferAmount;
-                Substances[Tag] = 0;
-                Dirty = true;
-            } 
-           // Debug.Log("After Quantity Check " + TransferAmount);
+            return 0.0f;
+        }
+        
+        if (Substances[(int)Tag] >= TransferAmount)
+        {
+            Substances[(int)Tag] -= TransferAmount;
         }
         else
         {
-            TransferAmount = 0;
-        }
+            TransferAmount += Substances[(int)Tag] - TransferAmount;
+            Substances[(int)Tag] = 0;
+            Dirty = true;
+        } 
         UsedCapacity -= TransferAmount;
         if (ContainingComposion != null)
         {
@@ -431,41 +417,33 @@ public class UrbComposition
         return TransferTo(Target, Recipe.Product,Result);
     }
 
+    static ProfilerMarker s_UrbCompEmptyInto_p = new ProfilerMarker("UrbComposition.EmptyInto");
+
     public float EmptyInto(UrbComposition Target)
     {
+        s_UrbCompEmptyInto_p.Begin();
         float Result = 0;
-        UrbSubstanceTag[] tags = new UrbSubstanceTag[Substances.Keys.Count];
-        int i = 0;
-        foreach(UrbSubstanceTag tag in Substances.Keys)
+        
+        
+        for (UrbSubstanceTag tag = UrbSubstanceTag.None; tag <= UrbSubstanceTag.All; tag++)
         {
-            tags[i] = tag;
-            i++;
+            float Amount = Substances[(int)tag];
+            Result += TransferTo(Target, tag, Amount);
         }
-
-        for(int t = 0; t < tags.Length; t++)
-        {
-            float Amount = Substances[tags[t]];
-            Result += TransferTo(Target, tags[t], Amount);
-        }
+        
+        s_UrbCompEmptyInto_p.End();
         return Result;
     }
 
     //TODO: Optimize this
     public bool ContainsEqualTo(UrbComposition composition)
     {
-        foreach (UrbSubstanceTag tag in Substances.Keys)
+        for (UrbSubstanceTag tag = UrbSubstanceTag.None; tag <= UrbSubstanceTag.All; tag++)
         {
-            if (composition.Substances.ContainsKey(tag))
-            {
-                if (Substances[tag] != composition[tag])
-                {
-                    return false;
-                }
-            }
-            else
+            if (Substances[(int) tag] != composition.Substances[(int) tag])
             {
                 return false;
-            }
+            } 
         }
         return true;
     }
@@ -474,14 +452,7 @@ public class UrbComposition
     {
         for(int i = 0; i < Recipe.Length; i++)
         {
-            if (Substances.ContainsKey(Recipe[i].Substance))
-            {
-                if (Substances[Recipe[i].Substance] != Recipe[i].SubstanceAmount)
-                {
-                    return false;
-                }
-            }
-            else
+            if (Substances[(int)(Recipe[i].Substance)] != Recipe[i].SubstanceAmount)
             {
                 return false;
             }
@@ -491,16 +462,19 @@ public class UrbComposition
 
     public bool ContainsLessThan(UrbComposition composition)
     {
-        foreach (UrbSubstanceTag tag in Substances.Keys)
+        for (UrbSubstanceTag tag = UrbSubstanceTag.None; tag <= UrbSubstanceTag.All; tag++)
         {
-            if (composition.Substances.ContainsKey(tag))
+            if (composition.Substances[(int)tag] <= 0)
             {
-                if (Substances[tag] >= composition[tag])
-                {
-                    return false;
-                }
+                continue;
+            }
+
+            if (Substances[(int)tag] >= composition[tag])
+            {
+                return false;
             }
         }
+        
         return true;
     }
 
@@ -508,12 +482,14 @@ public class UrbComposition
     {
         for (int i = 0; i < Recipe.Length; i++)
         {
-            if (Substances.ContainsKey(Recipe[i].Substance))
+            if (!(Substances[(int) (Recipe[i].Substance)] >= 0))
             {
-                if (Substances[Recipe[i].Substance] >= Recipe[i].SubstanceAmount)
-                {
-                    return false;
-                }
+                continue;
+            }
+            
+            if (Substances[(int) (Recipe[i].Substance)] >= Recipe[i].SubstanceAmount)
+            {
+                return false;
             }
         }
         return true;
@@ -521,16 +497,14 @@ public class UrbComposition
 
     public bool ContainsMoreOrEqualThan(UrbComposition composition)
     {
-        foreach (UrbSubstanceTag tag in Substances.Keys)
+        for (UrbSubstanceTag tag = UrbSubstanceTag.None; tag <= UrbSubstanceTag.All; tag++)
         {
-            if (composition.Substances.ContainsKey(tag))
+            if (composition.Substances[(int)tag] <= 0)
             {
-                if (Substances[tag] < composition[tag])
-                {
-                    return false;
-                }
+                return false;
             }
-            else
+
+            if (Substances[(int)tag] < composition[tag])
             {
                 return false;
             }
@@ -542,37 +516,35 @@ public class UrbComposition
     {
         for (int i = 0; i < Recipe.Length; i++)
         {
-            if (Substances.ContainsKey(Recipe[i].Substance))
+            if (!(Substances[(int) (Recipe[i].Substance)] >= 0))
             {
-                if (Substances[Recipe[i].Substance] < Recipe[i].SubstanceAmount)
-                {
-                    return false;
-                }
+                return false;
             }
-            else
+            
+            if (Substances[(int) (Recipe[i].Substance)] < Recipe[i].SubstanceAmount)
             {
                 return false;
             }
         }
+        
         return true;
     }
 
     public bool ContainsMoreThan(UrbComposition composition)
     {
-        foreach (UrbSubstanceTag tag in Substances.Keys)
+        for (UrbSubstanceTag tag = UrbSubstanceTag.None; tag <= UrbSubstanceTag.All; tag++)
         {
-            if (composition.Substances.ContainsKey(tag))
+            if (composition.Substances[(int)tag] <= 0)
             {
-                if (Substances[tag] <= composition[tag])
-                {
-                    return false;
-                }
+                return false;
             }
-            else
+
+            if (Substances[(int)tag] <= composition[tag])
             {
                 return false;
             }
         }
+        
         return true;
     }
 
@@ -580,18 +552,17 @@ public class UrbComposition
     {
         for (int i = 0; i < Recipe.Length; i++)
         {
-            if (Substances.ContainsKey(Recipe[i].Substance))
+            if ((Substances[(int) (Recipe[i].Substance)] <= 0))
             {
-                if (Substances[Recipe[i].Substance] <= Recipe[i].SubstanceAmount)
-                {
-                    return false;
-                }
+                return false;
             }
-            else
+            
+            if (Substances[(int) (Recipe[i].Substance)] <= Recipe[i].SubstanceAmount)
             {
                 return false;
             }
         }
+        
         return true;
     }
 }

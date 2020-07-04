@@ -19,49 +19,41 @@ public enum UrbScentTag
     MaxScentTag
 }
 
-public class UrbScent
+public struct DirtyableTag
+{
+    public float Value;
+    public bool IsDirty;
+}
+
+public struct UrbScent
 {
     public const float ScentDecay = 0.5f;
     const float DecayLimit = 0.0001f;
     public const float ScentDiffusion = 0.95f;
     public const float ScentInterval = 1.2f;
-    const uint MaxTag = (uint)UrbScentTag.MaxScentTag;
-    float[] Tags;
-    bool[] DirtyTags;
+    public const uint MaxTag = (uint)UrbScentTag.MaxScentTag;
+    
+    public DirtyableTag[] Tags;
 
-    public bool dirty = false;
+    public bool dirty;
 
     public float this[UrbScentTag i] {
         get { return this[(int)i]; }
         set { this[(int)i] = value;
-            
         }
     }
 
     public float this[int i] {
-        get { return this.Tags[i]; }
+        get { return Tags[i].Value; }
         set {
-            this.Tags[i] = value;
+            Tags[i].Value = value;
             if (value > 0)
             {
                 dirty = true;
-                DirtyTags[i] = true;
-                
+                Tags[i].IsDirty = true;
                 return;
             }
-            DirtyTags[i] = false;
-
-        }
-    }
-
-    public UrbScent()
-    {
-        Tags = new float[MaxTag];
-        DirtyTags = new bool[MaxTag];
-        for (int i = 0; i < MaxTag; i++)
-        {
-            Tags[i] = 0;
-            DirtyTags[i] = false;
+            Tags[i].IsDirty = false;
         }
     }
 
@@ -69,19 +61,20 @@ public class UrbScent
     public IEnumerator DecayScent()
     {
         s_DecayScent_p.Begin();
-        for (int i = 0; i < MaxTag; i++)
+        for (int i = 0; i < Tags.Length; i++)
         {
-            if (DirtyTags[i])
+            if (!Tags[i].IsDirty)
             {
-                if (Tags[i] > DecayLimit)
-                {
-                    this[i] = Tags[i] * ScentDecay;
-                }
-                else
-                {
-                    this[i] = 0.0f;
-                }
-                
+                continue;
+            }
+            
+            if (Tags[i].Value > DecayLimit)
+            {
+                this[i] = Tags[i].Value * ScentDecay;
+            }
+            else
+            {
+                this[i] = 0.0f;
             }
         }
         s_DecayScent_p.End();
@@ -95,16 +88,20 @@ public class UrbScent
     public IEnumerator ReceiveScent(UrbScent input, float Diffusion = 1.0f)
     {
         s_ReceiveScent_p.Begin();
-        for (int i = 0; i < MaxTag; i++)
+        DirtyableTag inputTag;
+        float diffusedVal;
+        for (int i = 0; i < Tags.Length; i++)
         {
-            if (!input.DirtyTags[i])
+            inputTag = input.Tags[i];
+            if (!inputTag.IsDirty)
             {
                 continue;
             }
-            
-            if (Tags[i] < input.Tags[i] * Diffusion)
+
+            diffusedVal = inputTag.Value * Diffusion;
+            if (Tags[i].Value < diffusedVal)
             {
-                this[i] = input.Tags[i] * Diffusion;
+                this[i] = diffusedVal;
             }
         }
 

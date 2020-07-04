@@ -267,8 +267,6 @@ public class UrbTileprint
                         if (CheckedTile.Blocked)
                             return true;
                         break;
-                    default:
-                        break;
                 }
             }
         }

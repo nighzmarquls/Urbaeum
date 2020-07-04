@@ -1,13 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.Camera;
 
 public class UrbAgentDetailWindow : UrbDisplayWindow
 {
     bool AgentAssigned = false;
     protected UrbAgent mAgent = null;
-    public UrbAgent TargetAgent { get { return mAgent; } set { mAgent = value; AgentAssigned = value != null; } }
+
+    public UrbAgent TargetAgent
+    {
+        get
+        {
+            return mAgent;
+        }
+        set
+        {
+            mAgent = value;
+            AgentAssigned = value != null;
+        }
+    }
 
     public Text DisplayText;
 
@@ -18,13 +29,12 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             if(mAgent.WasDestroyed)
             {
                 DisplayText.text = "Dead";
-                TargetAgent = null;
             }
+            
             if(DisplayText != null)
             {
                 DisplayText.text = TextSummary();
             }
-            
         }
     }
 
@@ -120,11 +130,22 @@ public class UrbGetAgentDetails : UrbUserAction
     public override string MapDisplayAssetPath => "";
     public override void MouseClick(UrbTile currentCursorTile)
     {
-
-        Ray mouseray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (main == null)
+        {
+            base.MouseClick(currentCursorTile);
+            return;
+        }
+        
+        Ray mouseray = main.ScreenPointToRay(Input.mousePosition);
         Vector3 Location = mouseray.origin;
 
         Collider2D Result = Physics2D.OverlapCircle(Location, 0.1f);
+        if (Result == null)
+        {
+            Debug.Log("UrbGetAgentDetails failed because physics check is null");
+            base.MouseClick(currentCursorTile);
+        }
+        
         if (Result!= null)
         {
             UrbAgent SelectedAgent = Result.GetComponentInParent<UrbAgent>();
@@ -132,6 +153,10 @@ public class UrbGetAgentDetails : UrbUserAction
             {
                 UrbAgentDetailWindow Window = Object.Instantiate(UrbUIManager.Instance.AgentDisplayPrefab, UrbUIManager.Instance.WindowManager.transform);
                 Window.TargetAgent = SelectedAgent;
+            }
+            else
+            {
+                Debug.Log("UrbGetAgentDetails failed because GetComponentInParent returned null");
             }
         }
 

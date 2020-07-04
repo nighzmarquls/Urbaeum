@@ -47,6 +47,7 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
             {
                 debugTiles[i][ii] = Instantiate<GameObject>(Exemplar, targetMap.TileAddressToLocation(i, ii), Quaternion.identity);
                 UrbTile tile = targetMap.GetTile(i, ii);
+                Debug.Log("Initializing Scent coroutine in EnvDebugDisplay");
                 IEnumerator routine = tile.ScentCoroutine();
                 StartCoroutine(routine);
                 scentRoutines.Add(routine);
