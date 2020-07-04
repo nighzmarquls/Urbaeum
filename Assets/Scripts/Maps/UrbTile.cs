@@ -208,9 +208,7 @@ public class UrbTile
             {
                 ++LinkCount;
             }
-
         }
-        
     }
 
     public UrbTile(UrbMap CreatingMap, Vector2 MapLocation)
@@ -225,6 +223,14 @@ public class UrbTile
         Constructor(CreatingMap);
         OwningMap.LocationToTileAddress(MapLocation, out XAddress, out YAddress);
         Links = LinkedTiles;
+        LinkCount = 0;
+        foreach (var tile in LinkedTiles)
+        {
+            if (tile != null)
+            {
+                ++LinkCount;
+            }
+        }
     }
 
     public bool LoadTileFromData(UrbTileData input)
@@ -591,10 +597,10 @@ public class UrbTile
         }
     }
 
-    static ProfilerMarker s_TileScentCoroutine_p = new ProfilerMarker("UrbTile.ScentCoroutineTerrainLoop");
+    static ProfilerMarker s_TileScentCoroutineLoop_p = new ProfilerMarker("UrbTile.ScentCoTerrainLoop");
     public IEnumerator ScentCoroutine()
     {
-        Debug.Log("Initializing Scent coroutine in EnvDebugDisplay");
+        Debug.Log("Initializing Scent coroutine in UrbTile");
 
         while(true)
         {
@@ -612,8 +618,8 @@ public class UrbTile
             {
                 continue;
             }
-            
-            s_TileScentCoroutine_p.Begin();
+
+            s_TileScentCoroutineLoop_p.Begin();
             for (int t = 0; t < TerrainTypes.Length; t++)
             {
                 for (int s = 0; s < SizeLimit; s++)
@@ -626,7 +632,9 @@ public class UrbTile
                     }
                     
                     terrainFilter.dirty = false;
+                    s_TileScentCoroutineLoop_p.End();
                     yield return terrainFilter.DecayScent();
+                    s_TileScentCoroutineLoop_p.Begin();
                     if (ScentDirty)
                     {
                         continue;
@@ -638,7 +646,7 @@ public class UrbTile
                     ScentDirty = TerrainFilter[(int)TerrainTypes[t]][s].dirty || ScentDirty;
                 }
             }
-            s_TileScentCoroutine_p.End();
+            s_TileScentCoroutineLoop_p.End();
 
             if (!ScentDirty)
             {

@@ -25,7 +25,6 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
     void Start()
     {
         targetMap = GetComponent<UrbMap>();
-
     }
 
     void Initialize()
