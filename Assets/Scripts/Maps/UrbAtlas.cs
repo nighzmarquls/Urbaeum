@@ -37,17 +37,17 @@ public class UrbAtlas : MonoBehaviour
         LandMap = LandObject.AddComponent<UrbMap>();
         LandMap.SetNewMap(AtlasX, AtlasY, 1, UrbPathTerrain.Land);
 
-        //GameObject SkyObject = new GameObject("SkyMap");
+        GameObject SkyObject = new GameObject("SkyMap");
         
-        //SkyMap = SkyObject.AddComponent<UrbMap>();
-        //SkyMap.SetNewMap(AtlasX / SkySizeFactor, AtlasY / SkySizeFactor, SkySizeFactor, UrbPathTerrain.Air);
+        SkyMap = SkyObject.AddComponent<UrbMap>();
+        SkyMap.SetNewMap(AtlasX / SkySizeFactor, AtlasY / SkySizeFactor, SkySizeFactor, UrbPathTerrain.Air);
 
-        //LinkSkyToLand();
+        LinkSkyToLand();
 
         Maps.Add(LandMap);
         UrbSystemIO.RegisterMap(LandMap);
-        //Maps.Add(SkyMap);
-        //UrbSystemIO.RegisterMap(SkyMap);
+        Maps.Add(SkyMap);
+        UrbSystemIO.RegisterMap(SkyMap);
 
         RefreshAllMaps();
         StartBehaviours();

@@ -870,6 +870,7 @@ MonoBehaviour:
   CameraSpeed: 10
   CameraZoomSpeed: 10
   MinZoomSize: 0.5
+  ScreenPushPixelBuffer: 60
   CameraStartLocation: {x: 0, y: 0, z: 0}
 --- !u!1001 &356006240961405946
 PrefabInstance:
@@ -879,16 +880,16 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 715143067, guid: 5f41d8de6eb14de49b4811071da72e4d, type: 3}
-      propertyPath: AtlasX
-      value: 64
-      objectReference: {fileID: 0}
-    - target: {fileID: 715143067, guid: 5f41d8de6eb14de49b4811071da72e4d, type: 3}
       propertyPath: AtlasY
       value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 715143067, guid: 5f41d8de6eb14de49b4811071da72e4d, type: 3}
       propertyPath: SkySizeFactor
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 715143067, guid: 5f41d8de6eb14de49b4811071da72e4d, type: 3}
+      propertyPath: AtlasX
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 618441047085783132, guid: 5f41d8de6eb14de49b4811071da72e4d,
         type: 3}

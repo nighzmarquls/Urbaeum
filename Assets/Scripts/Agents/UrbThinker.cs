@@ -206,7 +206,7 @@ public class UrbThinker : UrbBase
             }
             else
             {
-                if (!CanEat)
+                if (!CanEat && !CanBreed)
                 {
                     RestUrge = 1.0f;
                 }
@@ -222,7 +222,7 @@ public class UrbThinker : UrbBase
 
             if (CanBreed)
             {
-                BreedUrge -= 1.0f;
+                BreedUrge -= 0.5f;
             }
 
             if (!CanEat)
