@@ -576,103 +576,82 @@ public class UrbTile
         }
     }
 
-    public IEnumerator ScentCoroutine()
-    {
-        while(true)
-        {
-            yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
-            Ordering = false;
-            
-            if (!UrbSystemIO.HasInstance || UrbSystemIO.Instance.Loading)
-            {
-                continue;
-            }
-
-            if (!ScentDirty)
-            {
-                continue;
-            }
-            
-            for (int t = 0; t < TerrainTypes.Length; t++)
-            {
-                for (int s = 0; s < SizeLimit; s++)
-                {
-                    var terrainType = (int)TerrainTypes[t];
-                    var terrainFilter = TerrainFilter[terrainType][s];
-                    if(terrainFilter == null)
-                    {
-                        continue;
-                    }
-
-                    if (terrainFilter.dirty)
-                    {
-                        terrainFilter.dirty = false;
-                        yield return terrainFilter.DecayScent();
-                        if (ScentDirty)
-                        {
-                            continue;
-                        }
-
-                        //Want to use the terrainFilter var above, but 
-                        //I need to make sure that's not going to change what happens
-                        //here for this ScentDirty.
-                        ScentDirty = TerrainFilter[(int)TerrainTypes[t]][s].dirty || ScentDirty;
-                    }
-                }
-            }
-
-            if (!ScentDirty)
-            {
-                continue;
-            }
-            
-            yield return DiffuseScent();
-            ScentDirty = false;
-        }
-    }
-
     static ProfilerMarker s_DiffuseScent_p = new ProfilerMarker("UrbTile.DiffuseScent");
 
-    IEnumerator DiffuseScent()
+    IEnumerator ProcessScents(int terrainType)
     {
+        for (int s = 0; s < SizeLimit; s++)
+        {
+            var terrainFilter = TerrainFilter[terrainType][s];
+            if (terrainFilter == null || !terrainFilter.dirty)
+            {
+                continue;
+            }
+
+            terrainFilter.dirty = false;
+            yield return terrainFilter.DecayScent();
+            
+            ScentDirty |= terrainFilter.dirty;
+        }
+
         s_DiffuseScent_p.Begin();
+
+        UrbTile adj;
+        for (int t = 0; t < Adjacent.Length; t++)
+        {
+            adj = Adjacent[t];
+            if (adj == null || adj.Blocked)
+            {
+                continue;
+            }
+
+            for (int check = 0; check < adj.TerrainTypes.Length; check++)
+            {
+                if (check != terrainType)
+                {
+                    continue;
+                }
+
+                adj.ScentDirty = true;
+                for (int s = 0; s < adj.SizeLimit; s++)
+                {
+                    var filter = adj.TerrainFilter[terrainType][s];
+                    var scent = filter.ReceiveScent(TerrainFilter[terrainType][s], ScentDiffusion);
+                    s_DiffuseScent_p.End();
+                    yield return scent;
+                    s_DiffuseScent_p.Begin();
+                }
+            }
+        }
+
+        s_DiffuseScent_p.End();
+    }
+    public IEnumerator ScentCoroutine()
+    {
+        yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
+        Ordering = false;
+
+        if (!UrbSystemIO.HasInstance || UrbSystemIO.Instance.Loading)
+        {
+            yield break;
+        }
+
         if (LinksDirty)
         {
             Adjacent = OwningMap.GetAdjacent(XAddress, YAddress, true);
             LinksDirty = false;
         }
 
-        for (int i = 0; i < TerrainTypes.Length; i++)
+        if (!ScentDirty && !LinksDirty)
         {
-            for(int t = 0; t < Adjacent.Length; t++)
-            {
-                var adj = Adjacent[t];
-                if (adj == null || adj.Blocked)
-                {
-                    continue;
-                }
-
-                for (int check = 0; check < Adjacent[t].TerrainTypes.Length; check++)
-                {
-                    var terrainType = (int) TerrainTypes[i];
-                    
-                    if (check != terrainType)
-                        continue;
-
-                    adj.ScentDirty = true;
-                    for(int s = 0; s < adj.SizeLimit; s++)
-                    {
-                        var filter = adj.TerrainFilter[terrainType][s];
-                        var scent = filter.ReceiveScent(TerrainFilter[terrainType][s], ScentDiffusion);
-                        s_DiffuseScent_p.End();
-                        
-                        yield return scent;
-                        s_DiffuseScent_p.Begin();
-                    }
-                }     
-            }
+            yield break;
         }
 
-        s_DiffuseScent_p.End();
+        for (int i = 0; i < TerrainTypes.Length; i++)
+        {
+            yield return ProcessScents((int) TerrainTypes[i]);
+        }
+        
+        ScentDirty = false;
     }
 }
