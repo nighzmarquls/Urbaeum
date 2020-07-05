@@ -17,7 +17,7 @@ public class UrbSmellSource : UrbBehaviour
         if(mAgent.Body != null && mAgent.Body.BodyComposition != null)
         {
             SmellTag = mAgent.Body.BodyComposition.GetScent();
-            //SmellStrength = mAgent.Mass;
+            SmellStrength = mAgent.MassPerTile;
         }
 
         if (LastSmellTile != mAgent.CurrentTile)

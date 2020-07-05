@@ -92,6 +92,7 @@ public class UrbThinker : UrbBase
     static ProfilerMarker s_ChooseBehaviour_p = new ProfilerMarker("UrbThinker.ChooseBehaviour");
     bool IsmBreederNotNull;
 
+    float LastTimeSuccessful = 0;
     public void ChooseBehaviour()
     {
         s_ChooseBehaviour_p.Begin(this);
@@ -131,7 +132,8 @@ public class UrbThinker : UrbBase
             }
         }
         else
-        { 
+        {
+            LastTimeSuccessful = Time.time;
             ChosenBehaviour.ExecuteTileBehaviour();
         }
 
@@ -238,15 +240,18 @@ public class UrbThinker : UrbBase
 
         if (HungerUrge > 0)
         {
+            HungerUrge = Mathf.Min(1, HungerUrge);
             for(int f = 0; f < mEater.FoodScents.Length; f++)
             {
                 TileValue += Tile.TerrainFilter[TerrainType][Size][mEater.FoodScents[f]] * HungerUrge;
             }
+
         }
 
         if(BreedUrge > 0)
         {
-            for(int b = 0; b < mBreeder.MateScents.Length; b++)
+            BreedUrge = Mathf.Min(1, BreedUrge);
+            for (int b = 0; b < mBreeder.MateScents.Length; b++)
             {
                 TileValue += Tile.TerrainFilter[TerrainType][Size][mBreeder.MateScents[b]] * BreedUrge;
             }
@@ -258,11 +263,13 @@ public class UrbThinker : UrbBase
 
         if (SafetyUrge > 0)
         {
+            SafetyUrge = Mathf.Min(1, SafetyUrge);
             TileValue -= Tile.TerrainFilter[TerrainType][Size][UrbScentTag.Violence] * SafetyUrge;
         }
 
         if (RestUrge > 0)
         {
+            RestUrge = Mathf.Min(1, RestUrge);
             TileValue -= RestUrge;
         }
 

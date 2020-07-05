@@ -27,6 +27,8 @@ public class UrbAttack : UrbAction
                 return Result;
             }
 
+            //Instigator.CurrentTile.AddScent(UrbScentTag.Violence, Result);
+
             UrbAction DefenseAction = Target.PickAction(DefenseCategory, Result);
 
             if (DefenseAction != null)

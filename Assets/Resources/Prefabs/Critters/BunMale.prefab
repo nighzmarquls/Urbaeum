@@ -107,10 +107,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b2e0f7c83d69948a96dc66fccbac5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BirthTime: 308.27484
-  CurrentMap: {fileID: 0}
+  LogMe: 0
+  BirthTime: 7.8464003
+  IsCurrentMapNull: 1
   Shuffle: 1
-  Interacting: 0
   SizeOffset: 1
   TileprintString: 1
 --- !u!114 &5738278284471327094
@@ -125,6 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d2d170163064e42bda7b740df8716e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   BodyRecipe:
   - Substance: 6
     SubstanceAmount: 50
@@ -153,6 +154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b2f4988372b7c64a95866759bfbf429, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 2
   BodyGrowthRecipe:
   - Substance: 7
@@ -173,6 +175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7820138edadbea4ab3ada9d2530f9c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 1
 --- !u!114 &-2832398848432110761
 MonoBehaviour:
@@ -186,6 +189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9f725e25e0b28c4d8aef6238c55a7ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 1
   GoalTag: 1
   Size: 0
@@ -202,6 +206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dfd735a9f716e74398620d0212a3ee9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 0.5
   FoodSubstances: 040000000300000002000000
 --- !u!114 &1285019260808379821
@@ -216,10 +221,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fb352cbb9e235d46a8e3c997f5983a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 2
   MateRequirement: 1
   MateCrowding: 2
   OffspringCount: 0
+  OffspringRequiredSpace: 500
   Gestation: 10
   DispersalDistance: 0
   BreedType: 1
@@ -241,6 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abaab3ca621fbad4b92f163726cb68c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Interval: 1
   SmellTag: 
   SmellStrength: 10
@@ -256,6 +264,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89760c5a60a1c48469e26698ab374520, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  Impatience: 0.001
 --- !u!114 &9142228112597239207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -268,6 +278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d973e6a44621c2a4ba41b85a65aa5087, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
   Modifications:
   - DisplayDrivingSubstance: 13
     SubstanceSizeRatio: 1000
@@ -299,7 +310,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 595bc0b273ea0d64c9696083da17f405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Interval: 1
+  LogMe: 0
+  Interval: 0.25
   PerceptionPrintString: 
   ContactPrintString: 
 --- !u!1001 &2693958147845626054

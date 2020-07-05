@@ -191,6 +191,11 @@ public class UrbBreeder : UrbBehaviour
 
                 for (int o = 0; o < RegisteredTiles[i].Occupants.Count; o++)
                 {
+                    if(RegisteredTiles[i].Occupants[o].WasDestroyed)
+                    {
+                        continue;
+                    }
+
                     UrbBreeder PossibleMate = RegisteredTiles[i].Occupants[o].GetComponent<UrbBreeder>();
                     if (PossibleMate.WasDestroyed || PossibleMate == this)
                     {
