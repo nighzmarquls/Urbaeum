@@ -617,49 +617,51 @@ public class UrbTile
             }
         }
 
+        jobs.AddRange(DiffuseScent());
+        
         foreach (var job in jobs)
         {
             job.Complete();
         }
     }
 
-    static ProfilerMarker s_DiffuseScentJobsComplete_p = new ProfilerMarker("UrbTile.PropagateScent.DiffuseScent_JobCompleteWaiting");
-    static ProfilerMarker s_PropagateScent_p = new ProfilerMarker("UrbTile.PropagateScent");
+    // static ProfilerMarker s_DiffuseScentJobsComplete_p = new ProfilerMarker("UrbTile.PropagateScent.DiffuseScent_JobCompleteWaiting");
+    // static ProfilerMarker s_PropagateScent_p = new ProfilerMarker("UrbTile.PropagateScent");
     //TODO: Optimize this
-    public void PropagateScent()
-    {
-        s_PropagateScent_p.Begin();
-        //TODO: The array-copying here seems non-performant.
-        var ToAdd = new List<UrbTile>(OwningMap.GetAdjacent(XAddress, YAddress));
-        var ToDiffuse = new List<UrbTile>(ToAdd.Count);
-
-        List<JobHandle> JobHandles = new List<JobHandle>(ToAdd.Count);
-        
-        while (ToAdd.Count > 0)
-        {
-            var scent = ToAdd[0];
-            if(scent == null || scent.Blocked || ToDiffuse.Contains(scent))
-            {
-                ToAdd.RemoveAt(0);
-                continue; 
-            }
-            
-            ToDiffuse.Add(scent);
-            JobHandles.AddRange(ToAdd[0].DiffuseScent());
-            ToAdd.AddRange(OwningMap.GetAdjacent(ToAdd[0].XAddress, ToAdd[0].YAddress));
-            ToAdd.RemoveAt(0);
-        }
-
-        Debug.Log($"DiffuseScent Scheduled {JobHandles.Count} jobs");
-        s_PropagateScent_p.End();
-
-        s_DiffuseScentJobsComplete_p.Begin();
-        foreach (var job in JobHandles)
-        {
-            job.Complete();
-        }
-        s_DiffuseScentJobsComplete_p.End();
-    }
+    // public void PropagateScent()
+    // {
+    //     s_PropagateScent_p.Begin();
+    //     //TODO: The array-copying here seems non-performant.
+    //     var ToAdd = new List<UrbTile>(OwningMap.GetAdjacent(XAddress, YAddress));
+    //     var ToDiffuse = new List<UrbTile>(ToAdd.Count);
+    //
+    //     List<JobHandle> JobHandles = new List<JobHandle>(ToAdd.Count);
+    //     
+    //     while (ToAdd.Count > 0)
+    //     {
+    //         var scent = ToAdd[0];
+    //         if(scent == null || scent.Blocked || ToDiffuse.Contains(scent))
+    //         {
+    //             ToAdd.RemoveAt(0);
+    //             continue; 
+    //         }
+    //         
+    //         ToDiffuse.Add(scent);
+    //         JobHandles.AddRange(ToAdd[0].DiffuseScent());
+    //         ToAdd.AddRange(OwningMap.GetAdjacent(ToAdd[0].XAddress, ToAdd[0].YAddress));
+    //         ToAdd.RemoveAt(0);
+    //     }
+    //
+    //     Debug.Log($"DiffuseScent Scheduled {JobHandles.Count} jobs");
+    //     s_PropagateScent_p.End();
+    //
+    //     s_DiffuseScentJobsComplete_p.Begin();
+    //     foreach (var job in JobHandles)
+    //     {
+    //         job.Complete();
+    //     }
+    //     s_DiffuseScentJobsComplete_p.End();
+    // }
     
     static ProfilerMarker s_DiffuseScentJobSchedule_p = new ProfilerMarker("UrbTile.DiffuseScent.JobScheduling");
 
