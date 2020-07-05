@@ -631,39 +631,6 @@ public class UrbTile
         }
     }
 
-    static ProfilerMarker s_PropagateScent_p = new ProfilerMarker("UrbTile.PropagateScent");
-    //TODO: Optimize this
-    public void PropagateScent()
-    {
-        s_PropagateScent_p.Begin();
-        //TODO: The array-copying here seems non-performant.
-        var ToAdd = new List<UrbTile>(OwningMap.GetAdjacent(XAddress, YAddress));
-        var ToDiffuse = new List<UrbTile>(ToAdd.Count);
-        
-        while (ToAdd.Count > 0)
-        {
-            var scent = ToAdd[0];
-            if(scent == null || scent.Blocked || ToDiffuse.Contains(scent))
-            {
-                ToAdd.RemoveAt(0);
-                continue; 
-            }
-            
-            ToDiffuse.Add(ToAdd[0]);
-            ToAdd.AddRange(OwningMap.GetAdjacent(ToAdd[0].XAddress, ToAdd[0].YAddress));
-            ToAdd.RemoveAt(0);
-        }
-
-        foreach(UrbTile Tile in ToDiffuse)
-        {
-            // ReSharper disable once IteratorMethodResultIsIgnored
-            Tile.DiffuseScent();
-        }
-
-        s_PropagateScent_p.End();
-    }
-
-    
     static ProfilerMarker s_DiffuseScent_p = new ProfilerMarker("UrbTile.DiffuseScent");
 
     IEnumerator DiffuseScent()
