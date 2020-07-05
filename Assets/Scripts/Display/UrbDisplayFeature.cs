@@ -54,7 +54,7 @@ public class UrbDisplayFeature : MonoBehaviour
 
     protected string mSpritePath;
 
-    virtual public string SpritePath
+    public virtual string SpritePath
     {
         get { return mSpritePath; }
         set {
@@ -75,7 +75,7 @@ public class UrbDisplayFeature : MonoBehaviour
         }
     }
 
-    virtual public Color LineColor
+    public virtual Color LineColor
     {
         get { return mLineColor; }
         set {
@@ -93,7 +93,7 @@ public class UrbDisplayFeature : MonoBehaviour
     [SerializeField]
     protected Color mFillColor;
 
-    virtual public Color FillColor
+    public virtual Color FillColor
     {
         get { return mFillColor; }
         set {

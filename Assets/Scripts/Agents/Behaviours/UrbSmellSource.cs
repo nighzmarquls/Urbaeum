@@ -12,7 +12,7 @@ public class UrbSmellSource : UrbBehaviour
     protected UrbTile[] TileCache = null;
     protected UrbTile LastSmellTile = null;
 
-    override public IEnumerator FunctionalCoroutine()
+    public override IEnumerator FunctionalCoroutine()
     {
         if(mAgent.Body != null && mAgent.Body.BodyComposition != null)
         {
@@ -43,7 +43,7 @@ public class UrbSmellSource : UrbBehaviour
         }
     }
 
-    override public UrbComponentData GetComponentData()
+    public override UrbComponentData GetComponentData()
     {
         UrbComponentData Data = base.GetComponentData();
 
@@ -61,7 +61,7 @@ public class UrbSmellSource : UrbBehaviour
         return Data;
     }
 
-    override public bool SetComponentData(UrbComponentData Data)
+    public override bool SetComponentData(UrbComponentData Data)
     {
         SmellStrength = UrbEncoder.GetField("SmellStrength", Data);
         SmellTag = UrbEncoder.GetEnumArray<UrbScentTag>("SmellTag", Data);
