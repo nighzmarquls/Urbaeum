@@ -29,6 +29,7 @@ public class UrbCritterDebugDisplay : MonoBehaviour
 
     void Initialize()
     {
+        Debug.Log("Initializing CritterDebugDisplay", this);
         needsInit = false;
         debugTiles = new GameObject[targetMap.Xsize][];
         scentRoutines = new List<IEnumerator>();
@@ -45,9 +46,10 @@ public class UrbCritterDebugDisplay : MonoBehaviour
             {
                 debugTiles[i][ii] = Instantiate<GameObject>(Exemplar, targetMap.TileAddressToLocation(i, ii), Quaternion.identity);
                 UrbTile tile = targetMap.GetTile(i, ii);
-                IEnumerator routine = tile.ScentCoroutine();
-                StartCoroutine(routine);
-                scentRoutines.Add(routine);
+                Debug.Log("ScentCoroutine");
+                //IEnumerator routine = tile.ScentCoroutine();
+                //StartCoroutine(routine);
+                //scentRoutines.Add(routine);
             }
         }
         targetMap.RefreshAllPathableSize();

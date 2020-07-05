@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public enum UrbSubstanceTag
+public enum UrbSubstanceTag : int
 {
     None = 0,
     Seed,
@@ -18,6 +18,8 @@ public enum UrbSubstanceTag
     Nerves,
     Teeth,
     Claw,
+    //Testing our ability to manage different scents
+    TestScent = 400, 
     All
 }
 

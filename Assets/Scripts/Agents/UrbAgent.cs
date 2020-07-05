@@ -21,9 +21,7 @@ public class UrbAgent : UrbBase
 
     [NonSerialized]
     public UrbMerge[] UrbMerges = null;
-
-    public bool IsMergeable { get; private set; } = false;
-
+    
     UrbDisplay _display = null; 
     public UrbDisplay Display
     {
@@ -335,14 +333,6 @@ public class UrbAgent : UrbBase
         BodyDisplay = GetComponent<UrbBodyDisplay>();
         IsMindNull = Mind == null;
         LastCheckedMass = 0;
-
-        UrbMerges = GetComponents<UrbMerge>();
-
-        if (UrbMerges != null && UrbMerges.Length > 0)
-        {
-            IsMergeable = true;
-        }
-        
         
         UrbAgentManager.RegisterAgent(this);
         IsPaused = UrbAgentManager.IsPaused;

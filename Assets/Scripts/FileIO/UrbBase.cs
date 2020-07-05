@@ -10,6 +10,9 @@ public class UrbBase : MonoBehaviour
     public UrbEater Eater { get; protected set; }
     public UrbBreeder Breeder { get; protected set; }
     
+    public UrbMerge[] Merges { get; protected set; }
+    public bool HasMerges;
+    
     public bool IsBreeder { get; protected set; }
     public bool IsEater { get; protected set; }
     
@@ -66,6 +69,9 @@ public class UrbBase : MonoBehaviour
 
         Breeder = GetComponent<UrbBreeder>();
         IsBreeder = Breeder != null;
+
+        Merges = GetComponents<UrbMerge>();
+        HasMerges = (Merges != null) && Merges.Length > 0;
         
         LogMe = false;
         logger.logEnabled = false;

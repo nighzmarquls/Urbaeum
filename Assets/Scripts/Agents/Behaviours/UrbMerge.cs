@@ -17,9 +17,12 @@ public class UrbMerge : UrbBehaviour
     int TotalTiles = 0;
     int TotalCount = 0;
     
+    static ProfilerMarker s_UrbMergeIntoTarget_p = new ProfilerMarker("UrbMerge.MergeIntoTarget");
     protected void MergeIntoTarget(UrbAgent Target)
     {
         logger.Log("Attempting to merge", Target);
+        
+        s_UrbMergeIntoTarget_p.Begin();
         mAgent.Body.BodyComposition.EmptyInto(Target.Body.BodyComposition);
         
         if (Target.IsEater && !Target.Eater.WasDestroyed)
@@ -30,9 +33,10 @@ public class UrbMerge : UrbBehaviour
             }
         }
 
+        s_UrbMergeIntoTarget_p.End();
         mAgent.Remove();
     }
-
+    
     static ProfilerMarker s_UrbMergeTileEvalCheck_p = new ProfilerMarker("UrbMerge.TileEvaluateCheck");
     //Contact is for saying what KIND of check - only when trying to do something that REQUIRES a contact
     // A contact is done for checks that require sharing a tile with another entity
@@ -51,13 +55,19 @@ public class UrbMerge : UrbBehaviour
       
         for (int c = 0; c < Target.Occupants.Count; c++)
         {
+            if (!Target.Occupants[c].HasMerges)
+            {
+                continue;
+            }
+            
             if (MergeProduct.TemplatesMatch(Target.Occupants[c]))
             {
                 logger.Log("Attempting to merge into target", this);
                 MergeIntoTarget(Target.Occupants[c]);
                 break;
             }
-            UrbMerge[] MergeComponents = Target.Occupants[c].GetComponents<UrbMerge>();
+
+            UrbMerge[] MergeComponents = Target.Occupants[c].Merges;
             for (int i = 0; i < MergeComponents.Length; i++)
             {
                 var mergeComp = MergeComponents[i];

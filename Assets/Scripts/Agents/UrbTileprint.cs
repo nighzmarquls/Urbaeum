@@ -267,8 +267,6 @@ public class UrbTileprint
                         if (CheckedTile.Blocked)
                             return true;
                         break;
-                    default:
-                        break;
                 }
             }
         }
@@ -313,8 +311,8 @@ public class UrbTileprint
                 if (Tile.Occupants.Contains(Agent))
                 {
                     Tile.Occupants.Remove(Agent);
-                        Tile.ReorderContents();
-                    }
+                    Tile.ReorderContents();
+                }
                 break;
             default:
                 break;

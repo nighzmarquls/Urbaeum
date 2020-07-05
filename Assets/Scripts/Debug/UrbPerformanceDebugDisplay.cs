@@ -26,6 +26,7 @@ public class UrbPerformanceDebugDisplay : MonoBehaviour
 
     void Initialize()
     {
+        Debug.Log("Initializing PerformanceDebugDisplay", this);
         needsInit = false;
         scentRoutines = new List<IEnumerator>();
         environmentRoutine = new List<IEnumerator>();
@@ -36,11 +37,11 @@ public class UrbPerformanceDebugDisplay : MonoBehaviour
             {
                
                 UrbTile tile = targetMap.GetTile(i, ii);
-                IEnumerator routine = tile.ScentCoroutine();
-                StartCoroutine(routine);
-                scentRoutines.Add(routine);
+                // IEnumerator routine = tile.ScentCoroutine();
+                // StartCoroutine(routine);
+                // scentRoutines.Add(routine);
 
-                routine = tile.Environment.EnvironmentCoroutine();
+                var routine = tile.Environment.EnvironmentCoroutine();
                 StartCoroutine(routine);
                 environmentRoutine.Add(routine);
             }

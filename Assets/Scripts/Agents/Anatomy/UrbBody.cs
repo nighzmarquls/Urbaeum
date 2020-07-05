@@ -110,7 +110,7 @@ public class UrbBody : UrbBase
         return Data;
     }
 
-    override public bool SetComponentData(UrbComponentData Data)
+    public override bool SetComponentData(UrbComponentData Data)
     {
         Height = UrbEncoder.GetField("Height", Data);
         BodyRecipe = UrbEncoder.GetSubstancesFromArray("BodyRecipe",Data);

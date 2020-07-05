@@ -100,9 +100,9 @@ public class UrbMapDebugDisplay : MonoBehaviour
         if (dirty)
         {
             tile = targetMap.GetTile(xTarget, yTarget);
-            targetMap.RefreshAllScent();
+            //targetMap.RefreshAllScent();
             tile.AddScent(UrbScentTag.Goal, 1.0f);
-            tile.PropagateScent();
+            // tile.PropagateScent();
             
             for (int i = 0; i < targetMap.Xsize; i++)
             {
