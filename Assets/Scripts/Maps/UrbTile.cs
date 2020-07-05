@@ -590,12 +590,8 @@ public class UrbTile
 
             terrainFilter.dirty = false;
             yield return terrainFilter.DecayScent();
-            if (ScentDirty)
-            {
-                continue;
-            }
             
-            ScentDirty = terrainFilter.dirty || ScentDirty;
+            ScentDirty |= terrainFilter.dirty;
         }
 
         s_DiffuseScent_p.Begin();
