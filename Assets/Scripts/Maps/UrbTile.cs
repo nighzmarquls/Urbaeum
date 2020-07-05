@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Unity.Collections;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Profiling;
@@ -160,12 +161,18 @@ public class UrbTile
         s_ReorderContents_p2_p.End();
     }
 
+    //Ideally the "true" Entity Manager will live on UrbMap or higher up.
+    //Seems fairly wasteful to make one on every UrbTile
+    EntityManager TileEM = new EntityManager(); 
     void Constructor(UrbMap CreatingMap)
     {
         Occupants = new List<UrbAgent>();
         Contents = new List<UrbAgent>();
         OwningMap = CreatingMap;
-
+        
+        //The danger of NativeArrays are that they require being disposed when no longer being used.
+        //This is kind of an abomination
+        
         TerrainFilter = new NativeArray<UrbScent>[MaxTerrain];
         for(int i = 0; i < MaxTerrain; i++)
         {
@@ -173,7 +180,7 @@ public class UrbTile
             for (int ii = 0; ii < MaxSize; ii++)
             {
                 TerrainFilter[i][ii] = new UrbScent{
-                    Tags = new NativeArray<DirtyableTag>((int)UrbScentTag.MaxScentTag, Allocator.Persistent),
+                    Tags = new ScentTag[(int)UrbScentTag.MaxScentTag]
                 };
             }
         }
@@ -421,7 +428,7 @@ public class UrbTile
             for (int s = 0; s < SizeLimit; s++)
             {
                 var scent = TerrainFilter[TerrainType][s];  
-                scent[tag] = value;
+                scent.Tags[(int)tag].Value = value;
                 TerrainFilter[TerrainType][s] = scent;
             }
         }
@@ -624,44 +631,6 @@ public class UrbTile
             job.Complete();
         }
     }
-
-    // static ProfilerMarker s_DiffuseScentJobsComplete_p = new ProfilerMarker("UrbTile.PropagateScent.DiffuseScent_JobCompleteWaiting");
-    // static ProfilerMarker s_PropagateScent_p = new ProfilerMarker("UrbTile.PropagateScent");
-    //TODO: Optimize this
-    // public void PropagateScent()
-    // {
-    //     s_PropagateScent_p.Begin();
-    //     //TODO: The array-copying here seems non-performant.
-    //     var ToAdd = new List<UrbTile>(OwningMap.GetAdjacent(XAddress, YAddress));
-    //     var ToDiffuse = new List<UrbTile>(ToAdd.Count);
-    //
-    //     List<JobHandle> JobHandles = new List<JobHandle>(ToAdd.Count);
-    //     
-    //     while (ToAdd.Count > 0)
-    //     {
-    //         var scent = ToAdd[0];
-    //         if(scent == null || scent.Blocked || ToDiffuse.Contains(scent))
-    //         {
-    //             ToAdd.RemoveAt(0);
-    //             continue; 
-    //         }
-    //         
-    //         ToDiffuse.Add(scent);
-    //         JobHandles.AddRange(ToAdd[0].DiffuseScent());
-    //         ToAdd.AddRange(OwningMap.GetAdjacent(ToAdd[0].XAddress, ToAdd[0].YAddress));
-    //         ToAdd.RemoveAt(0);
-    //     }
-    //
-    //     Debug.Log($"DiffuseScent Scheduled {JobHandles.Count} jobs");
-    //     s_PropagateScent_p.End();
-    //
-    //     s_DiffuseScentJobsComplete_p.Begin();
-    //     foreach (var job in JobHandles)
-    //     {
-    //         job.Complete();
-    //     }
-    //     s_DiffuseScentJobsComplete_p.End();
-    // }
     
     static ProfilerMarker s_DiffuseScentJobSchedule_p = new ProfilerMarker("UrbTile.DiffuseScent.JobScheduling");
 
