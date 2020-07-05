@@ -1,5 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Entities;
+using Unity.Jobs;
 using UnityEngine;
 
 public class UrbMap : MonoBehaviour
@@ -65,7 +69,7 @@ public class UrbMap : MonoBehaviour
                 MapTiles[i][ii] = new UrbTile(this, i, ii);
                 MapTiles[i][ii].TerrainTypes = new UrbPathTerrain[] { DefaultTerrain };
                 //Instead of the Coroutines, we're going to be using Unity Jobs.
-                // CoroutineList.Add(MapTiles[i][ii].ScentCoroutine());
+                CoroutineList.Add(MapTiles[i][ii].RunScentJobs());
                 CoroutineList.Add(MapTiles[i][ii].Environment.EnvironmentCoroutine());
             }
         }
@@ -258,16 +262,4 @@ public class UrbMap : MonoBehaviour
             }
         }
     }
-
-    public void RefreshAllScent()
-    {
-        for (int i = 0; i < Xsize; i++)
-        {
-            for (int ii = 0; ii < Ysize; ii++)
-            {
-                MapTiles[i][ii].ClearScent();
-            }
-        }
-    }
-
 }

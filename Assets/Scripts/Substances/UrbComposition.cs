@@ -1,12 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Profiling;
 using UnityEngine;
 
 public class UrbComposition
 {
     protected UrbComposition ContainingComposion;
-
     public UrbMembrane Membrane { get; protected set; }
 
     public float MaxCapacity { get; protected set; } = 1000;

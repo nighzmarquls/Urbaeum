@@ -1,5 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Entities;
+using Unity.Jobs;
 using Unity.Profiling;
 using UnityEngine;
 using UrbUtility;
@@ -25,22 +28,20 @@ public struct DirtyableTag
     public bool IsDirty;
 }
 
-public struct UrbScent
+public struct UrbScent : ISharedComponentData
 {
     public const float ScentDecay = 0.5f;
-    const float DecayLimit = 0.0001f;
+    public const float DecayLimit = 0.0001f;
     public const float ScentDiffusion = 0.95f;
     public const float ScentInterval = 1.2f;
     public const uint MaxTag = (uint)UrbScentTag.MaxScentTag;
     
     public DirtyableTag[] Tags;
-
     public bool dirty;
 
     public float this[UrbScentTag i] {
         get { return this[(int)i]; }
-        set { this[(int)i] = value;
-        }
+        set { this[(int)i] = value; }
     }
 
     public float this[int i] {
@@ -56,56 +57,77 @@ public struct UrbScent
             Tags[i].IsDirty = false;
         }
     }
+}
 
-    static ProfilerMarker s_DecayScent_p = new ProfilerMarker("UrbScent.DecayScent");
-    public IEnumerator DecayScent()
+
+[UpdateBefore(typeof(DecayScentJob))]
+public struct ReceiveScentJob : IJobParallelFor
+{
+    public NativeArray<UrbScent> passTo;
+    [ReadOnly]
+    public NativeArray<UrbScent> toPass;
+    public float diffusion;
+    public void Execute(int index)
     {
-        s_DecayScent_p.Begin();
-        for (int i = 0; i < Tags.Length; i++)
+        var scent = passTo[index];
+        if (!scent.dirty)
         {
-            if (!Tags[i].IsDirty)
-            {
-                continue;
-            }
-            
-            if (Tags[i].Value > DecayLimit)
-            {
-                this[i] = Tags[i].Value * ScentDecay;
-            }
-            else
-            {
-                this[i] = 0.0f;
-            }
+            return;
         }
-        s_DecayScent_p.End();
-        yield return ScentThrottle.PerformanceThrottle();
-    }
-
-    public static UrbThrottle ScentThrottle = new UrbThrottle(7);
-
-    static ProfilerMarker s_ReceiveScent_p = new ProfilerMarker("UrbScent.ReceiveScent");
-
-    public IEnumerator ReceiveScent(UrbScent input, float Diffusion = 1.0f)
-    {
-        s_ReceiveScent_p.Begin();
+        
+        var tags = scent.Tags;
         DirtyableTag inputTag;
         float diffusedVal;
-        for (int i = 0; i < Tags.Length; i++)
+        for (int i = 0; i < tags.Length; i++)
         {
-            inputTag = input.Tags[i];
+            inputTag = toPass[index].Tags[i];
             if (!inputTag.IsDirty)
             {
                 continue;
             }
 
-            diffusedVal = inputTag.Value * Diffusion;
-            if (Tags[i].Value < diffusedVal)
+            diffusedVal = inputTag.Value * diffusion;
+            if (tags[i].Value < diffusedVal)
             {
-                this[i] = diffusedVal;
+                scent[i] = diffusedVal;
+            }
+        }
+    }
+}
+
+[UpdateAfter(typeof(ReceiveScentJob))]
+public struct DecayScentJob : IJobParallelFor
+{
+    public NativeArray<UrbScent> scents;
+    public void Execute(int index)
+    {
+        var scent = scents[index];
+        if (!scent.dirty)
+        {
+            return;
+        }
+        
+        var tags = scent.Tags;
+        DirtyableTag tag; 
+        for (int i = 0; i < tags.Length; i++)
+        {
+            tag = tags[i];
+            if (!tag.IsDirty)
+            {
+                continue;
+            }
+
+            if (tag.Value > UrbScent.DecayLimit)
+            {
+                scent[i] = tag.Value * UrbScent.ScentDecay;
+            }
+            else
+            {
+                scent[i] = 0.0f;
             }
         }
 
-        s_ReceiveScent_p.End();
-        yield return ScentThrottle.PerformanceThrottle();
+        scent.dirty = false;
+        scents[index] = scent;
     }
 }

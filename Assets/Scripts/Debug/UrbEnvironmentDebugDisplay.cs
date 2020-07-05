@@ -29,6 +29,7 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
 
     void Initialize()
     {
+        Debug.Log("Initializing EnvironmentDebugDisplay", this);
         needsInit = false;
         debugTiles = new GameObject[targetMap.Xsize][];
         scentRoutines = new List<IEnumerator>();
@@ -47,11 +48,11 @@ public class UrbEnvironmentDebugDisplay : MonoBehaviour
                 debugTiles[i][ii] = Instantiate<GameObject>(Exemplar, targetMap.TileAddressToLocation(i, ii), Quaternion.identity);
                 UrbTile tile = targetMap.GetTile(i, ii);
                 Debug.Log("Initializing Scent coroutine in EnvDebugDisplay");
-                IEnumerator routine = tile.ScentCoroutine();
-                StartCoroutine(routine);
-                scentRoutines.Add(routine);
+                // IEnumerator routine = tile.ScentCoroutine();
+                // StartCoroutine(routine);
+                // scentRoutines.Add(routine);
 
-                routine = tile.Environment.EnvironmentCoroutine();
+                var routine = tile.Environment.EnvironmentCoroutine();
                 StartCoroutine(routine);
                 environmentRoutine.Add(routine);
             }

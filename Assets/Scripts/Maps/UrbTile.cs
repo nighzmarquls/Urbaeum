@@ -1,7 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.WSA;
 
 public class UrbTile
 {
@@ -21,9 +26,8 @@ public class UrbTile
 
     public float TimeMultiplier { get { return OwningMap.TimeMultiplier;  } }
 
-    bool ScentDirty = false;
     public UrbPathTerrain[] TerrainTypes;
-    public UrbScent[][] TerrainFilter;
+    public NativeArray<UrbScent>[] TerrainFilter;
 
     protected List<UrbAgent> Contents;
     public List<UrbAgent> Occupants; 
@@ -149,15 +153,7 @@ public class UrbTile
         }
 
         float Free = FreeCapacity / TileCapacity;
-        if (Free <= 0)
-        {
-            ScentDirty = false;
-            Blocked = true;
-        }
-        else
-        {
-            Blocked = false;
-        }
+        Blocked = Free <= 0;
 
         ScentDiffusion = UrbScent.ScentDiffusion * Free;
         Occupants = OrderedOccupants;
@@ -170,10 +166,10 @@ public class UrbTile
         Contents = new List<UrbAgent>();
         OwningMap = CreatingMap;
 
-        TerrainFilter = new UrbScent[MaxTerrain][];
+        TerrainFilter = new NativeArray<UrbScent>[MaxTerrain];
         for(int i = 0; i < MaxTerrain; i++)
         {
-            TerrainFilter[i] = new UrbScent[MaxSize];
+            TerrainFilter[i] = new NativeArray<UrbScent>(MaxSize, Allocator.Persistent);
             for (int ii = 0; ii < MaxSize; ii++)
             {
                 TerrainFilter[i][ii] = new UrbScent{
@@ -192,6 +188,7 @@ public class UrbTile
         YAddress = CreatedY;
         Links = new UrbTile[] { null, null, null };
         LinkCount = 0;
+        
     }
 
     public UrbTile(UrbMap CreatingMap, int CreatedX, int CreatedY, UrbTile[] LinkedTiles)
@@ -414,33 +411,23 @@ public class UrbTile
         {
             PathableSize = 1;
         }
-        ScentDirty = true;
     }
 
     public void AddScent(UrbScentTag tag, float value)
     {
-        ScentDirty = true;
         for (int i = 0; i < TerrainTypes.Length; i++)
         {
             int TerrainType = (int)TerrainTypes[i];
-
             for (int s = 0; s < SizeLimit; s++)
             {
-                TerrainFilter[TerrainType][s][tag] = value;
+                var scent = TerrainFilter[TerrainType][s];  
+                scent[tag] = value;
+                TerrainFilter[TerrainType][s] = scent;
             }
-            
         }
-
-    }
-
-    public void ClearScent()
-    {
-        ScentDirty = true;
-
     }
 
     public UrbAgent CurrentContent {
-
         get {
             if(Contents == null || Contents.Count == 0)
             {
@@ -531,8 +518,7 @@ public class UrbTile
         }
 
         Links[emptySlot] = input;
-
-        ScentDirty = true;
+        
         LinksDirty = true;
         Environment.MakeDirty();
 
@@ -571,8 +557,6 @@ public class UrbTile
         }
 
         Links[idx] = null;
-
-        ScentDirty = true;
         LinksDirty = true;
         Environment.MakeDirty();
 
@@ -596,68 +580,50 @@ public class UrbTile
             Contents[i].Remove();
         }
     }
-
+    
+    
     static ProfilerMarker s_TileScentCoroutineLoop_p = new ProfilerMarker("UrbTile.ScentCoTerrainLoop");
-    public IEnumerator ScentCoroutine()
+    [JetBrains.Annotations.Pure]
+    [Pure]
+    public IEnumerator RunScentJobs()
     {
         Debug.Log("Initializing Scent coroutine in UrbTile");
-
-        while(true)
+        yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
+        
+        Ordering = false;
+        
+        if (!UrbSystemIO.HasInstance || UrbSystemIO.Instance.Loading)
         {
+            //UrbSystemIO can take a second or two to load. 
             yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
-            Ordering = false;
-            
-            if (!UrbSystemIO.HasInstance || UrbSystemIO.Instance.Loading)
-            {
-                //UrbSystemIO can take a second or two to load, so may as well make sure we give it the chance. 
-                //yield return new WaitForSeconds(0.2f);
-                continue;
-            }
+        }
+        
+        List<JobHandle> jobs = new List<JobHandle>(10);
+        s_TileScentCoroutineLoop_p.Begin();
+        //TODO: All of this should be an IJob
+        for (int t = 0; t < TerrainTypes.Length; t++)
+        {
+            var terrainType = (int)TerrainTypes[t];
 
-            if (!ScentDirty)
+            for (int s = 0; s < SizeLimit; s++)
             {
-                continue;
-            }
-
-            s_TileScentCoroutineLoop_p.Begin();
-            for (int t = 0; t < TerrainTypes.Length; t++)
-            {
-                for (int s = 0; s < SizeLimit; s++)
+                s_TileScentCoroutineLoop_p.End();
+                jobs.Add(new DecayScentJob
                 {
-                    var terrainType = (int)TerrainTypes[t];
-                    var terrainFilter = TerrainFilter[terrainType][s];
-                    if (!terrainFilter.dirty)
-                    {
-                        continue;
-                    }
-                    
-                    terrainFilter.dirty = false;
-                    s_TileScentCoroutineLoop_p.End();
-                    yield return terrainFilter.DecayScent();
-                    s_TileScentCoroutineLoop_p.Begin();
-                    if (ScentDirty)
-                    {
-                        continue;
-                    }
-
-                    //Want to use the terrainFilter var above, but 
-                    //I need to make sure that's not going to change what happens
-                    //here for this ScentDirty.
-                    ScentDirty = TerrainFilter[(int)TerrainTypes[t]][s].dirty || ScentDirty;
-                }
+                    scents = TerrainFilter[terrainType],
+                    //Setting the innerloopBatchCounts to 1 because I'm not sure how they handle them yet.
+                }.Schedule(TerrainFilter[terrainType].Length, 1));
+                s_TileScentCoroutineLoop_p.Begin();
             }
-            s_TileScentCoroutineLoop_p.End();
+        }
 
-            if (!ScentDirty)
-            {
-                continue;
-            }
-            
-            yield return DiffuseScent();
-            ScentDirty = false;
+        foreach (var job in jobs)
+        {
+            job.Complete();
         }
     }
 
+    static ProfilerMarker s_DiffuseScentJobsComplete_p = new ProfilerMarker("UrbTile.PropagateScent.DiffuseScent_JobCompleteWaiting");
     static ProfilerMarker s_PropagateScent_p = new ProfilerMarker("UrbTile.PropagateScent");
     //TODO: Optimize this
     public void PropagateScent()
@@ -666,6 +632,8 @@ public class UrbTile
         //TODO: The array-copying here seems non-performant.
         var ToAdd = new List<UrbTile>(OwningMap.GetAdjacent(XAddress, YAddress));
         var ToDiffuse = new List<UrbTile>(ToAdd.Count);
+
+        List<JobHandle> JobHandles = new List<JobHandle>(ToAdd.Count);
         
         while (ToAdd.Count > 0)
         {
@@ -676,34 +644,41 @@ public class UrbTile
                 continue; 
             }
             
-            ToDiffuse.Add(ToAdd[0]);
+            ToDiffuse.Add(scent);
+            JobHandles.AddRange(ToAdd[0].DiffuseScent());
             ToAdd.AddRange(OwningMap.GetAdjacent(ToAdd[0].XAddress, ToAdd[0].YAddress));
             ToAdd.RemoveAt(0);
         }
 
-        foreach(UrbTile Tile in ToDiffuse)
-        {
-            // ReSharper disable once IteratorMethodResultIsIgnored
-            Tile.DiffuseScent();
-        }
-
+        Debug.Log($"DiffuseScent Scheduled {JobHandles.Count} jobs");
         s_PropagateScent_p.End();
+
+        s_DiffuseScentJobsComplete_p.Begin();
+        foreach (var job in JobHandles)
+        {
+            job.Complete();
+        }
+        s_DiffuseScentJobsComplete_p.End();
     }
-
     
-    static ProfilerMarker s_DiffuseScent_p = new ProfilerMarker("UrbTile.DiffuseScent");
+    static ProfilerMarker s_DiffuseScentJobSchedule_p = new ProfilerMarker("UrbTile.DiffuseScent.JobScheduling");
 
-    IEnumerator DiffuseScent()
+    List<JobHandle> DiffuseScent()
     {
-        s_DiffuseScent_p.Begin();
+        List<JobHandle> scentJobs = new List<JobHandle>(5);
+        s_DiffuseScentJobSchedule_p.Begin();
         if (LinksDirty)
         {
             Adjacent = OwningMap.GetAdjacent(XAddress, YAddress, true);
             LinksDirty = false;
         }
 
+        //TODO: Find a way of optimizing this so we don't have so many nested loops
+        int terrainType;
         for (int i = 0; i < TerrainTypes.Length; i++)
         {
+            terrainType = (int) TerrainTypes[i];
+
             for(int t = 0; t < Adjacent.Length; t++)
             {
                 var adj = Adjacent[t];
@@ -712,27 +687,23 @@ public class UrbTile
                     continue;
                 }
 
-                for (int check = 0; check < Adjacent[t].TerrainTypes.Length; check++)
+                for (int check = 0; check < adj.TerrainTypes.Length; check++)
                 {
-                    var terrainType = (int) TerrainTypes[i];
-                    
                     if (check != terrainType)
                         continue;
 
-                    adj.ScentDirty = true;
-                    for(int s = 0; s < adj.SizeLimit; s++)
+                    var newJob = new ReceiveScentJob()
                     {
-                        var filter = adj.TerrainFilter[terrainType][s];
-                        var scent = filter.ReceiveScent(TerrainFilter[terrainType][s], ScentDiffusion);
-                        s_DiffuseScent_p.End();
-                        
-                        yield return scent;
-                        s_DiffuseScent_p.Begin();
-                    }
+                        passTo = adj.TerrainFilter[terrainType],
+                        toPass = TerrainFilter[terrainType],
+                        diffusion = ScentDiffusion
+                        //Setting the innerloopBatchCounts to 1 because I'm not sure how they handle them yet.
+                    }.Schedule(adj.TerrainFilter[terrainType].Length, 1);
+                    scentJobs.Add(newJob);
                 }     
             }
         }
-
-        s_DiffuseScent_p.End();
+        s_DiffuseScentJobSchedule_p.End();
+        return scentJobs;
     }
 }
