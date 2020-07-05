@@ -12,15 +12,15 @@ public class UrbScentInvestigator : UrbInvestigatorTool
     {
         Color TileColor = DetectionColor;
         TileColor.a = 0;
-        if (Tile.TerrainFilter[0][2][UrbScentTag.Plant] > 0)
+        if (Tile.TerrainFilter[0][2][DisplayScentTag] > 0)
         {
             TileColor.a = (Tile.TerrainFilter[0][2][DisplayScentTag] * Sensitivity);
         }
-        else if (Tile.TerrainFilter[0][1][UrbScentTag.Plant] > 0)
+        else if (Tile.TerrainFilter[0][1][DisplayScentTag] > 0)
         {
             TileColor.a = (Tile.TerrainFilter[0][1][DisplayScentTag] * Sensitivity);
         }
-        else if (Tile.TerrainFilter[0][0][UrbScentTag.Plant] > 0)
+        else if (Tile.TerrainFilter[0][0][DisplayScentTag] > 0)
         {
             TileColor.a = (Tile.TerrainFilter[0][0][DisplayScentTag] * Sensitivity);
         }
