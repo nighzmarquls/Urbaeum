@@ -173,7 +173,7 @@ public class UrbTile
             for (int ii = 0; ii < MaxSize; ii++)
             {
                 TerrainFilter[i][ii] = new UrbScent{
-                    Tags = new DirtyableTag[UrbScent.MaxTag],
+                    Tags = new NativeArray<DirtyableTag>((int)UrbScentTag.MaxScentTag, Allocator.Persistent),
                 };
             }
         }

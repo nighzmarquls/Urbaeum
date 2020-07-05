@@ -28,15 +28,14 @@ public struct DirtyableTag
     public bool IsDirty;
 }
 
-public struct UrbScent : ISharedComponentData
+public struct UrbScent : IComponentData
 {
     public const float ScentDecay = 0.5f;
     public const float DecayLimit = 0.0001f;
     public const float ScentDiffusion = 0.95f;
     public const float ScentInterval = 1.2f;
-    public const uint MaxTag = (uint)UrbScentTag.MaxScentTag;
     
-    public DirtyableTag[] Tags;
+    public NativeArray<DirtyableTag> Tags;
     public bool dirty;
 
     public float this[UrbScentTag i] {
@@ -46,15 +45,18 @@ public struct UrbScent : ISharedComponentData
 
     public float this[int i] {
         get { return Tags[i].Value; }
-        set {
-            Tags[i].Value = value;
+        set
+        {
+            var tag = Tags[i];
+            tag.Value = value;
             if (value > 0)
             {
                 dirty = true;
-                Tags[i].IsDirty = true;
+                tag.IsDirty = true;
                 return;
             }
-            Tags[i].IsDirty = false;
+            tag.IsDirty = false;
+            Tags[i] = tag;
         }
     }
 }
