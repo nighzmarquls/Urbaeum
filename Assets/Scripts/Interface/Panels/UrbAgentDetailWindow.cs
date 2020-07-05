@@ -5,13 +5,23 @@ using UnityEngine.UI;
 
 public class UrbAgentDetailWindow : UrbDisplayWindow
 {
-    public UrbInterfaceInput AgentTrackInput;
+    public UrbInterfaceInput TrackAgentInput;
 
-    bool AgentAssigned = false;
+    public bool AgentAssigned { get; protected set; } = false;
     protected UrbAgent mAgent = null;
     public UrbAgent TargetAgent { get { return mAgent; } set { mAgent = value; AgentAssigned = value != null; } }
 
     public Text DisplayText;
+
+    public override void Awake()
+    {
+        base.Awake();
+
+        if(TrackAgentInput != null)
+        {
+            TrackAgentInput.UserAction = new UrbTrackAgent { OwningWindow = this };
+        }
+    }
 
     public void Update()
     {
@@ -138,5 +148,29 @@ public class UrbGetAgentDetails : UrbUserAction
         }
 
         base.MouseClick(currentCursorTile);
+    }
+}
+
+public class UrbTrackAgent : UrbUserAction
+{
+    public override string Name => "Track Agent";
+    public override string MapDisplayAssetPath => "";
+
+    public UrbAgentDetailWindow OwningWindow;
+
+    public override void SelectAction()
+    {
+        if (OwningWindow == null)
+            return;
+
+        if (OwningWindow.InFocus || OwningWindow.MouseOver)
+        {
+            base.SelectAction();
+            
+            if(OwningWindow.AgentAssigned)
+            {
+                UrbCameraControls.Focus = OwningWindow.TargetAgent; 
+            }
+        }
     }
 }

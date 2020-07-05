@@ -25,7 +25,7 @@ public class UrbDisplayWindow : MonoBehaviour
 
     public bool MouseOver { get; protected set; } = false;
 
-    public void Awake()
+    public virtual void Awake()
     {
         WindowRect = GetComponent<RectTransform>();
 

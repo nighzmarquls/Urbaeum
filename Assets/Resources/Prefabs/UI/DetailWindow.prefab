@@ -56,6 +56,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CloseInput: {fileID: 828108535141796374}
+  TrackAgentInput: {fileID: 7841767448769247604}
   DisplayText: {fileID: 6412630156964978556}
 --- !u!1 &6322226752640170737
 GameObject:
@@ -234,6 +235,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Blank
       objectReference: {fileID: 0}
+    - target: {fileID: 107553651535682545, guid: c77f1bac439041841b86731627d074d5,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 107553651555353463, guid: c77f1bac439041841b86731627d074d5,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -373,6 +379,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Blank
+      objectReference: {fileID: 0}
+    - target: {fileID: 107553651535682545, guid: c77f1bac439041841b86731627d074d5,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 107553651555353463, guid: c77f1bac439041841b86731627d074d5,
         type: 3}
@@ -623,7 +634,7 @@ PrefabInstance:
     - target: {fileID: 6346166530166693735, guid: c77f1bac439041841b86731627d074d5,
         type: 3}
       propertyPath: Shortcut
-      value: 27
+      value: 108
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c77f1bac439041841b86731627d074d5, type: 3}
@@ -633,6 +644,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 3801479159567590931}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7841767448769247604 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6346166530166693735, guid: c77f1bac439041841b86731627d074d5,
+    type: 3}
+  m_PrefabInstance: {fileID: 3801479159567590931}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5913680dc4ec674c89722d1bd30db85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6011202171420775793
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -808,6 +831,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Blank
+      objectReference: {fileID: 0}
+    - target: {fileID: 107553651535682545, guid: c77f1bac439041841b86731627d074d5,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 107553651555353463, guid: c77f1bac439041841b86731627d074d5,
         type: 3}
