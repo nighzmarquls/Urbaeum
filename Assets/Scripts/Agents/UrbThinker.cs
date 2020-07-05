@@ -295,6 +295,7 @@ public class UrbThinker : UrbBase
         {
             Evaluation *= RestUrge;
         }
+
         if ((Input.UrgeSatisfied & UrbUrgeCategory.Safety) > 0)
         {
             Evaluation *= SafetyUrge;

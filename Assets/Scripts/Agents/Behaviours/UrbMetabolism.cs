@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(UrbBody))]
 public class UrbMetabolism : UrbBehaviour
 {
-    public const float EnergyConversionRatio = 0.00001f ;
+    public const float EnergyConversionRatio = 0.00006f ;
     public UrbSubstance[] BodyGrowthRecipe;
     public UrbSubstanceTag BodyEnergyReserveStorage;
     public float GrowthRate = 10.0f;
@@ -100,6 +100,8 @@ public class UrbMetabolism : UrbBehaviour
             if (SpentCost < EnergyDebt)
             {
                 Starving = true;
+                mAgent.Express(UrbDisplayFace.Expression.Cry);
+
                 float RemainingDebt = EnergyDebt - SpentCost;
                 for (int b = 0; b < BodyGrowthRecipe.Length; b++)
                 {
@@ -111,6 +113,10 @@ public class UrbMetabolism : UrbBehaviour
                     }
                 }
                 EnergyDebt = RemainingDebt;
+            }
+            else
+            {
+                mAgent.Express(UrbDisplayFace.Expression.Default);
             }
         }
 
@@ -169,6 +175,7 @@ public class UrbMetabolism : UrbBehaviour
         {
             Growth = mAgent.Body.BodyComposition.Membrane.Restore(GrowthRate);
             Healing = true;
+            mAgent.Express(UrbDisplayFace.Expression.Cry);
         }
 
         for (int g = 0; g < BodyGrowthRecipe.Length; g++)

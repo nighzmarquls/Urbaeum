@@ -420,8 +420,15 @@ public class UrbAgent : UrbBase
     bool IsMindNull;
     Camera Camera;
 
+    public void Express(UrbDisplayFace.Expression Expression)
+    {
+        Display.Express(Expression);
+    }
+
     public void Die()
     {
+        Express(UrbDisplayFace.Expression.Dead);
+
         if (DeathBehaviours != null)
         {
             for (int d = 0; d < DeathBehaviours.Length; d++)

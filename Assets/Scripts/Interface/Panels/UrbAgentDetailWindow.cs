@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class UrbAgentDetailWindow : UrbDisplayWindow
 {
+    public UrbInterfaceInput AgentTrackInput;
+
     bool AgentAssigned = false;
     protected UrbAgent mAgent = null;
     public UrbAgent TargetAgent { get { return mAgent; } set { mAgent = value; AgentAssigned = value != null; } }

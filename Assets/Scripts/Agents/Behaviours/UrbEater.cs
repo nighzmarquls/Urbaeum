@@ -113,7 +113,7 @@ public class UrbEater : UrbBehaviour
     static ProfilerMarker s_ExecuteTileBehaviour = new ProfilerMarker("UrbEater.ExecuteTileBehaviour");
     public override void ExecuteTileBehaviour()
     {
-        
+        mAgent.Express(UrbDisplayFace.Expression.Default);
         using (s_ExecuteTileBehaviour.Auto())
         {
             float BiteSize = BiteAttack.Test(mAgent);
@@ -123,6 +123,7 @@ public class UrbEater : UrbBehaviour
                 float Result = BiteAttack.Execute(mAgent, DetectedFood[d].mAgent, -Eaten);
                 if (Result > 0)
                 {
+                    mAgent.Express(UrbDisplayFace.Expression.Joy);
                     for (int f = 0; f < FoodSubstances.Length; f++)
                     {
                         Eaten += DetectedFood[d].BodyComposition.TransferTo(Stomach, FoodSubstances[f], Result);

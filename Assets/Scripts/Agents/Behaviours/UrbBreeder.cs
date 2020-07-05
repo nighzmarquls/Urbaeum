@@ -208,10 +208,12 @@ public class UrbBreeder : UrbBehaviour
                         float Result = LoveAction.Execute(mAgent, PossibleMate.mAgent, 0);
                         if (Result > 0)
                         {
+                            mAgent.Express(UrbDisplayFace.Expression.Joy);
                             Result = LoveAction.Execute(PossibleMate.mAgent, mAgent, 0);
 
                             if (Result > 0)
                             {
+                                PossibleMate.mAgent.Express(UrbDisplayFace.Expression.Joy);
                                 MateCount++;
                             }
                         }

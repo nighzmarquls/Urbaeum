@@ -64,12 +64,14 @@ public class UrbBody : UrbBase
         float TotalBody = BodyComposition.Mass; 
         if(Utilization >= TotalBody)
         {
+            mAgent.Express(UrbDisplayFace.Expression.Closed);
             return 0;
         }
 
         Utilization += Amount;
         if(Utilization > TotalBody)
         {
+            mAgent.Express(UrbDisplayFace.Expression.Closed);
             Amount -= Utilization - TotalBody;
         }
         return Amount;

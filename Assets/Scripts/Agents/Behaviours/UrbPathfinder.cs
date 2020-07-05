@@ -68,6 +68,7 @@ public class UrbPathfinder : UrbBehaviour
             }
 
         }
+
         return goalTile;
     }
 

@@ -112,6 +112,7 @@ public class UrbMovement : UrbBehaviour
 
             if (Result > 0)
             {
+                
                 s_MoveAction_p_e.Begin();
                 UrbPathfinder Pathfinder = Instigator.GetComponent<UrbPathfinder>();
                 UrbMovement Movement = Instigator.GetComponent<UrbMovement>();

@@ -12,6 +12,7 @@ public class UrbDamage : UrbAction
 
         Result = Target.Body.BodyComposition.Membrane.Impact(Instigator.Body.BodyComposition, DamageSubstance, Result);
 
+        Target.Express(UrbDisplayFace.Expression.Flinch);
         DisplayActionIcon(Instigator, Target.Location);
         return Modifier;
     }

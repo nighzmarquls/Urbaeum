@@ -11,6 +11,7 @@ public class UrbDisplayFace : UrbDisplayFeature
         Cry,
         Flinch,
         Joy,
+        Dead,
         MaxNum
     }
 
