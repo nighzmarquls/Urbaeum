@@ -17,9 +17,13 @@ public class UrbAtlas : MonoBehaviour
 
     // Start is called before the first frame update
 
+    
     public float TimeMultiplier {
         set {
-
+            for(int i = 0; i < Maps.Count;i++)
+            {
+                Maps[i].TimeMultiplier = value;
+            }
         }
     }
     void Start()

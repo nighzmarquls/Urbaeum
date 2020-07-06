@@ -50,7 +50,7 @@ public class UrbMovement : UrbBehaviour
             }
             Goal.OnAgentArrive(mAgent);
 
-            float TravelTime = (1.0f / (Speed* mAgent.TimeMultiplier));
+            float TravelTime = (mAgent.TimeMultiplier / Speed);
             float ArrivalTime = Time.time + TravelTime;
             float StartTime = Time.time;
             Vector3 ArrivalLocation = Goal.Location;

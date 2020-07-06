@@ -31,7 +31,7 @@ public class UrbCameraControls : MonoBehaviour
         }
     }
 
-    public float AdjustedCameraSpeed {  get { return CameraSpeed * (mCamera.orthographicSize / StartingSize);  } }
+    public float AdjustedCameraSpeed {  get { return ( CameraSpeed * (mCamera.orthographicSize / StartingSize) )/ Time.timeScale;  } }
 
     Vector3 ViewportPosition;
     protected Vector3 WorldPosition;
@@ -89,14 +89,14 @@ public class UrbCameraControls : MonoBehaviour
 
         if(Input.GetKey(KeyCode.Plus) || Input.GetKey(KeyCode.KeypadPlus))
         {
-            size -= CameraZoomSpeed*Time.deltaTime;
+            size -= (CameraZoomSpeed*Time.deltaTime) / Time.timeScale;
         }
         else if(Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus))
         {
-            size += CameraZoomSpeed * Time.deltaTime;
+            size += (CameraZoomSpeed * Time.deltaTime) / Time.timeScale;
         }
 
-        size -= Input.mouseScrollDelta.y * CameraZoomSpeed * Time.deltaTime;
+        size -= (Input.mouseScrollDelta.y * CameraZoomSpeed * Time.deltaTime) / Time.timeScale;
 
 
         return Mathf.Max(size, MinZoomSize);

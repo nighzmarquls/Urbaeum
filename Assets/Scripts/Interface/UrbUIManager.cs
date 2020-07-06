@@ -25,6 +25,12 @@ public class UrbUIManager : MonoBehaviour
         get { return Instance == null || Instance.Atlas == null || Instance.CurrentAction == null || Instance.CurrentCursorTile == null; }//|| Instance.IsPaused; }
     }
 
+    public float TimeMultiplier {
+        set {
+            Time.timeScale = value;
+        }
+    }
+
     public static void SetCurrentAction(UrbUserAction Action)
     {
         if (Instance == null)
@@ -171,6 +177,7 @@ public class UrbUIManager : MonoBehaviour
         {
             Atlas.ResumeBehaviours();
         }
+
         UrbAgentManager.SetPauseOnAllAgents(Pause);
         
     }
