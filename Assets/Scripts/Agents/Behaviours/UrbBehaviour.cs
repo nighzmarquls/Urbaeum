@@ -9,7 +9,6 @@ public class UrbBehaviour : UrbBase
     [SerializeField]
     protected float Interval = 1.0f;
     private IEnumerator mCoroutine;
-    protected UrbAgent mAgent;
 
     public virtual UrbUrgeCategory UrgeSatisfied { get { return UrbUrgeCategory.None; } }
 
@@ -37,7 +36,6 @@ public class UrbBehaviour : UrbBase
 
     public override void OnEnable()
     {
-        mAgent = GetComponent<UrbAgent>();
         mCoroutine = IntervalCoroutine();
         Eater = GetComponent<UrbEater>();
         IsEater = Eater != null;

@@ -134,6 +134,10 @@ public class UrbPerception : UrbBehaviour
                     ContactBehaviours[b].RegisterTileForBehaviour(Evaluation, ContactSearchCache[i], i);
                 }
             }
+            s_ContactCheck_p.End();
+            yield return BehaviourThrottle;
+            s_ContactCheck_p.Begin();
+
         }
 
         s_ContactCheck_p.End();

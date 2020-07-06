@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 [System.Serializable]
@@ -313,8 +314,7 @@ public class UrbTileprint
                 if (Tile.Occupants.Contains(Agent))
                 {
                     Tile.Occupants.Remove(Agent);
-                        Tile.ReorderContents();
-                    }
+                }
                 break;
             default:
                 break;
@@ -329,8 +329,10 @@ public class UrbTileprint
         return new Vector2(Xoffset,Yoffset);
     }
 
+    static ProfilerMarker s_ArriveAtTile_p = new ProfilerMarker("UrbTilePrint.ArriveAtTile"); 
     public void ArriveAtTile(UrbTile Tile, UrbAgent Agent)
     {
+        s_ArriveAtTile_p.Begin();
         int Xoffset = 0;
         int Yoffset = 0;
 
@@ -354,6 +356,8 @@ public class UrbTileprint
                 PrintAtTile(Fill, FillingTile, Agent);
             }
         }
+
+        s_ArriveAtTile_p.End();
     }
 
     public void DepartFromTile(UrbTile Tile, UrbAgent Agent)

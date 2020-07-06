@@ -48,7 +48,6 @@ public class UrbThinker : UrbBase
 
     protected UrbPathfinder mPathfinder;
     protected UrbMovement mMovement;
-    protected UrbAgent mAgent;
     
     static ProfilerMarker s_Initialize_p = new ProfilerMarker("UrbThinker.Initialize");
 
