@@ -487,7 +487,7 @@ public class UrbAgent : UrbBase
                 BodyDisplay.UpdateDisplay(mBody.BodyComposition);
             }
         }
-
+        
         s_TickToBody_p.End();
 
         s_TickToDisplay_p.Begin();
@@ -497,7 +497,7 @@ public class UrbAgent : UrbBase
             if (massChange > MassChangeToReorder && Shuffle)
             {
                 LastCheckedMass = Mass;
-                //CurrentTile?.ReorderContents();
+                CurrentTile?.VisualShuffle();
             }
 
             if (!(Time.time > NextReposition) || !(Display.Significance > UrbDisplay.FeatureSignificance))

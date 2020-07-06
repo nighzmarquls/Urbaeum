@@ -73,71 +73,11 @@ public class UrbTile
     public Vector3 Location { get { return OwningMap.TileAddressToLocation(XAddress, YAddress) + LocationOffset;} }
     public Vector3 RawLocation { get { return OwningMap.TileAddressToLocation(XAddress, YAddress); } }
 
-    static ProfilerMarker s_ReorderContents_p = new ProfilerMarker("UrbTile.ReorderContents.ToTileWithBiggestMass");
-    static ProfilerMarker s_ReorderContents_p2_p = new ProfilerMarker("UrbTile.ReorderContents.AfterTileWithBiggestMass");
-    
-    public void ReorderContents()
+    public void UpdateClearance()
     {
-        s_ReorderContents_p.Begin();
-        LocationOffset = Vector3.zero;
         if (Occupants.Count <= 0)
         {
-            s_ReorderContents_p.End();
             return;
-        }
-        
-        Vector3 Center = OwningMap.TileAddressToLocation(XAddress, YAddress);
-        List<UrbAgent> OrderedOccupants = new List<UrbAgent>(Occupants.Count);
-        float BiggestMass = Occupants[0].MassPerTile;
-        for (int i = 0; i < Occupants.Count; i++)
-        {
-            var occupant = Occupants[i];
-            if (occupant.WasDestroyed || !occupant.isActiveAndEnabled)
-            {
-                continue;
-            }
-            
-            if(occupant.MassPerTile > BiggestMass)
-            {
-                OrderedOccupants.Insert(0, occupant);
-                BiggestMass = occupant.MassPerTile;
-            }
-            else
-            {
-                OrderedOccupants.Add(occupant);
-            }
-        }
-        
-        s_ReorderContents_p.End();
-        s_ReorderContents_p2_p.Begin();
-       
-        float Turn = 0;
-        float TurnAdjust = (Mathf.PI);
-        float Radius = 0;
-        float RadiusAdjust = 3;
-        float TileCapacityOffset = TileCapacity / 4f;
-        
-        LocationOffset = new Vector3(Mathf.Sin(Turn), Mathf.Cos(Turn), 0);
-        LocationOffset *= (Radius * OwningMap.TileSize);
-        var summedLocationOffset = new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x) + LocationOffset; 
-        
-        for (int i = 0; i < OrderedOccupants.Count; i++)
-        {
-            if(i > MaximumOccupants)
-            {
-                Debug.Log("Max entities on a tile have been reached. forcibly removing.");
-                OrderedOccupants[i].Remove(false);
-                continue;
-            }
-            
-            if (OrderedOccupants[i].Shuffle)
-            {
-                OrderedOccupants[i].Location = Center + summedLocationOffset;
-            }
-            Turn += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) * TurnAdjust;
-            TurnAdjust *= 0.85f;
-            Radius += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) / RadiusAdjust;
-            RadiusAdjust += 5f;
         }
 
         float Free = FreeCapacity / TileCapacity;
@@ -152,8 +92,62 @@ public class UrbTile
         }
 
         ScentDiffusion = UrbScent.ScentDiffusion * Free;
+    }
+
+    public void VisualShuffle()
+    {
+        LocationOffset = Vector3.zero;
+        if (Occupants.Count <= 0)
+        {
+            return;
+        }
+
+        Vector3 Center = OwningMap.TileAddressToLocation(XAddress, YAddress);
+        List<UrbAgent> OrderedOccupants = new List<UrbAgent>(Occupants.Count);
+        float BiggestMass = Occupants[0].MassPerTile;
+        for (int i = 0; i < Occupants.Count; i++)
+        {
+            var occupant = Occupants[i];
+            if (occupant.WasDestroyed || !occupant.isActiveAndEnabled)
+            {
+                continue;
+            }
+
+            if (occupant.MassPerTile > BiggestMass)
+            {
+                OrderedOccupants.Insert(0, occupant);
+                BiggestMass = occupant.MassPerTile;
+            }
+            else
+            {
+                OrderedOccupants.Add(occupant);
+            }
+        }
+
+        float Turn = 0;
+        float TurnAdjust = (Mathf.PI);
+        float Radius = 0;
+        float RadiusAdjust = 3;
+        float TileCapacityOffset = TileCapacity / 4f;
+
+        LocationOffset = new Vector3(Mathf.Sin(Turn), Mathf.Cos(Turn), 0);
+        LocationOffset *= (Radius * OwningMap.TileSize);
+        var summedLocationOffset = new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x) + LocationOffset;
+
+        for (int i = 0; i < OrderedOccupants.Count; i++)
+        {
+            if (OrderedOccupants[i].Shuffle)
+            {
+                OrderedOccupants[i].Location = Center + summedLocationOffset;
+            }
+            Turn += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) * TurnAdjust;
+            TurnAdjust *= 0.85f;
+            Radius += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) / RadiusAdjust;
+            RadiusAdjust += 5f;
+        }
+
         Occupants = OrderedOccupants;
-        s_ReorderContents_p2_p.End();
+
     }
 
     void Constructor(UrbMap CreatingMap)
@@ -397,7 +391,9 @@ public class UrbTile
     {
         s_OnAgentArrive_p.Begin(input);
         Contents.Add(input);
-        
+
+   
+
         input.Tileprint.ArriveAtTile(this, input);
         input.CurrentTile = this;
         
@@ -405,8 +401,17 @@ public class UrbTile
         //I can only find OwningMap being set once, at game initialization...
         //Can we move CurrentMap to object initialization?
         input.CurrentMap = OwningMap;
+      
         
         input.transform.localScale = new Vector3(this.OwningMap.TileSize, this.OwningMap.TileSize, this.OwningMap.TileSize)*input.SizeOffset;
+
+        if(input.IsSmelly)
+        {
+            ScentDirty = true;
+        }
+
+        UpdateClearance();
+
         s_OnAgentArrive_p.End();
     }
 
@@ -418,7 +423,16 @@ public class UrbTile
         s_OnAgentLeave_p.Begin();
         
         input.Tileprint.DepartFromTile(this, input);
+
+        if (input.IsSmelly)
+        {
+            ScentDirty = true;
+        }
+
+ 
+        UpdateClearance();
         
+
         s_OnAgentLeave_p.End();
     }
 
@@ -544,6 +558,10 @@ public class UrbTile
     {
         float LastReorderTime = 0.0f;
         const float MinimumTimeSinceLastReorder = .25f;
+
+        float LastScentUpdate = 0.0f;
+        const float MinimumScentUpdate = 1.0f;
+
         while(true)
         {
             yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
@@ -553,17 +571,31 @@ public class UrbTile
                 continue;
             }
 
+            //Now we update ordering on similar timescales as our Scents
+            if (Time.fixedTime - LastReorderTime > MinimumTimeSinceLastReorder)
+            {
+                VisualShuffle();
+                LastReorderTime = Time.fixedTime;
+            }
+
             if (LinksDirty)
             {
                 Adjacent = OwningMap.GetAdjacent(XAddress, YAddress, true);
                 LinksDirty = false;
             }
-            
+
+            UpdateClearance();
+
             if (!ScentDirty)
             {
+                if (Time.fixedTime - LastScentUpdate > MinimumScentUpdate)
+                {
+                    ScentDirty = true;
+                    LastScentUpdate = Time.fixedTime;
+                }
                 continue;
             }
-            
+
             //Don't need to call this _that_ often, but I'm still not sure how often we SHOULD call it 
             SynchronizeScents();
             
@@ -610,13 +642,6 @@ public class UrbTile
                 }
             }
             ScentDirty = false;
-
-            //Now we update ordering on similar timescales as our Scents
-            if (Time.fixedTime - LastReorderTime > MinimumTimeSinceLastReorder)
-            {
-                ReorderContents();
-                LastReorderTime = Time.fixedTime;
-            }
         }
     }
 

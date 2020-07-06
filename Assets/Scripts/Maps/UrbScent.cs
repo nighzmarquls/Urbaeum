@@ -48,7 +48,6 @@ public class UrbScent
             {
                 dirty = true;
                 DirtyTags[i] = true;
-                
                 return;
             }
             DirtyTags[i] = false;
