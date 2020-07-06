@@ -7,12 +7,18 @@ public class UrbAgentSpawner
     {
         s_SpawnAgent_prof.Begin();
 
-        var Template = TestAgent.gameObject;
+        if (Tile.Occupants.Count >= UrbTile.MaximumOccupants)
+        {
+            spawned = null;
+            Debug.Log("Failed to spawn agent because Tile hit max occupancy!", TestAgent);
+            s_SpawnAgent_prof.End();
+            return false;
+        }
         
         if (TestAgent.WasDestroyed)
         {
             spawned = null;
-            Debug.Log("Failed to spawn agent because TestAgent was null", TestAgent);
+            Debug.Log("Failed to spawn agent because TestAgent was null!", TestAgent);
             s_SpawnAgent_prof.End();
             return false;
         }
@@ -22,26 +28,45 @@ public class UrbAgentSpawner
         if(TestPrint.TilePrintCollisionCheck(Tile))
         {
             spawned = null;
-            Debug.Log("Failed to spawn agent because of TestPrint check on Tile", Template);
+            Debug.Log("Failed to spawn agent because of TestPrint check on Tile!");
             s_SpawnAgent_prof.End();
             return false;
         }
-
+        
         Vector3 SpawnLocation = Tile.Location;
-        spawned = Object.Instantiate(Template, SpawnLocation, Quaternion.identity);
-        UrbAgent Agent = spawned.GetComponent<UrbAgent>();
-
+        if (TestAgent.enabled)
+        {
+            Debug.Log("TestAgent not enabled!");
+        }
+        
+        spawned = Object.Instantiate(TestAgent.gameObject, SpawnLocation, Quaternion.identity);
+        
         if (Data != null)
         {
             UrbEncoder.Write(Data, spawned);
             //Debug.Log(JsonUtility.ToJson(Data, true));
+
+            if (spawned.activeSelf == false)
+            {
+                Debug.Log("the spawned object was inactive!");
+            }
+            spawned.SetActive(true);
+        }
+        
+        UrbAgent Agent = spawned.GetComponent<UrbAgent>();
+        if (!Agent.enabled)
+        {
+            //This method should automatically be called by Unity.
+            //I wonder why it's not always being called all the time
+            Agent.gameObject.SetActive(true);
         }
 
-        UrbBase[] BaseComponents = spawned.GetComponents<UrbBase>();
-        for (int i = 0; i < BaseComponents.Length; i++)
+        foreach (var urb in Agent.GetComponents<UrbBase>())
         {
-            
-            BaseComponents[i].OnEnable();
+            if (!urb.isActiveAndEnabled)
+            {
+                urb.gameObject.SetActive(true);
+            }
         }
 
         Tile.OnAgentArrive(Agent);

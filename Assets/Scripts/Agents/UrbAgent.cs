@@ -316,7 +316,7 @@ public class UrbAgent : UrbBase
         }
 
         BirthTime = Time.time;
-
+        
         Metabolism = GetComponent<UrbMetabolism>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
         Camera = Camera.main;
@@ -413,6 +413,7 @@ public class UrbAgent : UrbBase
         }
     }
 
+    const float MassChangeToReorder = 60f;
     const float RepositionInterval = 0.1f;
     float NextReposition = 0;
     bool IsMindNull;
@@ -492,10 +493,11 @@ public class UrbAgent : UrbBase
         s_TickToDisplay_p.Begin();
         if (HasDisplay && !Display.Invisible && Shuffle)
         {
-            if (Math.Abs(LastCheckedMass - Mass) > 0.01f && Shuffle)
+            var massChange = Math.Abs(LastCheckedMass - Mass);
+            if (massChange > MassChangeToReorder && Shuffle)
             {
                 LastCheckedMass = Mass;
-                CurrentTile.ReorderContents();
+                //CurrentTile?.ReorderContents();
             }
 
             if (!(Time.time > NextReposition) || !(Display.Significance > UrbDisplay.FeatureSignificance))

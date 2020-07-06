@@ -22,6 +22,9 @@ public class UrbBase : MonoBehaviour
     public UrbSmellSource SmellSource { get; protected set; }
     
     [DontSerialize]
+    public UrbAgent mAgent { get; protected set; }
+    
+    [DontSerialize]
     public bool IsSmelly { get; protected set; }
     
     [DontSerialize]
@@ -32,10 +35,13 @@ public class UrbBase : MonoBehaviour
     
     [DontSerialize]
     public bool IsEater { get; protected set; }
+    [DontSerialize]
+    public bool HasAgent { get; protected set; }
     
     [DontSerialize]
     public bool LogMe = false;
-
+    
+    [DontSerialize]
     public bool HasEnableBeenCalled = false;
     public virtual void Update()
     {
@@ -99,6 +105,14 @@ public class UrbBase : MonoBehaviour
             mBody = null;
         }
         
+        mAgent = GetComponent<UrbAgent>();
+
+        if (mAgent == this)
+        {
+            mAgent = null;
+        }
+        
+        HasAgent = mAgent != null;
         HasBody = mBody != null;
         if (HasBody && !mBody.HasEnableBeenCalled)
         {

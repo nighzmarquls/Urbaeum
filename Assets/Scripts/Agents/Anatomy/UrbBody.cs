@@ -10,7 +10,6 @@ public class UrbBody : UrbBase
     public UrbSubstance[] BodyRecipe;
     public UrbSubstanceTag[] SkinRecipe;
     public UrbSubstance[] CriticalBodyPartAmounts;
-    public UrbAgent mAgent { get; protected set; }
     public float SurfaceArea { get {
             if(BodyComposition != null)
             {

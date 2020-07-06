@@ -15,9 +15,9 @@ namespace UrbUtility
         const int HardMaxSkips = 60;
         const float MilliSeconds = (1.0f / 1000.0f);
         //The maximum time into a frame we keep calling
-        const float MaxDelay = 6.0f * MilliSeconds; 
-        const float MinTime = 3.0f * MilliSeconds;
-        const float MaxWaitTime = MaxDelay + MinTime;
+        const float MaxDelay = 10.0f * MilliSeconds; 
+        const float MinTime = 2.0f * MilliSeconds;
+        const float MaxWaitTime = 2 * MaxDelay;
 
         public UrbThrottle(int maxSkips = 60)
         {
@@ -27,13 +27,14 @@ namespace UrbUtility
 
         public IEnumerator PerformanceThrottle()
         {
+            yield return new WaitForSeconds(MinTime);
             //Don't add MORE work on to the overloaded frame times
             //Also, if SkipCount == 0; we should wait at least once so we can 
             //ensure other coroutines get their chances
             if (Time.deltaTime > MaxDelay || SkipCount == 0)
             {
                 ++SkipCount;
-                yield return new WaitForSeconds(MaxWaitTime * (MaxSkips / SkipCount));
+                yield return new WaitForSeconds((MaxWaitTime * (MaxSkips / SkipCount)) + MinTime);
             }
             
             if (SkipCount > MaxSkips || SkipCount > HardMaxSkips)

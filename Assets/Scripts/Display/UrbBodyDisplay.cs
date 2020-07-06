@@ -124,9 +124,7 @@ public class DisplayModification
 public class UrbBodyDisplay : UrbBase
 {
     public DisplayModification[] Modifications;
-
-    UrbAgent mAgent;
-
+    
     UrbDisplay _disp; 
     UrbDisplay Display {
         get

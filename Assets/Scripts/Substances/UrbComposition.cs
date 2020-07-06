@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions.Comparers;
 
 public class UrbComposition
 {
@@ -34,8 +36,14 @@ public class UrbComposition
     }
 
     public float Fullness {
-        get {
-            return UsedCapacity / MaxCapacity;
+        get
+        {
+            var fullness = UsedCapacity / MaxCapacity;
+            if (float.IsNaN(fullness))
+            {
+                return 1;
+            }
+            return fullness;
         }
     }
 
