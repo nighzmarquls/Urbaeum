@@ -4,6 +4,15 @@ using UnityEngine;
 
 public class UrbCameraControls : MonoBehaviour
 {
+    protected static UrbAgent CameraFocus;
+    protected static bool CameraIsFocused;
+    public static UrbAgent Focus { get { return CameraFocus; }
+        set {
+            CameraIsFocused = value != null;
+            CameraFocus = value;
+        }
+    }
+
     public float CameraSpeed = 1.0f;
     public float CameraZoomSpeed = 1.0f;
     public float MinZoomSize = 1.25f;
@@ -99,12 +108,23 @@ public class UrbCameraControls : MonoBehaviour
         SynchronizeMousePosition();
         Vector3 CameraMoveInput = GetScreenPushInput() + GetKeyboardInput();
         mCamera.orthographicSize = GetZoomTarget();
-        this.transform.position += (CameraMoveInput * (Time.deltaTime * AdjustedCameraSpeed));
-        
+        if (CameraMoveInput.magnitude > 0)
+        {
+            Focus = null;
+            this.transform.position += (CameraMoveInput * (Time.deltaTime * AdjustedCameraSpeed));
+        }
         //Temporary until we have non-ui shortcuts.
         if (Input.GetKeyUp(KeyCode.Space))
         {
+            Focus = null;
             RecenterCamera();
+        }
+
+        if(CameraIsFocused)
+        {
+            Vector3 FocusLocation = Focus.transform.position;
+            FocusLocation.z = this.transform.position.z;
+            this.transform.position = FocusLocation;
         }
     }
 }
