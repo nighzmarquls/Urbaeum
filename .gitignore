@@ -1,5 +1,5 @@
 Library/*
-Packages/manifest.json
+#Packages/manifest.json
 Urbaeum.sln
 UserSettings/EditorUserSettings.asset
 ProjectSettings/PackageManagerSettings.asset
