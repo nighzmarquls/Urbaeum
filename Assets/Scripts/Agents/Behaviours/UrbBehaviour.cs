@@ -35,19 +35,14 @@ public class UrbBehaviour : UrbBase
         StartCoroutine(mCoroutine);
     }
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        if (bInitialized)
-        {
-            return;
-        }
-        
         mAgent = GetComponent<UrbAgent>();
         mCoroutine = IntervalCoroutine();
         Eater = GetComponent<UrbEater>();
         IsEater = Eater != null;
         
-        base.Initialize();
+        base.OnEnable();
         if (ShouldInterval && isActiveAndEnabled)
         {
             StartCoroutine(mCoroutine);
@@ -154,15 +149,17 @@ public class UrbBehaviour : UrbBase
 
     static ProfilerMarker s_IntervalCoroutine_p = new ProfilerMarker("UrbBehavior.FunctionalCoroutine");
 
+    protected float behaviourInterval;
+    
     public IEnumerator IntervalCoroutine()
     {
         IEnumerator retVal;
+
         while (true)
         {
+            behaviourInterval = Interval * mAgent.TimeMultiplier;
             if (ValidToInterval())
             {
-                yield return BehaviourThrottle.PerformanceThrottle();
-                
                 //The profiler has a tendency to freak out w/ yields between marked points 
                 s_IntervalCoroutine_p.Begin();
                 retVal = FunctionalCoroutine();
@@ -170,7 +167,8 @@ public class UrbBehaviour : UrbBase
                 yield return retVal;
             }
 
-            yield return new WaitForSeconds(Interval * mAgent.TimeMultiplier);
+            //yield return BehaviourThrottle.PerformanceThrottle();
+            yield return new WaitForSeconds(behaviourInterval);
         }
     }
 

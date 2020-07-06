@@ -325,13 +325,8 @@ public class UrbDisplay : UrbBase
         }
     }
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        if (bInitialized)
-        {
-            return;
-        }
-
         if(EffectDisplay != null)
         {
             EffectQueue = new List<UrbAction>();
@@ -424,8 +419,7 @@ public class UrbDisplay : UrbBase
         DisplayFace.SortingOrder = SortingOrder;
         DisplayBody.SortingOrder = SortingOrder;
         
-       
-        base.Initialize();
+        base.OnEnable();
     }
 
     public void Express(UrbDisplayFace.Expression Expression)
@@ -504,15 +498,6 @@ public class UrbDisplay : UrbBase
             Features[i].FillColor = Color.Fill;
         }
     }
-
-    void Start()
-    {
-        if (!bInitialized)
-        {
-            Initialize();
-        }
-    }
-
     public override void Update()
     {
         UpdateEffectDisplay();

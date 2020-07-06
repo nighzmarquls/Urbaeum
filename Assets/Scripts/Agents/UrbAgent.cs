@@ -40,7 +40,6 @@ public class UrbAgent : UrbBase
 
     protected string AgentLocalName;
     public bool IsCurrentMapNull = true;
-    bool IsBodyNotNull;
     UrbMap _currentMap;
     public UrbMap CurrentMap
     {
@@ -79,12 +78,15 @@ public class UrbAgent : UrbBase
     
     protected override void OnDestroy()
     {
-        CurrentTile.Occupants.Remove(this);
+        if (CurrentTile != null && CurrentTile.Occupants != null)
+        {
+            CurrentTile.Occupants.Remove(this);
+        }
         //generally we don't actually care if 
         //the underlying objects are non-null
         //only if it's null and we don't know about it
         IsCurrentMapNull = true;
-        IsBodyNotNull = false;
+        CurrentTile = null;
         IsMindNull = true;
         CurrentMap = null;
         UrbAgentManager.UnregisterAgent(this);
@@ -112,18 +114,18 @@ public class UrbAgent : UrbBase
 
     protected float LastCheckedMass = 0;
     public float Mass {  get {
-            if(!IsBodyNotNull || Body.BodyComposition == null)
+            if(!HasBody || mBody.BodyComposition == null)
             {
                 return 0;
             }
 
-            return Body.BodyComposition.UsedCapacity;
+            return mBody.BodyComposition.UsedCapacity;
         } }
 
     public float MassPerTile { get {
             if(tileprint.TileCount > 1)
             {
-                return Mass / ((Body.Height > 1)? tileprint.TileCount*Body.Height : tileprint.TileCount );
+                return Mass / ((mBody.Height > 1)? tileprint.TileCount*mBody.Height : tileprint.TileCount );
             }
             else
             {
@@ -144,9 +146,6 @@ public class UrbAgent : UrbBase
             return tileprint;
         }
     }
-
-
-    public UrbBody Body { get; private set; }
     public UrbMetabolism Metabolism { get; private set; }
 
     public Sprite CurrentSprite {
@@ -307,13 +306,8 @@ public class UrbAgent : UrbBase
         }
     }
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        if (bInitialized)
-        {
-            return;
-        }
-
         Display = GetComponentInChildren<UrbDisplay>();
 
         if (!HasDisplay)
@@ -322,15 +316,19 @@ public class UrbAgent : UrbBase
         }
 
         BirthTime = Time.time;
-        Body = GetComponent<UrbBody>();
-        IsBodyNotNull = Body != null;
 
         Metabolism = GetComponent<UrbMetabolism>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
         Camera = Camera.main;
+        if (Camera == null)
+        {
+            Debug.LogError("Camera for UrbAgent is NULL", this);
+            return;
+        }
+        
         this.transform.rotation = Camera.transform.rotation;
         tileprint = new UrbTileprint(TileprintString);
-
+        
         Mind = GetComponent<UrbThinker>();
         BodyDisplay = GetComponent<UrbBodyDisplay>();
         IsMindNull = Mind == null;
@@ -346,7 +344,7 @@ public class UrbAgent : UrbBase
         
         UrbAgentManager.RegisterAgent(this);
         IsPaused = UrbAgentManager.IsPaused;
-        base.Initialize();
+        base.OnEnable();
 
         if (gameObject.name.Contains("("))
         {
@@ -456,8 +454,14 @@ public class UrbAgent : UrbBase
             logger.Log("missing a map!", gameObject);
             // s_TickToMind_p.End();
             // Destroy(gameObject);
-            // return;
+            return;
         }
+
+        if (CurrentTile == null)
+        {
+            logger.Log("Agent has no Tile!");
+        }
+        
         if (!IsMindNull)
         {
             Mind.CheckUrges();
@@ -467,19 +471,19 @@ public class UrbAgent : UrbBase
         s_TickToMind_p.End();
         
         s_TickToBody_p.Begin();
-        if(IsBodyNotNull)
+        if(HasBody)
         {
-            if(Body.BodyCritical())
+            if(mBody.BodyCritical())
             {
                 Die();
             }
 
             //TODO: Move this into some other behaviour/into a different cadence.
-            Body.RecoverUtilization();
+            mBody.RecoverUtilization();
 
             if (BodyDisplay != null)
             {
-                BodyDisplay.UpdateDisplay(Body.BodyComposition);
+                BodyDisplay.UpdateDisplay(mBody.BodyComposition);
             }
         }
 

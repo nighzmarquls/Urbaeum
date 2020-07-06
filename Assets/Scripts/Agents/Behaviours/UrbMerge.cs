@@ -20,7 +20,7 @@ public class UrbMerge : UrbBehaviour
     protected void MergeIntoTarget(UrbAgent Target)
     {
         logger.Log("Attempting to merge", Target);
-        mAgent.Body.BodyComposition.EmptyInto(Target.Body.BodyComposition);
+        mAgent.mBody.BodyComposition.EmptyInto(Target.mBody.BodyComposition);
         
         if (Target.IsEater && !Target.Eater.WasDestroyed)
         {

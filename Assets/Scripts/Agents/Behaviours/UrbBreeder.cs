@@ -42,18 +42,14 @@ public class UrbBreeder : UrbBehaviour
     public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Breed;
 
     public bool CanBreed { get {
-            if (mAgent == null || mAgent.Body == null || mAgent.Body.BodyComposition == null)
+            if (mAgent == null || !mAgent.HasBody || mAgent.mBody.BodyComposition == null)
                 return false;
 
-            return mAgent.Body.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe);
+            return mAgent.mBody.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe);
         } }
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        if (bInitialized)
-        {
-            return;
-        }
         Gestating = false;
         Crowd = 0;
 
@@ -61,10 +57,10 @@ public class UrbBreeder : UrbBehaviour
         {
             EncodeOffspringData();
         }
-
+        
         mMetabolism = GetComponent<UrbMetabolism>();
 
-        base.Initialize();
+        base.OnEnable();
 
     }
 
@@ -94,7 +90,7 @@ public class UrbBreeder : UrbBehaviour
 
     protected override bool ValidToInterval()
     {
-        return base.ValidToInterval() && mAgent.CurrentTile != null && OffspringData != null && OffspringData.Length > 0 && mAgent.Body != null;
+        return base.ValidToInterval() && mAgent.CurrentTile != null && OffspringData != null && OffspringData.Length > 0 && mAgent.mBody != null;
     }
 
     static ProfilerMarker s_TileEvaluateCheck_p = new ProfilerMarker("UrbBreeder.TileEvaluateCheck");
@@ -303,7 +299,7 @@ public class UrbBreeder : UrbBehaviour
 
                 Delay = Random.Range((int)0, (int)2);
                 NumberOffspring++;
-                mAgent.Body.BodyComposition.RemoveRecipe(GestationRecipe);
+                mAgent.mBody.BodyComposition.RemoveRecipe(GestationRecipe);
                 if(mAgent.Metabolism != null)
                 {
                     if (OffspringAgent != null)
@@ -316,7 +312,7 @@ public class UrbBreeder : UrbBehaviour
 
             }
 
-            if (OffspringCount <= NumberOffspring || mAgent.Body.BodyComposition.ContainsLessThan(GestationRecipe))
+            if (OffspringCount <= NumberOffspring || mAgent.mBody.BodyComposition.ContainsLessThan(GestationRecipe))
             {
                 Gestating = false;
                 yield break;
@@ -400,8 +396,8 @@ public class UrbBreeder : UrbBehaviour
 
         public override float Test(UrbAgent target, float Modifier = 0)
         {
-            float Sex = target.Body.BodyComposition[UrbSubstanceTag.Female] + target.Body.BodyComposition[UrbSubstanceTag.Male];
-            return MobilityTest(target.Body) + Sex + Modifier;
+            float Sex = target.mBody.BodyComposition[UrbSubstanceTag.Female] + target.mBody.BodyComposition[UrbSubstanceTag.Male];
+            return MobilityTest(target.mBody) + Sex + Modifier;
         }
     }
 }

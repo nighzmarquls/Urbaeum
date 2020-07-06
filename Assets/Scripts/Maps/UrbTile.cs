@@ -22,12 +22,15 @@ public class UrbTile
     public float TimeMultiplier { get { return OwningMap.TimeMultiplier;  } }
 
     bool ScentDirty = false;
+
+    protected List<UrbSmellSource> SmellySources = new List<UrbSmellSource>();
+    protected ScentList AgentScentCache = new ScentList(5);
+    
     public UrbPathTerrain[] TerrainTypes;
     public UrbScent[][] TerrainFilter;
 
     protected List<UrbAgent> Contents;
-    public List<UrbAgent> Occupants; 
-
+    public List<UrbAgent> Occupants;
     public UrbEnvironment Environment;
 
     protected int PathableSize = 0;
@@ -295,7 +298,6 @@ public class UrbTile
         }
         else
         {
-
             output.Contents = new int[0];
         }
 
@@ -314,8 +316,6 @@ public class UrbTile
     static ProfilerMarker s_GetAdjacent_p = new ProfilerMarker("UrbTile.GetAdjacent");
     public UrbTile[] GetAdjacent(bool GetLinked = false, int xOffset = 1, int yOffset = 1)
     {
-        //Nominally, this GetAdjacent section would be using Auto, but
-        //Issues with `using` on ProfileMarkers seems to have blow
         using (s_GetAdjacent_p.Auto())
         {
             return OwningMap.GetAdjacent(XAddress, YAddress, GetLinked, xOffset, yOffset);
@@ -395,52 +395,12 @@ public class UrbTile
         }
         ScentDirty = true;
     }
-
-    public void AddScent(UrbScentTag tag, float value)
-    {
-        ScentDirty = true;
-        for (int i = 0; i < TerrainTypes.Length; i++)
-        {
-            int TerrainType = (int)TerrainTypes[i];
-
-            for (int s = 0; s < SizeLimit; s++)
-            {
-                TerrainFilter[TerrainType][s][tag] = value;
-            }
-            
-        }
-
-    }
-
+    
     public void ClearScent()
     {
         ScentDirty = true;
-
     }
-
-    public UrbAgent CurrentContent {
-
-        get {
-            if(Contents == null || Contents.Count == 0)
-            {
-                return null;
-            }
-
-            return Contents[Contents.Count-1];
-        }
-
-    }
-
-    public UrbAgent[] CurrentContents {
-        get {
-            if(Contents == null || Contents.Count == 0)
-            {
-                return new UrbAgent[0];
-            }
-
-            return Contents.ToArray();
-        }
-    }
+    
     static ProfilerMarker s_OnAgentArrive_p = new ProfilerMarker("UrbTile.OnAgentArrive");
 
     public void OnAgentArrive(UrbAgent input)
@@ -448,8 +408,15 @@ public class UrbTile
         s_OnAgentArrive_p.Begin(input);
         Ordering = false;
         Contents.Add(input);
+        
         input.Tileprint.ArriveAtTile(this, input);
         input.CurrentTile = this;
+        
+        if (input.IsSmelly)
+        {
+            SmellySources.Add(input.SmellSource);
+            SynchronizeScents();
+        }
 
         //TODO: What is a map, and why are we assigning it so frequently
         //I can only find OwningMap being set once, at game initialization...
@@ -468,12 +435,18 @@ public class UrbTile
         Contents.Remove(input);
         
         s_OnAgentLeave_p.Begin();
+        if (input.IsSmelly)
+        {
+            SmellySources.Remove(input.SmellSource);
+            SynchronizeScents();
+        }
+        
         input.Tileprint.DepartFromTile(this, input);
         if (reorder)
         {
             ReorderContents();
         }
-
+        
         s_OnAgentLeave_p.End();
     }
 
@@ -576,12 +549,27 @@ public class UrbTile
         }
     }
 
+    public void SynchronizeScents()
+    {
+        //Normalize the scent values we use
+        AgentScentCache.ClearValues();
+            
+        foreach (var smellSource in SmellySources)
+        {
+            foreach (var tag in smellSource.SmellTag)
+            {
+                AgentScentCache.AddScent(tag, smellSource.SmellStrength);
+            }
+        }
+    }
+    
     public IEnumerator ScentCoroutine()
     {
         while(true)
         {
             yield return new WaitForSeconds(UrbScent.ScentInterval * TimeMultiplier);
             Ordering = false;
+
             
             if (!UrbSystemIO.HasInstance || UrbSystemIO.Instance.Loading)
             {
@@ -595,15 +583,27 @@ public class UrbTile
             
             for (int t = 0; t < TerrainTypes.Length; t++)
             {
+                var terrainType = (int)TerrainTypes[t];
+                var currentTerrainScents = TerrainFilter[terrainType];
+
                 for (int s = 0; s < SizeLimit; s++)
                 {
-                    var terrainType = (int)TerrainTypes[t];
                     var terrainFilter = TerrainFilter[terrainType][s];
                     if(terrainFilter == null)
                     {
                         continue;
                     }
 
+                    int idx = 0;
+                    var currentTag = AgentScentCache.GetScentTag(idx);
+                    //This enumerations' kinda terrible
+                    while (currentTag != UrbScentTag.MaxScentTag)
+                    {
+                        var value = AgentScentCache.Values[idx];
+                        currentTerrainScents[s][currentTag] = value;
+                        currentTag = AgentScentCache.GetScentTag(++idx);
+                    }
+                    
                     if (terrainFilter.dirty)
                     {
                         terrainFilter.dirty = false;
@@ -641,9 +641,17 @@ public class UrbTile
             Adjacent = OwningMap.GetAdjacent(XAddress, YAddress, true);
             LinksDirty = false;
         }
+        
+        // yield return new WaitForSeconds(.02f);
+        //Don't need to call this _that_ often, but I'm still not sure how often we SHOULD call it 
+        SynchronizeScents();
+        // yield return new WaitForSeconds(.02f);
 
+        
         for (int i = 0; i < TerrainTypes.Length; i++)
         {
+            var terrainType = (int) TerrainTypes[i];
+            
             for(int t = 0; t < Adjacent.Length; t++)
             {
                 var adj = Adjacent[t];
@@ -654,10 +662,10 @@ public class UrbTile
 
                 for (int check = 0; check < Adjacent[t].TerrainTypes.Length; check++)
                 {
-                    var terrainType = (int) TerrainTypes[i];
-                    
                     if (check != terrainType)
+                    {
                         continue;
+                    }
 
                     adj.ScentDirty = true;
                     for(int s = 0; s < adj.SizeLimit; s++)
@@ -665,7 +673,6 @@ public class UrbTile
                         var filter = adj.TerrainFilter[terrainType][s];
                         var scent = filter.ReceiveScent(TerrainFilter[terrainType][s], ScentDiffusion);
                         s_DiffuseScent_p.End();
-                        
                         yield return scent;
                         s_DiffuseScent_p.Begin();
                     }
@@ -675,4 +682,47 @@ public class UrbTile
 
         s_DiffuseScent_p.End();
     }
+
+    #region Obsolete or obsoleting
+    // Was once used by FunctionalCoroutine in UrbSmellSource
+    public void AddScent(UrbScentTag tag, float value)
+    {
+        ScentDirty = true;
+        for (int i = 0; i < TerrainTypes.Length; i++)
+        {
+            int TerrainType = (int)TerrainTypes[i];
+    
+            for (int s = 0; s < SizeLimit; s++)
+            {
+                TerrainFilter[TerrainType][s][tag] = value;
+            }
+        }
+    }
+
+    //Unused methods. Just read from Contents for now
+    // public UrbAgent CurrentContent {
+    //
+    //     get {
+    //         if(Contents == null || Contents.Count == 0)
+    //         {
+    //             return null;
+    //         }
+    //
+    //         return Contents[Contents.Count-1];
+    //     }
+    //
+    // }
+    //
+    // public UrbAgent[] CurrentContents {
+    //     get {
+    //         if(Contents == null || Contents.Count == 0)
+    //         {
+    //             return new UrbAgent[0];
+    //         }
+    //
+    //         return Contents.ToArray();
+    //     }
+    // }
+    
+    #endregion
 }

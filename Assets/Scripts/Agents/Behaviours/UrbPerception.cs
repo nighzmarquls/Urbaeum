@@ -65,14 +65,10 @@ public class UrbPerception : UrbBehaviour
         }
     }
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        if (bInitialized)
-        {
-            return;
-        }
        
-        base.Initialize();
+        base.OnEnable();
         List<UrbBehaviour> ContactList = new List<UrbBehaviour>();
         List<UrbBehaviour> SenseList = new List<UrbBehaviour>();
 
@@ -101,11 +97,25 @@ public class UrbPerception : UrbBehaviour
     float Evaluation;
     protected IEnumerator ContactCheck()
     {
+        //This happens if ContactCheck gets called too soon
+        if (mAgent.CurrentTile == null && LastContactTile == null)
+        {
+            yield return new WaitUntil(() => mAgent.CurrentTile != null);
+        }
+        
         if (LastContactTile != mAgent.CurrentTile)
         {
             LastContactTile = mAgent.CurrentTile;
-            ContactSearchCache = (ContactPrint == null) ? GetSearchTiles(true) : ContactPrint.GetAllPrintTiles(mAgent);
+            if (ContactPrint == null)
+            {
+                ContactSearchCache = GetSearchTiles(true);
+            }
+            else
+            {
+                ContactSearchCache = ContactPrint.GetAllPrintTiles(mAgent);
+            }
         }
+
         for(int b = 0; b < ContactBehaviours.Length; b++)
         {
             ContactBehaviours[b].ClearBehaviour();

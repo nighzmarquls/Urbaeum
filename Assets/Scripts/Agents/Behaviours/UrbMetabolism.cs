@@ -1,7 +1,9 @@
 ﻿
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Debug_1 = Debug;
 
 [RequireComponent(typeof(UrbAgent))]
 [RequireComponent(typeof(UrbBody))]
@@ -21,27 +23,28 @@ public class UrbMetabolism : UrbBehaviour
 
     public float EnergyBudget {
         get {
-            return (mAgent.Body.BodyComposition[BodyEnergyReserveStorage] - EnergyDebt);
+            return (mAgent.mBody.BodyComposition[BodyEnergyReserveStorage] - EnergyDebt);
         }
     }
 
     public bool Healing { get; protected set; }
     public bool Starving { get; protected set; }
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        if(bInitialized)
-        {
-            return;
-        }
-
         mEater = GetComponent<UrbEater>();
         InitializeGrowthRecipes();
         if(mEater != null)
         {
             InitializeReserveRecipes();
         }
-        base.Initialize();
+        
+        base.OnEnable();
+        
+        if (HasBody && mBody.HasEnableBeenCalled == false)
+        {
+            mBody.OnEnable();  
+        }
     }
 
     protected void InitializeGrowthRecipes()
@@ -88,6 +91,12 @@ public class UrbMetabolism : UrbBehaviour
 
     public override IEnumerator FunctionalCoroutine()
     {
+        if (!HasEnableBeenCalled)
+        {
+            Debug.Log("Attempting to update without full states initialized");
+            yield return new WaitForFixedUpdate();
+        }
+
         //SpendEnergy(mAgent.Body.BodyComposition.Mass);
         BuildReserves();
         GrowBody(GrowthRate);
@@ -95,7 +104,7 @@ public class UrbMetabolism : UrbBehaviour
         if (EnergyDebt > 0)
         {
             Starving = false;
-            float SpentCost = mAgent.Body.BodyComposition.RemoveSubstance(BodyEnergyReserveStorage, EnergyDebt);
+            float SpentCost = mAgent.mBody.BodyComposition.RemoveSubstance(BodyEnergyReserveStorage, EnergyDebt);
 
             if (SpentCost < EnergyDebt)
             {
@@ -105,7 +114,7 @@ public class UrbMetabolism : UrbBehaviour
                 float RemainingDebt = EnergyDebt - SpentCost;
                 for (int b = 0; b < BodyGrowthRecipe.Length; b++)
                 {
-                    RemainingDebt -= mAgent.Body.BodyComposition.RemoveSubstance(BodyGrowthRecipe[b].Substance, RemainingDebt);
+                    RemainingDebt -= mAgent.mBody.BodyComposition.RemoveSubstance(BodyGrowthRecipe[b].Substance, RemainingDebt);
                     if (RemainingDebt <= 0)
                     {
                         EnergyDebt = 0;
@@ -144,7 +153,7 @@ public class UrbMetabolism : UrbBehaviour
 
                 Growth += mEater.Stomach.MixRecipe(FoodToReserves[e], GrowthRate);
 
-                float GrowthSuccess = mEater.Stomach.TransferTo(mAgent.Body.BodyComposition, FoodToReserves[e].Product, Growth);
+                float GrowthSuccess = mEater.Stomach.TransferTo(mAgent.mBody.BodyComposition, FoodToReserves[e].Product, Growth);
 
                 if (GrowthSuccess < Growth)
                 {
@@ -159,7 +168,7 @@ public class UrbMetabolism : UrbBehaviour
         }
         else
         {
-            Growth += mAgent.Body.BodyComposition.AddSubstance(BodyEnergyReserveStorage, GrowthRate);
+            Growth += mAgent.mBody.BodyComposition.AddSubstance(BodyEnergyReserveStorage, GrowthRate);
         }
 
         return Growth;
@@ -170,11 +179,10 @@ public class UrbMetabolism : UrbBehaviour
         float Growth = 0.0f;
 
         Healing = false;
-
-        if(mAgent.Body.BodyComposition.Membrane.Damage > 0)
+        
+        if(HasBody && mBody.BodyComposition.Membrane.Damage > 0)
         {
-            Growth = mAgent.Body.BodyComposition.Membrane.Restore(GrowthRate);
-            Healing = true;
+            Growth = mBody.BodyComposition.Membrane.Restore(GrowthRate); Healing = true;
             mAgent.Express(UrbDisplayFace.Expression.Cry);
         }
 
@@ -185,15 +193,15 @@ public class UrbMetabolism : UrbBehaviour
                 break;
             }
 
-            if (mAgent.Body.BodyComposition[BodyGrowthRecipe[g].Substance] < BodyGrowthRecipe[g].SubstanceAmount)
+            if (mAgent.mBody.BodyComposition[BodyGrowthRecipe[g].Substance] < BodyGrowthRecipe[g].SubstanceAmount)
             {
                 if (BodyEnergyReserveStorage == UrbSubstanceTag.None)
                 {
-                    Growth += mAgent.Body.BodyComposition.AddSubstance(BodyGrowthRecipe[g].Substance, Amount);
+                    Growth += mAgent.mBody.BodyComposition.AddSubstance(BodyGrowthRecipe[g].Substance, Amount);
                 }
                 else
                 {
-                    Growth += mAgent.Body.BodyComposition.MixRecipe(ReserveToGrowth[g], Amount);
+                    Growth += mAgent.mBody.BodyComposition.MixRecipe(ReserveToGrowth[g], Amount);
                     SpendEnergy(Growth);
                 }
             }
@@ -204,7 +212,6 @@ public class UrbMetabolism : UrbBehaviour
 
     public override UrbComponentData GetComponentData()
     {
-        
         UrbComponentData Data = base.GetComponentData();
 
         Data.Fields = new UrbFieldData[]

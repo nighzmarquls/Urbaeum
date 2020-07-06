@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Schema;
 using Unity.Profiling;
 using UnityEngine;
 using UrbUtility;
@@ -24,7 +26,7 @@ public class UrbScent
     public const float ScentDecay = 0.5f;
     const float DecayLimit = 0.0001f;
     public const float ScentDiffusion = 0.95f;
-    public const float ScentInterval = 1.2f;
+    public const float ScentInterval = 0.9f;
     const uint MaxTag = (uint)UrbScentTag.MaxScentTag;
     float[] Tags;
     bool[] DirtyTags;
@@ -110,5 +112,87 @@ public class UrbScent
 
         s_ReceiveScent_p.End();
         yield return ScentThrottle.PerformanceThrottle();
+    }
+}
+
+
+//This class should be of typename T but there's no way to enforce
+//that T is always compatible with basic arithmetic ops
+//so I'm assuming that we only ever want floats as our values
+//this can't possibly go wrong.
+public class ScentList
+{
+    //The index of the ScentTag is maps 1-for-1 the index in the Values List.
+    List<UrbScentTag> ScentIndexes;
+    public List<float> Values { get; protected set; }
+    public bool HasScents { get; protected set; }
+
+    public ScentList(int Capacity = 0)
+    {
+        ScentIndexes = new List<UrbScentTag>(Capacity);
+        Values = new List<float>(Capacity);
+    }
+
+    public UrbScentTag[] KnownScents
+    {
+        get
+        {
+            return ScentIndexes.ToArray();
+        }
+    }
+    public UrbScentTag GetScentTag(int idx)
+    {
+        if (ScentIndexes.Count == 0 || !HasScents || idx >= ScentIndexes.Count)
+        {
+            return UrbScentTag.MaxScentTag;
+        }
+
+        return ScentIndexes[idx];
+    }
+    
+    public void AddScent(UrbScentTag tag, float value)
+    {
+        if (value > 0)
+        {
+            HasScents = true;
+        }
+
+        var idx = ScentIndexes.IndexOf(tag);
+        if (idx < 0)
+        {
+            ScentIndexes.Add(tag);
+            Values.Add(value);
+            return;
+        }
+        
+        Values[idx] += value;
+    }
+
+    public void DetractScent(UrbScentTag tag, float value = 0.0f)
+    {
+        var idx = ScentIndexes.IndexOf(tag);
+        if (idx < 0)
+        {
+            return;
+        }
+
+        var newVal = Values[idx] = value;
+
+        if (newVal < 0)
+        {
+            newVal = 0.0f;
+        }
+        
+        Values[idx] = newVal;
+    }
+
+    public void ClearValues()
+    {
+        for (int i = 0; i < Values.Count; ++i)
+        {
+            Values[i] = 0;
+        }
+
+        HasScents = false;
     }
 }

@@ -7,7 +7,7 @@ public class UrbUIPanel : MonoBehaviour
 {
     protected UrbInterfaceInput[] InterfaceInputs;
 
-    private void Start()
+    public void Start()
     {
         Initialize();
     }

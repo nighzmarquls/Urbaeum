@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,39 +10,56 @@ public class UrbSmellSource : UrbBehaviour
     public UrbScentTag[] SmellTag;
     public float SmellStrength = 1.0f;
 
-    protected UrbTile[] TileCache = null;
-    protected UrbTile LastSmellTile = null;
+    // protected UrbTile[] TileCache;
+    // protected UrbTile LastSmellTile = null;
 
-    public override IEnumerator FunctionalCoroutine()
-    {
-        if(mAgent.Body != null && mAgent.Body.BodyComposition != null)
-        {
-            SmellTag = mAgent.Body.BodyComposition.GetScent();
-            SmellStrength = mAgent.MassPerTile;
-        }
+    // public void FixedUpdate()
+    // {
+    //     if(mAgent.HasBody && mAgent.Body.BodyComposition != null)
+    //     {
+    //         SmellTag = mAgent.Body.BodyComposition.GetScent();
+    //         SmellStrength = mAgent.MassPerTile;
+    //     }
+    //     
+    //     if (LastSmellTile != mAgent.CurrentTile)
+    //     {
+    //         mAgent.Tileprint.GetAllPrintTiles()
+    //             mAgent.Tileprint.TileCount
+    //         TileCache = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
+    //     }
+    //     
+    //     for(int s = 0; s < TileCache.Length; s++)
+    //     {
+    //         if (TileCache[s] == null)
+    //         {
+    //             continue;
+    //         }
+    //         for (int t = 0; t < SmellTag.Length; t++)
+    //         {
+    //             TileCache[s].AddScent(SmellTag[t], SmellStrength / TileCache.Length);
+    //         }
+    //     }
+    // }
 
-        if (LastSmellTile != mAgent.CurrentTile)
-        {
-            TileCache = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
-        }
-
-        for(int s = 0; s < TileCache.Length; s++)
-        {
-            if (TileCache[s] == null)
-            {
-                continue;
-            }
-            for (int t = 0; t < SmellTag.Length; t++)
-            {
-                TileCache[s].AddScent(SmellTag[t], SmellStrength / TileCache.Length);
-            }
-        }
-
-        if (Interval < UrbScent.ScentInterval)
-        {
-            yield return new WaitForSeconds(UrbScent.ScentInterval - Interval);
-        }
-    }
+    // Obsolete. Scents now pull from the occupants list
+     public override IEnumerator FunctionalCoroutine()
+     {
+         if(mAgent.HasBody && mAgent.mBody.BodyComposition != null)
+         {
+             SmellTag = mAgent.mBody.BodyComposition.GetScent();
+             SmellStrength = mAgent.MassPerTile;
+         }
+    
+         // if (LastSmellTile != mAgent.CurrentTile)
+         // {
+         //     TileCache = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
+         // }
+         
+         if (Interval < UrbScent.ScentInterval)
+         {
+             yield return new WaitForSeconds(UrbScent.ScentInterval - Interval);
+         }
+     }
 
     public override UrbComponentData GetComponentData()
     {
@@ -56,8 +74,7 @@ public class UrbSmellSource : UrbBehaviour
         {
             UrbEncoder.EnumsToArray<UrbScentTag>("SmellTag",SmellTag) 
         };
-
-
+        
         return Data;
     }
 

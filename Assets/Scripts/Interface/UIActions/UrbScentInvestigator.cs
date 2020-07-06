@@ -6,7 +6,7 @@ public class UrbScentInvestigator : UrbInvestigatorTool
 {
  
     public UrbScentTag DisplayScentTag = UrbScentTag.Plant;
-    public override float Sensitivity => 0.01f;
+    public override float Sensitivity => 0.02f;
 
     public override Color GetColorFromTile(UrbTile Tile)
     {

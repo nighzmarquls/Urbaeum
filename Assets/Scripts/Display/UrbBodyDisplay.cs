@@ -144,21 +144,12 @@ public class UrbBodyDisplay : UrbBase
     bool IsViewNotNull = false;
     bool IsDisplayNull = true;
 
-    void Start()
+    public override void OnEnable()
     {
         View = Camera.main;
         IsViewNotNull = View != null;
-    }
-
-    public override void Initialize()
-    {
-        if(bInitialized)
-        {
-            return;
-        }
         mAgent = GetComponent<UrbAgent>();
-
-        base.Initialize();
+        base.OnEnable();
     }
 
     public void UpdateDisplay(UrbComposition input)
