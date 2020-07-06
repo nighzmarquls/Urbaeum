@@ -14,9 +14,9 @@ public class UrbMovement : UrbBehaviour
 
     public override bool ShouldInterval => false;
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        base.Initialize();
+        base.OnEnable();
         mAgent.AddAction(MoveAction);
     }
 
@@ -92,7 +92,7 @@ public class UrbMovement : UrbBehaviour
 
         public override float Test(UrbAgent target, float Modifier = 0)
         {
-            return MobilityTest(target.Body);
+            return MobilityTest(target.mBody);
         }
 
         public override float CostEstimate(UrbAgent Instigator)
@@ -108,7 +108,7 @@ public class UrbMovement : UrbBehaviour
             s_MoveAction_p.Begin(Instigator);
             float Result = Test(Instigator, Modifier);
 
-            Result = Instigator.Body.UtilizeBody(Result);
+            Result = Instigator.mBody.UtilizeBody(Result);
 
             if (Result > 0)
             {

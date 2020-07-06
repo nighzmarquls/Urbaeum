@@ -61,7 +61,7 @@ public class UrbAction
     }
     public virtual float Test(UrbAgent target, float Modifier = 0.0f)
     {
-        UrbBody TestBody = target.Body;
+        UrbBody TestBody = target.mBody;
         Debug.Log(this.GetType() + " Using Default Test");
         float Result = Modifier;
         
@@ -77,7 +77,7 @@ public class UrbAction
 
         float Result = Modifier;
         Result += Test(Instigator, Modifier);
-        Result = Instigator.Body.UtilizeBody(Result);
+        Result = Instigator.mBody.UtilizeBody(Result);
         if (Result > 0)
         {
             DisplayActionIcon(Instigator, Instigator.Location);

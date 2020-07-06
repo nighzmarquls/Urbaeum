@@ -48,10 +48,10 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
         string LocalName = mAgent.gameObject.name.Split('(')[0];
         string Age = Mathf.Round(Time.time - mAgent.BirthTime).ToString();
         UrbMetabolism Metabolism = mAgent.Metabolism;
-        UrbBody Body = mAgent.Body;
-        UrbEater Eater = mAgent.GetComponent<UrbEater>();
-        UrbBreeder Breeder = mAgent.GetComponent<UrbBreeder>();
-        UrbSmellSource Smell = mAgent.GetComponent<UrbSmellSource>();
+        UrbBody Body = mAgent.mBody;
+        UrbEater Eater = mAgent.Eater;
+        UrbBreeder Breeder = mAgent.Breeder;
+        UrbSmellSource Smell = mAgent.SmellSource;
         UrbThinker Thinker = mAgent.GetComponent<UrbThinker>();
 
         string returnText =

@@ -18,30 +18,25 @@ public class UrbEater : UrbBehaviour
 
     public override bool ShouldInterval => false;
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        if (bInitialized)
-        {
-            return;
-        }
         Stomach = new UrbComposition();
         FoodScents = UrbSubstances.Scent(FoodSubstances);
         DetectedFood = new List<UrbBody>();
 
-        base.Initialize();
-        if (mAgent.Body.BodyComposition == null)
+        base.OnEnable();
+        if (mAgent.mBody.BodyComposition == null)
         {
-            mAgent.Body.Initialize();
+            mAgent.mBody.OnEnable();
         }
 
-        mAgent.Body.BodyComposition.AddComposition(Stomach);
+        mAgent.mBody.BodyComposition.AddComposition(Stomach);
         mAgent.AddAction(BiteAttack);
     }
     static ProfilerMarker s_TileEvaluateCheck_p = new ProfilerMarker("UrbEater.TileEvaluateCheck");
 
     public override float TileEvaluateCheck(UrbTile Target, bool Contact = false)
     {
-        
         if (Stomach == null || Target == null)
             return 0;
 
@@ -54,7 +49,7 @@ public class UrbEater : UrbBehaviour
             {
                 continue;
             }
-            UrbBody PossibleFood = Target.Occupants[o].Body;
+            UrbBody PossibleFood = Target.Occupants[o].mBody;
 
             if (PossibleFood != null)
             {
@@ -83,7 +78,7 @@ public class UrbEater : UrbBehaviour
             {
                 continue;
             }
-            UrbBody PossibleFood = Target.Occupants[o].Body;
+            UrbBody PossibleFood = Target.Occupants[o].mBody;
 
             if (PossibleFood != null)
             {
@@ -178,9 +173,9 @@ public class UrbBiteAttack : UrbAttack
     protected override UrbDamage DamageAction { get; set; } = new UrbBiteDamage();
     public override float Test(UrbAgent target, float Modifier = 0)
     {
-        float Teeth = target.Body.BodyComposition[UrbSubstanceTag.Teeth];
+        float Teeth = target.mBody.BodyComposition[UrbSubstanceTag.Teeth];
 
-        return Mathf.Max(0,Teeth + MobilityTest(target.Body) + Modifier);
+        return Mathf.Max(0,Teeth + MobilityTest(target.mBody) + Modifier);
     }
 
 }

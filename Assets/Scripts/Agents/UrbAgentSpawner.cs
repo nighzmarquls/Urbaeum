@@ -40,7 +40,8 @@ public class UrbAgentSpawner
         UrbBase[] BaseComponents = spawned.GetComponents<UrbBase>();
         for (int i = 0; i < BaseComponents.Length; i++)
         {
-            BaseComponents[i].Initialize();
+            
+            BaseComponents[i].OnEnable();
         }
 
         Tile.OnAgentArrive(Agent);

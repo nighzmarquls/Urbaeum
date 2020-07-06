@@ -6,6 +6,7 @@ using UnityEngine;
 public class UrbBody : UrbBase
 {
     public UrbComposition BodyComposition { get; protected set; }
+    public bool HasComposition { get; protected set; }
     public UrbSubstance[] BodyRecipe;
     public UrbSubstanceTag[] SkinRecipe;
     public UrbSubstance[] CriticalBodyPartAmounts;
@@ -22,23 +23,18 @@ public class UrbBody : UrbBase
 
     protected static UrbRecoverBodyAction RecoverAction = new UrbRecoverBodyAction();
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        if(bInitialized)
-        {
-            return;
-        }
-
         if (BodyComposition == null)
         {
             BodyComposition = new UrbComposition(BodyRecipe);
             BodyComposition.Membrane.Layers = SkinRecipe;
+            HasComposition = true;
         }
-
+        
         mAgent = GetComponent<UrbAgent>();
-
         BodyComposition.SetSize(mAgent.Tileprint.TileCount * Height);
-        base.Initialize();
+        base.OnEnable();
     }
 
     public bool BodyCritical()
@@ -127,7 +123,7 @@ public class UrbRecoverBodyAction : UrbAction
 {
     public override float Test(UrbAgent target, float Modifier = 0)
     {
-        return MobilityTest(target.Body);
+        return MobilityTest(target.mBody);
     }
 
     public override float Execute(UrbAgent Instigator, UrbAgent Target, float Modifier = 0)
@@ -138,7 +134,7 @@ public class UrbRecoverBodyAction : UrbAction
             return 0;
         }
 
-        float Result = Mathf.Min(Instigator.Body.Utilization, Test(Instigator));
+        float Result = Mathf.Min(Instigator.mBody.Utilization, Test(Instigator));
 
         if (Instigator.Metabolism != null)
         {

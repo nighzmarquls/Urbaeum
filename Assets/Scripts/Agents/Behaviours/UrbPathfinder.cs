@@ -18,10 +18,10 @@ public class UrbPathfinder : UrbBehaviour
 
     protected UrbThinker mThinker;
 
-    public override void Initialize()
+    public override void OnEnable()
     {
         mThinker = GetComponent<UrbThinker>();
-        base.Initialize();
+        base.OnEnable();
     }
 
     public override bool ShouldInterval => false;

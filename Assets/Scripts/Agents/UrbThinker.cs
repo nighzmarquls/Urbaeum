@@ -48,33 +48,18 @@ public class UrbThinker : UrbBase
 
     protected UrbPathfinder mPathfinder;
     protected UrbMovement mMovement;
-    protected UrbBody mBody;
     protected UrbAgent mAgent;
-
-    private void Start()
-    {
-        IsmMetabolismNull = mMetabolism == null;
-        IsmEaterNotNull = mEater != null;
-        IsmBreederNotNull = mBreeder != null;
-        Initialize();
-    }
-
+    
     static ProfilerMarker s_Initialize_p = new ProfilerMarker("UrbThinker.Initialize");
 
-    public override void Initialize()
+    public override void OnEnable()
     {
-        if(bInitialized)
-        {
-            return;
-        }
         s_Initialize_p.Begin();
         
         mAgent = GetComponent<UrbAgent>();
         mPathfinder = GetComponent<UrbPathfinder>();
         
-        
         mMovement = GetComponent<UrbMovement>();
-        mBody = mAgent.Body;
 
         mPerception = GetComponent<UrbPerception>();
 
@@ -85,8 +70,12 @@ public class UrbThinker : UrbBase
         mMetabolism = GetComponent<UrbMetabolism>();
         RestUrge = 0;
         SafetyUrge = 0;
-
-        base.Initialize();
+        
+        IsmMetabolismNull = mMetabolism == null;
+        IsmEaterNotNull = mEater != null;
+        IsmBreederNotNull = mBreeder != null;
+        
+        base.OnEnable();
         s_Initialize_p.End();
     }
     static ProfilerMarker s_ChooseBehaviour_p = new ProfilerMarker("UrbThinker.ChooseBehaviour");
@@ -148,7 +137,7 @@ public class UrbThinker : UrbBase
     {
         using (s_CheckUrges_p.Auto())
         {
-            if (mBody.BodyComposition == null)
+            if (HasBody && mBody.BodyComposition == null)
             {
                 return;
             }
