@@ -285,7 +285,7 @@ public class UrbDisplay : UrbBase
         {
             EffectQueue.Clear();
             EffectPositionQueue.Clear();
-            ScheduledDisplayChange = Time.time;
+            ScheduledDisplayChange = Time.unscaledTime;
         }
        
         EffectQueue.Add(Input);
@@ -300,7 +300,7 @@ public class UrbDisplay : UrbBase
             return;
         }
 
-        if(Time.time > ScheduledDisplayChange)
+        if(Time.unscaledTime > ScheduledDisplayChange)
         {
             if (EffectQueue.Count <= 0)
             {
@@ -309,7 +309,7 @@ public class UrbDisplay : UrbBase
                 return;
             }
 
-            ScheduledDisplayChange = Time.time + EffectQueue[0].DisplayTime;
+            ScheduledDisplayChange = Time.unscaledTime + EffectQueue[0].DisplayTime;
 
             if (Invisible)
             {

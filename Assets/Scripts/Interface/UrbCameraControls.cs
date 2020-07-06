@@ -31,7 +31,7 @@ public class UrbCameraControls : MonoBehaviour
         }
     }
 
-    public float AdjustedCameraSpeed {  get { return ( CameraSpeed * (mCamera.orthographicSize / StartingSize) )/ Time.timeScale;  } }
+    public float AdjustedCameraSpeed {  get { return ( CameraSpeed * (mCamera.orthographicSize / StartingSize) );  } }
 
     Vector3 ViewportPosition;
     protected Vector3 WorldPosition;
@@ -77,8 +77,8 @@ public class UrbCameraControls : MonoBehaviour
     {
         Vector3 KeyboardInput = Vector3.zero;
 
-        KeyboardInput.x = Input.GetAxis("Horizontal");
-        KeyboardInput.y = Input.GetAxis("Vertical");
+        KeyboardInput.x = Input.GetAxisRaw("Horizontal");
+        KeyboardInput.y = Input.GetAxisRaw("Vertical");
 
         return KeyboardInput ;
     }
@@ -89,14 +89,14 @@ public class UrbCameraControls : MonoBehaviour
 
         if(Input.GetKey(KeyCode.Plus) || Input.GetKey(KeyCode.KeypadPlus))
         {
-            size -= (CameraZoomSpeed*Time.deltaTime) / Time.timeScale;
+            size -= (CameraZoomSpeed*Time.unscaledDeltaTime);
         }
         else if(Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus))
         {
-            size += (CameraZoomSpeed * Time.deltaTime) / Time.timeScale;
+            size += (CameraZoomSpeed * Time.unscaledDeltaTime);
         }
 
-        size -= (Input.mouseScrollDelta.y * CameraZoomSpeed * Time.deltaTime) / Time.timeScale;
+        size -= (Input.mouseScrollDelta.y * CameraZoomSpeed * Time.unscaledDeltaTime) ;
 
 
         return Mathf.Max(size, MinZoomSize);
@@ -111,7 +111,7 @@ public class UrbCameraControls : MonoBehaviour
         if (CameraMoveInput.magnitude > 0)
         {
             Focus = null;
-            this.transform.position += (CameraMoveInput * (Time.deltaTime * AdjustedCameraSpeed));
+            this.transform.position += (CameraMoveInput * (Time.unscaledDeltaTime * AdjustedCameraSpeed));
         }
         //Temporary until we have non-ui shortcuts.
         if (Input.GetKeyUp(KeyCode.Space))
