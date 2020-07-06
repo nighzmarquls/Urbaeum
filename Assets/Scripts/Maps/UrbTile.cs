@@ -634,23 +634,33 @@ public class UrbTile
                 continue;
             }
 
+            bool sentScent = false;
+            
             for (int check = 0; check < Adjacent[t].TerrainTypes.Length; check++)
             {
                 if (check != terrainType)
                 {
                     continue;
                 }
-
-                adj.ScentDirty = true;
+                
                 for (int s = 0; s < adj.SizeLimit; s++)
                 {
+                    var sendScent = TerrainFilter[terrainType][s];
+                    if (sendScent.dirty == false)
+                    {
+                        continue;
+                    }
+
+                    sentScent = true;
                     var filter = adj.TerrainFilter[terrainType][s];
-                    var scent = filter.ReceiveScent(TerrainFilter[terrainType][s], ScentDiffusion);
+                    var scent = filter.ReceiveScent(sendScent, ScentDiffusion);
                     s_DiffuseScent_p.End();
                     yield return scent;
                     s_DiffuseScent_p.Begin();
                 }
             }
+            //Leave ScentDirty alone if both are false or if ScentDirty is already true and sentScent is false
+            adj.ScentDirty |= sentScent;
         }
 
         s_DiffuseScent_p.End();
