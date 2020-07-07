@@ -7,8 +7,8 @@ using UnityEngine;
 public enum UrbTileprintFill
 {
     Empty = 0,
-    Occupy,
-    Block,
+    Occupy = 1,
+    Block = 2,
     MaxTileprintFill
 }
 
@@ -336,6 +336,13 @@ public class UrbTileprint
         int Xoffset = 0;
         int Yoffset = 0;
 
+        if(X == 1 && Y ==1)
+        {
+            PrintAtTile(Print[0][0], Tile, Agent);
+            s_ArriveAtTile_p.End();
+            return;
+        }
+
         if ( X > 2 && Y > 2)
         {
             Vector2 Voffset = GetOffset();
@@ -364,6 +371,13 @@ public class UrbTileprint
     {
         int Xoffset = 0;
         int Yoffset = 0;
+
+        if (X == 1 && Y == 1)
+        {
+            UnprintAtTile(Print[0][0], Tile, Agent);
+            s_ArriveAtTile_p.End();
+            return;
+        }
 
         if (X > 2 && Y > 2)
         {

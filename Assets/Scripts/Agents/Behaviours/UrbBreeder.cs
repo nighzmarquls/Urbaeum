@@ -24,6 +24,7 @@ public class UrbBreeder : UrbBehaviour
     public int DispersalDistance = -1;
 
     public UrbBreedTag BreedType = UrbBreedTag.Plant;
+    public UrbPathTerrain RequiredOffspringTerrain = UrbPathTerrain.Land;
 
     public UrbScentTag[] MateScents;
     public UrbScentTag[] RivalScents;
@@ -280,7 +281,7 @@ public class UrbBreeder : UrbBehaviour
 
         for (int t = 0; t < SearchCache.Length; t++)
         {
-            if (SearchCache[t] == null || SearchCache[t].Blocked || SearchCache[t].FreeCapacity < OffspringRequiredSpace)
+            if (SearchCache[t] == null || SearchCache[t].Blocked || !SearchCache[t].TerrainPassable(RequiredOffspringTerrain) || SearchCache[t].FreeCapacity < OffspringRequiredSpace)
             {
                 continue;
             }
@@ -345,7 +346,8 @@ public class UrbBreeder : UrbBehaviour
 
         Data.Strings = new UrbStringData[]
         {
-            new UrbStringData{ Name = "BreedType", Value = BreedType.ToString()}
+            new UrbStringData{ Name = "BreedType", Value = BreedType.ToString()},
+            new UrbStringData{ Name = "RequiredOffspringTerrain", Value = RequiredOffspringTerrain.ToString()}
         };
 
         Data.StringArrays = new UrbStringArrayData[]
@@ -377,6 +379,7 @@ public class UrbBreeder : UrbBehaviour
         Gestating = (UrbEncoder.GetField("Gestating", Data) > 0.0f);
 
         BreedType = UrbEncoder.GetEnum<UrbBreedTag>("BreedType", Data);
+        RequiredOffspringTerrain = UrbEncoder.GetEnum<UrbPathTerrain>("RequiredOffspringTerrain", Data);
         OffspringData = UrbEncoder.GetObjectDataArray("OffspringData", Data);
 
         MateScents = UrbEncoder.GetEnumArray<UrbScentTag>("MateScents", Data);

@@ -46,7 +46,8 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             return "Dead";
 
         string LocalName = mAgent.gameObject.name.Split('(')[0];
-        string Age = Mathf.Round(Time.time - mAgent.BirthTime).ToString();
+        string Mass = mAgent.Mass.ToString();
+        string MassPerTile = mAgent.MassPerTile.ToString();
         UrbMetabolism Metabolism = mAgent.Metabolism;
         UrbBody Body = mAgent.mBody;
         UrbEater Eater = mAgent.Eater;
@@ -56,7 +57,8 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
 
         string returnText =
             "Name: " + LocalName + "\n" +
-            "Age: " + Age + "\n";
+            "Mass: " + Mass + "\n" +
+            "Mass Per Tile:" + MassPerTile + "\n";
 
         if (Metabolism != null)
         {
@@ -67,7 +69,7 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
         {
             string Thoughts = "Thoughts- \n";
 
-            Thoughts += (Thinker.SafetyUrge > 0) ? "Safety Desire: " + Thinker.SafetyUrge + "\n " : "";
+            Thoughts += (Thinker.SafetyUrge > 0) ? "Safety Desire: " + Thinker.SafetyUrge + "\n" : "";
             Thoughts += (Thinker.BreedUrge > 0) ? "Breed Desire: " + Thinker.BreedUrge + "\n" : "";
             Thoughts += (Thinker.HungerUrge > 0) ? "Hunger Desire: " + Thinker.HungerUrge + "\n" : "";
             Thoughts += (Thinker.RestUrge > 0) ? "Rest Desire: " + Thinker.RestUrge + "\n" : "";
