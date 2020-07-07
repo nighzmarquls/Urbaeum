@@ -129,17 +129,18 @@ public class UrbTile
         float Radius = 0;
         float RadiusAdjust = 3;
         float TileCapacityOffset = TileCapacity / 4f;
-
-        LocationOffset = new Vector3(Mathf.Sin(Turn), Mathf.Cos(Turn), 0);
-        LocationOffset *= (Radius * OwningMap.TileSize);
-        var summedLocationOffset = new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x) + LocationOffset;
-
+        
         for (int i = 0; i < OrderedOccupants.Count; i++)
         {
+            LocationOffset = new Vector3(Mathf.Sin(Turn), Mathf.Cos(Turn), 0);
+            LocationOffset *= (Radius * OwningMap.TileSize);
+            var summedLocationOffset = new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x) + LocationOffset;
+
             if (OrderedOccupants[i].Shuffle)
             {
                 OrderedOccupants[i].Location = Center + summedLocationOffset;
             }
+            
             Turn += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) * TurnAdjust;
             TurnAdjust *= 0.85f;
             Radius += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) / RadiusAdjust;

@@ -413,7 +413,7 @@ public class UrbAgent : UrbBase
         }
     }
 
-    const float MassChangeToReorder = 60f;
+    const float MassChangeToReorder = 50f;
     const float RepositionInterval = 0.1f;
     float NextReposition = 0;
     bool IsMindNull;
