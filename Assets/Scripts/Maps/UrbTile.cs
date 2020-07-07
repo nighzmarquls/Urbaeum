@@ -589,10 +589,13 @@ public class UrbTile
 
             if (!ScentDirty)
             {
-                if (Time.fixedTime - LastScentUpdate > MinimumScentUpdate)
+                if (Occupants.Count > 0)
                 {
-                    ScentDirty = true;
-                    LastScentUpdate = Time.fixedTime;
+                    if (Time.fixedTime - LastScentUpdate > MinimumScentUpdate)
+                    {
+                        ScentDirty = true;
+                        LastScentUpdate = Time.fixedTime;
+                    }
                 }
                 continue;
             }
