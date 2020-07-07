@@ -7,42 +7,37 @@ public class UrbBase : MonoBehaviour
 {
     protected readonly UrbLogger logger = new UrbLogger(UnityEngine.Debug.unityLogger.logHandler);
 
+    #region OptionalComponents
     //Optional Urb Components which may find themselves on a given UrbAgent 
-    [DontSerialize]
+    [DontSerialize]     public UrbEater Eater { get; protected set; }
 
-    public UrbEater Eater { get; protected set; }
+    [DontSerialize] public UrbBreeder Breeder { get; protected set; }
+    
+    [DontSerialize] public UrbBody mBody { get; protected set; }
+    
+    [DontSerialize] public UrbSmellSource SmellSource { get; protected set; }
+    
+    [DontSerialize] public UrbAgent mAgent { get; protected set; }
+    [DontSerialize] public UrbThinker Mind;
+    #endregion
+    #region OptionalComponentIndicators
+    
+    [DontSerialize] public bool IsSmelly { get; protected set; }
+    
+    [DontSerialize] public bool HasBody { get; protected set; }
+    
+    [DontSerialize] public bool IsBreeder { get; protected set; }
+    
+    [DontSerialize] public bool IsEater { get; protected set; }
+    [DontSerialize] public bool HasAgent { get; protected set; }
+    
+    [DontSerialize] public bool IsMindNull;
+    #endregion
 
-    [DontSerialize]
-    public UrbBreeder Breeder { get; protected set; }
+    [DontSerialize] public bool HasEnableBeenCalled { get; protected set; }
+    [DontSerialize] public bool LogMe = false;
+
     
-    [DontSerialize]
-    public UrbBody mBody { get; protected set; }
-    
-    [DontSerialize]
-    public UrbSmellSource SmellSource { get; protected set; }
-    
-    [DontSerialize]
-    public UrbAgent mAgent { get; protected set; }
-    
-    [DontSerialize]
-    public bool IsSmelly { get; protected set; }
-    
-    [DontSerialize]
-    public bool HasBody { get; protected set; }
-    
-    [DontSerialize]
-    public bool IsBreeder { get; protected set; }
-    
-    [DontSerialize]
-    public bool IsEater { get; protected set; }
-    [DontSerialize]
-    public bool HasAgent { get; protected set; }
-    
-    [DontSerialize]
-    public bool LogMe = false;
-    
-    [DontSerialize]
-    public bool HasEnableBeenCalled = false;
     public virtual void Update()
     {
         if (LogMe != logger.shouldBeLogging)
@@ -97,6 +92,9 @@ public class UrbBase : MonoBehaviour
         SmellSource = GetComponent<UrbSmellSource>();
         IsSmelly = SmellSource != null;
 
+        Mind = GetComponent<UrbThinker>();
+        IsMindNull = Mind == null;
+        
         //Strange situation where UrbBody isn't getting enabled
         mBody = GetComponent<UrbBody>();
         //Protect from recursive nonsense

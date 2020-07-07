@@ -12,7 +12,6 @@ public class UrbAgent : UrbBase
     
     public bool HasPathfinder { get; protected set; } = false;
     const float LocationThreshold = 0.01f;
-    UrbThinker Mind;
 
     UrbBodyDisplay BodyDisplay;
 
@@ -87,7 +86,6 @@ public class UrbAgent : UrbBase
         //only if it's null and we don't know about it
         IsCurrentMapNull = true;
         CurrentTile = null;
-        IsMindNull = true;
         CurrentMap = null;
         UrbAgentManager.UnregisterAgent(this);
         base.OnDestroy();
@@ -329,9 +327,7 @@ public class UrbAgent : UrbBase
         this.transform.rotation = Camera.transform.rotation;
         tileprint = new UrbTileprint(TileprintString);
         
-        Mind = GetComponent<UrbThinker>();
         BodyDisplay = GetComponent<UrbBodyDisplay>();
-        IsMindNull = Mind == null;
         LastCheckedMass = 0;
 
         UrbMerges = GetComponents<UrbMerge>();
@@ -416,7 +412,6 @@ public class UrbAgent : UrbBase
     const float MassChangeToReorder = 10f;
     const float RepositionInterval = 0.1f;
     float NextReposition = 0;
-    bool IsMindNull;
     Camera Camera;
 
     public void Express(UrbDisplayFace.Expression Expression)
