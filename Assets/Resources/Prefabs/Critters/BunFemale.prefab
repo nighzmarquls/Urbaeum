@@ -108,7 +108,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
-  BirthTime: 43.54118
+  HasEnableBeenCalled: 0
+  BirthTime: 0
   IsCurrentMapNull: 1
   Shuffle: 1
   SizeOffset: 1
@@ -126,6 +127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  HasEnableBeenCalled: 0
   BodyRecipe:
   - Substance: 6
     SubstanceAmount: 50
@@ -157,6 +159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  HasEnableBeenCalled: 0
   Interval: 2
   BodyGrowthRecipe:
   - Substance: 7
@@ -178,6 +181,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  HasEnableBeenCalled: 0
   Interval: 1
 --- !u!114 &-2832398848432110761
 MonoBehaviour:
@@ -192,6 +196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  HasEnableBeenCalled: 0
   Interval: 1
   GoalTag: 1
   Size: 0
@@ -209,6 +214,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  HasEnableBeenCalled: 0
   Interval: 0.5
   FoodSubstances: 040000000300000002000000
 --- !u!114 &1285019260808379821
@@ -224,6 +230,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  HasEnableBeenCalled: 0
   Interval: 2
   MateRequirement: 1
   MateCrowding: 2
@@ -255,6 +262,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  HasEnableBeenCalled: 0
   Interval: 1
   SmellTag: 
   SmellStrength: 10
@@ -271,7 +279,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
-  Impatience: 0.001
+  HasEnableBeenCalled: 0
 --- !u!114 &-7163439831718555752
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -285,6 +293,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  HasEnableBeenCalled: 0
   Modifications:
   - DisplayDrivingSubstance: 13
     SubstanceSizeRatio: 1000
@@ -317,6 +326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  HasEnableBeenCalled: 0
   Interval: 0.25
   PerceptionPrintString: 
   ContactPrintString: 

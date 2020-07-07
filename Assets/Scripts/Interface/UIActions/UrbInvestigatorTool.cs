@@ -34,7 +34,7 @@ public class UrbInvestigatorTool : UrbUserAction
                     Display.name = "InvestigationDisplay";
                     SpriteRenderer Renderer = Display.AddComponent<SpriteRenderer>();
                     Renderer.sprite = DisplaySprite;
-                    Renderer.sortingOrder = -1;
+                    Renderer.sortingOrder = 2;
                     Renderer.enabled = false;
                     Display.transform.SetParent(MapDisplay.transform);
                     WorkingList.Add(Renderer);

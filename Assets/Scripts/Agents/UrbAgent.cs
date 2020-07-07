@@ -125,11 +125,11 @@ public class UrbAgent : UrbBase
     public float MassPerTile { get {
             if(tileprint.TileCount > 1)
             {
-                return Mass / ((mBody.Height > 1)? tileprint.TileCount*mBody.Height : tileprint.TileCount );
+                return Mass / ((mBody.Height > 1)? tileprint.TileCount*mBody.Height : (float)tileprint.TileCount );
             }
             else
             {
-                return Mass;
+                return Mass / ((mBody.Height > 1) ? mBody.Height : 1.0f);
             }
     } }
 
@@ -413,7 +413,7 @@ public class UrbAgent : UrbBase
         }
     }
 
-    const float MassChangeToReorder = 50f;
+    const float MassChangeToReorder = 10f;
     const float RepositionInterval = 0.1f;
     float NextReposition = 0;
     bool IsMindNull;
@@ -491,13 +491,17 @@ public class UrbAgent : UrbBase
         s_TickToBody_p.End();
 
         s_TickToDisplay_p.Begin();
-        if (HasDisplay && !Display.Invisible && Shuffle)
+        if (HasDisplay && !Display.Invisible)
         {
             var massChange = Math.Abs(LastCheckedMass - Mass);
-            if (massChange > MassChangeToReorder && Shuffle)
+            if (massChange > MassChangeToReorder)
             {
                 LastCheckedMass = Mass;
-                CurrentTile?.VisualShuffle();
+                CurrentTile.UpdateClearance();
+                if (Shuffle)
+                {
+                    CurrentTile?.VisualShuffle();
+                }
             }
 
             if (!(Time.time > NextReposition) || !(Display.Significance > UrbDisplay.FeatureSignificance))

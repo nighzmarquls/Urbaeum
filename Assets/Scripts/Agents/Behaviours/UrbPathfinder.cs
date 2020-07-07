@@ -53,6 +53,12 @@ public class UrbPathfinder : UrbBehaviour
                 continue;
             }
 
+            if(!Adjacent[t].TerrainPassable(PassableTerrain))
+            {
+                continue;
+            }
+
+
             float currentValue = (mThinker == null) ? Adjacent[t].TerrainFilter[TerrainType][Size][GoalTag] : mThinker.EvaluateTile(Adjacent[t], TerrainType, Size);
 
             if (currentValue <= 0)

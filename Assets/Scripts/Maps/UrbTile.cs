@@ -73,6 +73,20 @@ public class UrbTile
     public Vector3 Location { get { return OwningMap.TileAddressToLocation(XAddress, YAddress) + LocationOffset;} }
     public Vector3 RawLocation { get { return OwningMap.TileAddressToLocation(XAddress, YAddress); } }
 
+    public bool TerrainPassable(UrbPathTerrain Input)
+    {
+        bool Passable = false;
+        for(int tt = 0; tt < TerrainTypes.Length; tt++)
+        {
+            if(Input == TerrainTypes[tt])
+            {
+                Passable = true;
+                break;
+            }
+        }
+        return Passable;
+    }
+
     public void UpdateClearance()
     {
         if (Occupants.Count <= 0)
@@ -132,6 +146,11 @@ public class UrbTile
         
         for (int i = 0; i < OrderedOccupants.Count; i++)
         {
+            if(OrderedOccupants[i].CurrentTile != this)
+            {
+                continue;
+            }
+
             LocationOffset = new Vector3(Mathf.Sin(Turn), Mathf.Cos(Turn), 0);
             LocationOffset *= (Radius * OwningMap.TileSize);
             var summedLocationOffset = new Vector3(0, 0, (LocationOffset.y * DepthPush) - LocationOffset.x) + LocationOffset;
@@ -139,6 +158,10 @@ public class UrbTile
             if (OrderedOccupants[i].Shuffle)
             {
                 OrderedOccupants[i].Location = Center + summedLocationOffset;
+            }
+            else
+            {
+                OrderedOccupants[i].Location = Center;
             }
             
             Turn += (OrderedOccupants[i].MassPerTile / TileCapacityOffset) * TurnAdjust;
@@ -413,6 +436,10 @@ public class UrbTile
 
         UpdateClearance();
 
+        if (input.Shuffle)
+        {
+            VisualShuffle();
+        }
         s_OnAgentArrive_p.End();
     }
 
@@ -430,9 +457,12 @@ public class UrbTile
             ScentDirty = true;
         }
 
- 
         UpdateClearance();
-        
+
+        if (input.Shuffle)
+        {
+            VisualShuffle();
+        }
 
         s_OnAgentLeave_p.End();
     }
@@ -589,10 +619,13 @@ public class UrbTile
 
             if (!ScentDirty)
             {
-                if (Time.fixedTime - LastScentUpdate > MinimumScentUpdate)
+                if (Occupants.Count > 0)
                 {
-                    ScentDirty = true;
-                    LastScentUpdate = Time.fixedTime;
+                    if (Time.fixedTime - LastScentUpdate > MinimumScentUpdate)
+                    {
+                        ScentDirty = true;
+                        LastScentUpdate = Time.fixedTime;
+                    }
                 }
                 continue;
             }
