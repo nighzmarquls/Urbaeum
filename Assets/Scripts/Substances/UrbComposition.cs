@@ -7,7 +7,7 @@ using UnityEngine.Assertions.Comparers;
 public class UrbComposition
 {
     protected UrbComposition ContainingComposion;
-
+    
     public UrbMembrane Membrane { get; protected set; }
 
     public float MaxCapacity { get; protected set; } = 1000;
@@ -31,7 +31,13 @@ public class UrbComposition
 
     public float Emptiness {
         get {
-            return AvailableCapacity / MaxCapacity;
+            var emptiness = AvailableCapacity / MaxCapacity;
+            if (float.IsNaN(emptiness))
+            {
+                return 1;
+            }
+
+            return emptiness;
         }
     }
 
@@ -49,7 +55,13 @@ public class UrbComposition
 
     public float AvailableCapacity {
         get {
-            return MaxCapacity - UsedCapacity;
+            var availCapacity = MaxCapacity - UsedCapacity;
+            if (float.IsNaN(availCapacity))
+            {
+                return 1;
+            }
+
+            return availCapacity;
         }
     }
 
@@ -87,25 +99,19 @@ public class UrbComposition
         }
     }
 
-    protected Dictionary<UrbSubstanceTag, float> Substances;
-    protected List<UrbComposition> Compositions;
-
-    public virtual void Initialize()
+    protected Dictionary<UrbSubstanceTag, float> Substances = new Dictionary<UrbSubstanceTag, float>();
+    protected List<UrbComposition> Compositions = new List<UrbComposition>();
+    
+    public UrbComposition(UrbSubstance[] CompositionRecipe = null)
     {
-        Substances = new Dictionary<UrbSubstanceTag, float>();
-        Compositions = new List<UrbComposition>();
+        
         Membrane = new UrbMembrane(this);
-    }
 
-    public UrbComposition()
-    {
-        Initialize();
-    }
-
-    public UrbComposition(UrbSubstance[] CompositionRecipe)
-    {
-        Initialize();
-
+        if (CompositionRecipe == null)
+        {
+            return;
+        }
+        
         for (int i = 0; i < CompositionRecipe.Length; i++)
         {
             if (Substances.ContainsKey(CompositionRecipe[i].Substance))
