@@ -91,7 +91,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9104381072964362422}
-  - component: {fileID: 3375643400372815378}
   m_Layer: 5
   m_Name: AgentEventLog
   m_TagString: Untagged
@@ -122,21 +121,6 @@ RectTransform:
   m_AnchoredPosition: {x: 258, y: -342}
   m_SizeDelta: {x: 600, y: 250}
   m_Pivot: {x: 0.5, y: 1}
---- !u!114 &3375643400372815378
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3589649615401216775}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c3159928381c094a963620089ad0d2f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CloseInput: {fileID: 0}
-  TrackAgentInput: {fileID: 0}
-  DisplayText: {fileID: 5598357159590785175}
 --- !u!1 &4824039879071503642
 GameObject:
   m_ObjectHideFlags: 0
@@ -472,7 +456,7 @@ PrefabInstance:
     - target: {fileID: 6346166530166693735, guid: c77f1bac439041841b86731627d074d5,
         type: 3}
       propertyPath: Shortcut
-      value: 27
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c77f1bac439041841b86731627d074d5, type: 3}

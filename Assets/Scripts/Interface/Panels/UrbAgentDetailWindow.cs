@@ -11,62 +11,64 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
     protected UrbAgent mAgent = null;
     public UrbAgent TargetAgent { get { return mAgent; } set { mAgent = value; AgentAssigned = value != null; } }
 
-    public Text DisplayText;
+    protected bool HasDisplayText;
 
-    public override void Awake()
+    protected Text _displayText;
+
+    public Text DisplayText
     {
-        base.Awake();
+        get { return _displayText;  }
+        set
+        {
+            _displayText = value;
+            HasDisplayText = _displayText != null;
+        }
+    }
+
+    public override void OnEnable()
+    {
+        base.OnEnable();
 
         if(TrackAgentInput != null)
         {
             TrackAgentInput.UserAction = new UrbTrackAgent { OwningWindow = this };
         }
     }
-
+    
     public void Update()
     {
-        if(AgentAssigned)
+        if(AgentAssigned && HasDisplayText)
         {
-            if(mAgent.WasDestroyed)
-            {
-                DisplayText.text = "Dead";
-                TargetAgent = null;
-            }
-            if(DisplayText != null)
-            {
-                DisplayText.text = TextSummary();
-            }
-            
+            DisplayText.text = TextSummary();
         }
     }
 
     string TextSummary()
     {
         if (mAgent.WasDestroyed)
+        {
+            TargetAgent = null;
             return "Dead";
+        }
 
         string LocalName = mAgent.gameObject.name.Split('(')[0];
         string Mass = mAgent.Mass.ToString();
         string MassPerTile = mAgent.MassPerTile.ToString();
-        UrbMetabolism Metabolism = mAgent.Metabolism;
-        UrbBody Body = mAgent.mBody;
-        UrbEater Eater = mAgent.Eater;
-        UrbBreeder Breeder = mAgent.Breeder;
         UrbSmellSource Smell = mAgent.SmellSource;
-        UrbThinker Thinker = mAgent.GetComponent<UrbThinker>();
 
         string returnText =
             "Name: " + LocalName + "\n" +
             "Mass: " + Mass + "\n" +
             "Mass Per Tile:" + MassPerTile + "\n";
 
-        if (Metabolism != null)
+        if (mAgent.HasMetabolism)
         {
-            returnText += "Energy: " + Metabolism.EnergyBudget + "\n";
+            returnText += "Energy: " + mAgent.Metabolism.EnergyBudget + "\n";
         }
 
-        if (Thinker != null)
+        if (!mAgent.IsMindNull)
         {
+            UrbThinker Thinker = mAgent.Mind;
             string Thoughts = "Thoughts- \n";
 
             Thoughts += (Thinker.SafetyUrge > 0) ? "Safety Desire: " + Thinker.SafetyUrge + "\n" : "";
@@ -77,8 +79,9 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             returnText += Thoughts;
         }
 
-        if (Body != null)
+        if (mAgent.HasBody)
         {
+            UrbBody Body = mAgent.mBody;
             string BodyAnatomy = "Body- \n";
             if (Body.BodyComposition != null)
             {
@@ -92,16 +95,22 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             }
         }
 
-        if (Breeder != null)
+        if (mAgent.IsBreeder)
         {
+            UrbBreeder Breeder = mAgent.Breeder;
             if (Breeder.Gestating)
             {
                 returnText += "Pregnant \n";
             }
+            else if (Breeder.CanBreed)
+            {
+                returnText += "Capable of breeding \n";
+            }
         }
-
-        if (Eater != null)
+        
+        if (mAgent.IsEater)
         {
+            UrbEater Eater = mAgent.Eater;
             string FavoriteFood = "Diet- \n";
             for (int f = 0; f < Eater.FoodSubstances.Length; f++)
             {

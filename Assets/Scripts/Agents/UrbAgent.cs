@@ -31,7 +31,6 @@ public class UrbAgent : UrbBase
         {
             _display = value;
             // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
-            
             HasDisplay = _display != null;
         }
     }
@@ -144,7 +143,6 @@ public class UrbAgent : UrbBase
             return tileprint;
         }
     }
-    public UrbMetabolism Metabolism { get; private set; }
 
     public Sprite CurrentSprite {
         get {
@@ -315,7 +313,6 @@ public class UrbAgent : UrbBase
 
         BirthTime = Time.time;
         
-        Metabolism = GetComponent<UrbMetabolism>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
         Camera = Camera.main;
         if (Camera == null)

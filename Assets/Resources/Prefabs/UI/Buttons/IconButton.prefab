@@ -273,3 +273,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Shortcut: 0
+  Disabled: 0

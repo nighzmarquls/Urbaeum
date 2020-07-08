@@ -33,7 +33,6 @@ public class UrbBreeder : UrbBehaviour
 
     public GameObject[] OffspringObjects;
     protected UrbObjectData[] OffspringData = null;
-    protected UrbMetabolism mMetabolism;
 
     protected static UrbLoveAction LoveAction = new UrbLoveAction();
 
@@ -59,8 +58,6 @@ public class UrbBreeder : UrbBehaviour
             EncodeOffspringData();
         }
         
-        mMetabolism = GetComponent<UrbMetabolism>();
-
         base.OnEnable();
 
     }

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine;
 
-public class UrbDisplayWindow : MonoBehaviour
+public abstract class UrbDisplayWindow : MonoBehaviour
     , IDragHandler
     , IBeginDragHandler
     , IEndDragHandler
@@ -12,31 +12,50 @@ public class UrbDisplayWindow : MonoBehaviour
     , IPointerExitHandler
 {
     public UrbInterfaceInput CloseInput;
+    public UrbInterfaceInput MinimizeInput;
+    
     protected Vector2 offset;
     protected RectTransform WindowRect;
-
+    
     protected float WidthOffset;
-
     protected float HeightOffset;
-
+    
     protected static UrbDisplayWindow CurrentFocusedWindow = null;
-
+    public bool CanClose { get; protected set; }
+    public bool CanMinimize { get; protected set; }
+    
+    public bool AllowDragging = true;
     public bool InFocus { get; protected set; } = false;
 
     public bool MouseOver { get; protected set; } = false;
 
-    public virtual void Awake()
+    public virtual void OnEnable()
     {
-        WindowRect = GetComponent<RectTransform>();
-
-        WindowRect.pivot = new Vector2(0.5f, 0.5f);
-
-        WidthOffset = WindowRect.rect.width * 0.5f;
-        HeightOffset = WindowRect.rect.height * 0.5f;
-
-        if (CloseInput != null)
+        Debug.Log("Enabling UrbDisplayWindow");
+        
+        if (AllowDragging)
         {
-            CloseInput.UserAction = new UrbDisplayWindowClose { OwningWindow = this, };
+            WindowRect = GetComponent<RectTransform>();
+
+            WindowRect.pivot = new Vector2(0.5f, 0.5f);
+
+            var rect = WindowRect.rect;
+            WidthOffset = rect.width * 0.5f;
+            HeightOffset = rect.height * 0.5f;
+        }
+
+        CanClose = CloseInput != null;
+        if (CanClose)
+        {
+            Debug.Log("Added CloseInput UserAction to Window");
+            CloseInput.UserAction = new UrbDisplayWindowClose { OwningWindow = this };
+        }
+
+        CanMinimize = MinimizeInput != null;
+        if (CanMinimize)
+        {
+            Debug.Log("Added MinimizeInput UserAction to Window");
+            MinimizeInput.UserAction = new UrbDisplayWindowMinimize { OwningWindow = this };
         }
     }
 
@@ -61,11 +80,21 @@ public class UrbDisplayWindow : MonoBehaviour
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (!AllowDragging)
+        {
+            return;
+        }
+        
         UpdateOffset(eventData);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (!AllowDragging)
+        {
+            return;
+        }
+        
         Vector2 NewPosition = offset + eventData.position;
 
         if(NewPosition.x - WidthOffset < 0)
@@ -97,7 +126,15 @@ public class UrbDisplayWindow : MonoBehaviour
     public void OnPointerEnter(PointerEventData eventData)
     {
         MouseOver = true;
-        CloseInput.Disabled = false;
+        if (CanClose)
+        {
+            CloseInput.Disabled = false;
+        }
+
+        if (CanMinimize)
+        {
+            MinimizeInput.Disabled = false;
+        }
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -108,7 +145,26 @@ public class UrbDisplayWindow : MonoBehaviour
             return;
         }
 
-        CloseInput.Disabled = true;
+        if (CanClose)
+        {
+            CloseInput.Disabled = true;
+        }
+
+        if (CanMinimize)
+        {
+            MinimizeInput.Disabled = true;
+        }
+    }
+
+    public virtual void OnClose()
+    {
+        Debug.Log("UrbDisplayWindow OnClose");
+        return;
+    }
+    public virtual void OnMinimize()
+    {
+        Debug.Log("UrbDisplayWindow OnMinimize");
+        return;
     }
 }
 
@@ -121,13 +177,32 @@ public class UrbDisplayWindowClose : UrbUserAction
 
     public override void SelectAction()
     {
-        if (OwningWindow == null)
-            return;
+        if (OwningWindow == null) { return; }
 
         if (OwningWindow.InFocus || OwningWindow.MouseOver)
         {
             base.SelectAction();
+            OwningWindow.OnClose();
             Object.Destroy(OwningWindow.gameObject);
+        }
+    }
+}
+
+public class UrbDisplayWindowMinimize : UrbUserAction
+{
+    public override string Name => "Minimize Window";
+    public override string MapDisplayAssetPath => "";
+
+    public UrbDisplayWindow OwningWindow;
+
+    public override void SelectAction()
+    {
+        if (OwningWindow == null) { return; }
+
+        if (OwningWindow.InFocus || OwningWindow.MouseOver)
+        {
+            base.SelectAction();
+            Debug.Log("Minimize Window was pressed!");
         }
     }
 }

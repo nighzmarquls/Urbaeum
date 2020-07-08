@@ -14,6 +14,7 @@ public class UrbBase : MonoBehaviour
     [DontSerialize] public UrbBreeder Breeder { get; protected set; }
     
     [DontSerialize] public UrbBody mBody { get; protected set; }
+    [DontSerialize] public UrbMetabolism Metabolism { get; private set; }
     
     [DontSerialize] public UrbSmellSource SmellSource { get; protected set; }
     
@@ -32,6 +33,7 @@ public class UrbBase : MonoBehaviour
     [DontSerialize] public bool HasAgent { get; protected set; }
     
     [DontSerialize] public bool IsMindNull;
+    [DontSerialize] public bool HasMetabolism;
     #endregion
 
     [DontSerialize] public bool HasEnableBeenCalled { get; protected set; }
@@ -82,45 +84,72 @@ public class UrbBase : MonoBehaviour
     public virtual void OnEnable()
     {
         HasEnableBeenCalled = true;
+
+        SetUrbComponents();
         
-        Eater = GetComponent<UrbEater>();
         IsEater = Eater != null;
-
-        Breeder = GetComponent<UrbBreeder>();
         IsBreeder = Breeder != null;
-
-        SmellSource = GetComponent<UrbSmellSource>();
         IsSmelly = SmellSource != null;
-
-        Mind = GetComponent<UrbThinker>();
         IsMindNull = Mind == null;
-        
-        //Strange situation where UrbBody isn't getting enabled
-        mBody = GetComponent<UrbBody>();
-        //Protect from recursive nonsense
-        if (mBody == this)
-        {
-            mBody = null;
-        }
-        
-        mAgent = GetComponent<UrbAgent>();
-
-        if (mAgent == this)
-        {
-            mAgent = null;
-        }
-        
         HasAgent = mAgent != null;
         HasBody = mBody != null;
+        //Strange situation where UrbBody isn't getting enabled
         if (HasBody && !mBody.HasEnableBeenCalled)
         {
             mBody.OnEnable();
         }
+        
+        HasMetabolism = Metabolism != null;
         
         LogMe = false;
         logger.logEnabled = false;
         
         WasDestroyed = false;
         enabled = true;
+    }
+    
+    void SetUrbComponents()
+    {
+        Metabolism = GetComponent<UrbMetabolism>();
+        if (Metabolism == this)
+        {
+            Metabolism = null;
+        }
+        
+        Eater = GetComponent<UrbEater>();
+        if (Eater == this)
+        {
+            Eater = null;
+        }
+        
+        Breeder = GetComponent<UrbBreeder>();
+        if (Breeder == this)
+        {
+            Breeder = null;
+        }
+        
+        SmellSource = GetComponent<UrbSmellSource>();
+        if (SmellSource == this)
+        {
+            SmellSource = null;
+        }
+        
+        Mind = GetComponent<UrbThinker>();
+        if (Mind == this)
+        {
+            Mind = null;
+        }
+        
+        mBody = GetComponent<UrbBody>();
+        if (mBody == this)
+        {
+            mBody = null;
+        }
+        
+        mAgent = GetComponent<UrbAgent>();
+        if (mAgent == this)
+        {
+            mAgent = null;
+        }
     }
 }
