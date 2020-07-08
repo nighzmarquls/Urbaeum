@@ -11,8 +11,6 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
     protected UrbAgent mAgent = null;
     public UrbAgent TargetAgent { get { return mAgent; } set { mAgent = value; AgentAssigned = value != null; } }
     
-    protected Text _displayText;
-
     public Text DisplayText;
     public override void OnEnable()
     {
