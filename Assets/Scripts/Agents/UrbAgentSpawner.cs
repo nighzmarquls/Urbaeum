@@ -45,13 +45,14 @@ public class UrbAgentSpawner
         {
             UrbEncoder.Write(Data, spawned);
             //Debug.Log(JsonUtility.ToJson(Data, true));
-
-            if (spawned.activeSelf == false)
-            {
-                Debug.Log("the spawned object was inactive!");
-            }
-            spawned.SetActive(true);
         }
+        
+        if (spawned.activeSelf == false)
+        {
+            Debug.Log("the spawned object was inactive!");
+        }
+        
+        spawned.SetActive(true);
         
         UrbAgent Agent = spawned.GetComponent<UrbAgent>();
         if (!Agent.enabled)
@@ -82,10 +83,9 @@ public class UrbSpawnAction : UrbUserAction
     public UrbAgent AgentTemplate;
     public override void MouseClick(UrbTile currentCursorTile)
     {
-        GameObject SpawnedObject;
-        if(!UrbAgentSpawner.SpawnAgent(AgentTemplate,currentCursorTile, out SpawnedObject))
+        if(!UrbAgentSpawner.SpawnAgent(AgentTemplate,currentCursorTile, out _))
         {
-            UnityEngine.Debug.LogWarning("Failed to spawn agent from click");
+            Debug.LogWarning("Failed to spawn agent from click");
         }
     }
 
