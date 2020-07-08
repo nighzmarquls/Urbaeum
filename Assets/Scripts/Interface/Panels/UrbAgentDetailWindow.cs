@@ -10,21 +10,10 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
     public bool AgentAssigned { get; protected set; } = false;
     protected UrbAgent mAgent = null;
     public UrbAgent TargetAgent { get { return mAgent; } set { mAgent = value; AgentAssigned = value != null; } }
-
-    protected bool HasDisplayText;
-
+    
     protected Text _displayText;
 
-    public Text DisplayText
-    {
-        get { return _displayText;  }
-        set
-        {
-            _displayText = value;
-            HasDisplayText = _displayText != null;
-        }
-    }
-
+    public Text DisplayText;
     public override void OnEnable()
     {
         base.OnEnable();
@@ -37,7 +26,7 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
     
     public void Update()
     {
-        if(AgentAssigned && HasDisplayText)
+        if(AgentAssigned)
         {
             DisplayText.text = TextSummary();
         }
