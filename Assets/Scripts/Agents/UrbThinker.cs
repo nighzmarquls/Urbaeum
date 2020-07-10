@@ -231,7 +231,7 @@ public class UrbThinker : UrbBase
             HungerUrge = Mathf.Min(1, HungerUrge);
             for(int f = 0; f < mEater.FoodScents.Length; f++)
             {
-                TileValue += Tile.TerrainFilter[TerrainType][Size][mEater.FoodScents[f]] * HungerUrge;
+                TileValue += Tile.TerrainFilter[TerrainType][Size].tagList[(int)mEater.FoodScents[f]].value * HungerUrge;
             }
 
         }
@@ -241,18 +241,18 @@ public class UrbThinker : UrbBase
             BreedUrge = Mathf.Min(1, BreedUrge);
             for (int b = 0; b < mBreeder.MateScents.Length; b++)
             {
-                TileValue += Tile.TerrainFilter[TerrainType][Size][mBreeder.MateScents[b]] * BreedUrge;
+                TileValue += Tile.TerrainFilter[TerrainType][Size].tagList[(int)mBreeder.MateScents[b]].value * BreedUrge;
             }
             for (int b = 0; b < mBreeder.RivalScents.Length; b++)
             {
-                TileValue -= Tile.TerrainFilter[TerrainType][Size][mBreeder.RivalScents[b]] * BreedUrge;
+                TileValue -= Tile.TerrainFilter[TerrainType][Size].tagList[(int)mBreeder.RivalScents[b]].value * BreedUrge;
             }
         }
 
         if (SafetyUrge > 0)
         {
             SafetyUrge = Mathf.Min(1, SafetyUrge);
-            TileValue -= Tile.TerrainFilter[TerrainType][Size][UrbScentTag.Violence] * SafetyUrge;
+            TileValue -= Tile.TerrainFilter[TerrainType][Size].tagList[(int)UrbScentTag.Violence].value * SafetyUrge;
         }
 
         if (RestUrge > 0)

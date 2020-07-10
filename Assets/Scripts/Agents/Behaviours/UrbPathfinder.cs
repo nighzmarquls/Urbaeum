@@ -15,12 +15,9 @@ public class UrbPathfinder : UrbBehaviour
     public UrbScentTag GoalTag = UrbScentTag.Goal;
     public int Size = 0;
     public UrbPathTerrain PassableTerrain = UrbPathTerrain.Land;
-
-    protected UrbThinker mThinker;
-
+    
     public override void OnEnable()
     {
-        mThinker = GetComponent<UrbThinker>();
         base.OnEnable();
     }
 
@@ -31,11 +28,26 @@ public class UrbPathfinder : UrbBehaviour
         UrbTile currentTile = mAgent.CurrentTile;
         UrbTile[] Adjacent = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
 
-        UrbTile goalTile = currentTile;
-        int TerrainType = (int)PassableTerrain;
-        float bestValue = (mThinker == null)? currentTile.TerrainFilter[TerrainType][Size][GoalTag] : mThinker.EvaluateTile(currentTile, TerrainType, Size);
+        if (Adjacent == null || Adjacent.Length == 0)
+        {
+            return currentTile;
+        }
 
-        if (Adjacent == null) return goalTile;
+        int TerrainType = (int)PassableTerrain;
+
+        float bestValue = 0.0f;
+        
+        if (IsMindNull)
+        {
+            var scent = currentTile.TerrainFilter[TerrainType][Size]; 
+            bestValue = scent.tagList[(int)GoalTag].value;
+        }
+        else
+        {
+           bestValue = Mind.EvaluateTile(currentTile, TerrainType, Size);
+        }
+
+        UrbTile goalTile = currentTile;
         for(int t = 0; t < Adjacent.Length; t++)
         {
             if (Adjacent[t] == null)
@@ -58,21 +70,24 @@ public class UrbPathfinder : UrbBehaviour
                 continue;
             }
 
-
-            float currentValue = (mThinker == null) ? Adjacent[t].TerrainFilter[TerrainType][Size][GoalTag] : mThinker.EvaluateTile(Adjacent[t], TerrainType, Size);
-
-            if (currentValue <= 0)
+            var currentScent = Adjacent[t].TerrainFilter[TerrainType][Size];
+            
+            
+            float currentValue = 0f;
+            if (IsMindNull)
             {
-                continue;
+                currentValue = currentScent.tagList[(int) GoalTag].value;
             }
-
-                
+            else
+            {
+               currentValue = Mind.EvaluateTile(Adjacent[t], TerrainType, Size);
+            }
+            
             if (currentValue >= bestValue)
             {
                 bestValue = currentValue;
                 goalTile = Adjacent[t];
             }
-
         }
 
         return goalTile;

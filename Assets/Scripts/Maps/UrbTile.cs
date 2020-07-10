@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
+using UrbUtility;
 
 public class UrbTile
 {
@@ -415,9 +416,7 @@ public class UrbTile
     {
         s_OnAgentArrive_p.Begin(input);
         Contents.Add(input);
-
-   
-
+        
         input.Tileprint.ArriveAtTile(this, input);
         input.CurrentTile = this;
         
@@ -425,7 +424,6 @@ public class UrbTile
         //I can only find OwningMap being set once, at game initialization...
         //Can we move CurrentMap to object initialization?
         input.CurrentMap = OwningMap;
-      
         
         input.transform.localScale = new Vector3(this.OwningMap.TileSize, this.OwningMap.TileSize, this.OwningMap.TileSize)*input.SizeOffset;
 
@@ -584,6 +582,7 @@ public class UrbTile
             }
         }
     }
+    public static UrbThrottle ScentThrottle = new UrbThrottle();
     
     public IEnumerator ScentCoroutine()
     {
@@ -635,6 +634,7 @@ public class UrbTile
             
             for (int t = 0; t < TerrainTypes.Length; t++)
             {
+                
                 var terrainType = (int)TerrainTypes[t];
                 var currentTerrainScents = TerrainFilter[terrainType];
 
@@ -656,7 +656,10 @@ public class UrbTile
                         //by dividing the value of the scent by the number of tiles that
                         //were expected to get touched.
                         //This "base" value seems to be somewhat strong even so.
-                        currentTerrainScents[s][currentTag] = value * ScentDiffusion;
+                        var tmpTag = currentTerrainScents[s].tagList[(int) currentTag];
+                        tmpTag.value = value * ScentDiffusion;
+                        currentTerrainScents[s].tagList[(int) currentTag] = tmpTag;
+                        
                         currentTag = AgentScentCache.GetScentTag(++idx);
                     }
 
@@ -666,7 +669,8 @@ public class UrbTile
                     }
 
                     terrainFilter.dirty = false;
-                    yield return terrainFilter.DecayScent();
+                    terrainFilter.OnUpdate();
+                    yield return ScentThrottle.PerformanceThrottle();
 
                     ScentDirty = ScentDirty || terrainFilter.dirty;
                 }
@@ -712,9 +716,10 @@ public class UrbTile
 
                     sentScent = true;
                     var filter = adj.TerrainFilter[terrainType][s];
-                    var scent = filter.ReceiveScent(sendScent, ScentDiffusion);
+                    var res = filter.ReceiveScent(sendScent.tagList, ScentDiffusion);
+                    //This PROBABLY is not actually where we want to run the OnUpdate for that filter
                     s_DiffuseScent_p.End();
-                    yield return scent;
+                    yield return res;
                     s_DiffuseScent_p.Begin();
                 }
             }
