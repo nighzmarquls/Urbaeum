@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -41,10 +42,16 @@ public class UrbMap : MonoBehaviour
         {
             for (int ii = 0; ii < Ysize; ii++)
             {
+                MapTiles[i][ii].Dispose();
                 MapTiles[i][ii] = null; 
             }
             MapTiles[i] = null;
         }
+    }
+
+    public void OnDestroy()
+    {
+        ClearMap();
     }
 
     void GenerateMap()

@@ -11,21 +11,21 @@ public class UrbScentInvestigator : UrbInvestigatorTool
         Color TileColor = DetectionColor;
         TileColor.a = 0;
 
-        var val = Tile.TerrainFilter[0][2].tagList[(int) DisplayScentTag].value;
+        var val = Tile.TerrainFilter[0][2].readOnlyList[(int) DisplayScentTag].value;
         if (val > 0)
         {
             TileColor.a = (val * Sensitivity);
             return TileColor;
         }
 
-        val = Tile.TerrainFilter[0][1].tagList[(int) DisplayScentTag].value;
+        val = Tile.TerrainFilter[0][1].readOnlyList[(int) DisplayScentTag].value;
         if (val > 0)
         {
             TileColor.a = (val * Sensitivity);
             return TileColor;
         }
 
-        val = Tile.TerrainFilter[0][0].tagList[(int) DisplayScentTag].value;
+        val = Tile.TerrainFilter[0][0].readOnlyList[(int) DisplayScentTag].value;
         //If val is 0, it will multiply out to 0 anyway.
         TileColor.a = (val * Sensitivity);
 

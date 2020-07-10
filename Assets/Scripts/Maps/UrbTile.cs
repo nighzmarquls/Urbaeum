@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.Entities.UniversalDelegates;
 using Unity.Profiling;
 using UnityEngine;
 using UrbUtility;
 
-public class UrbTile
+public class UrbTile : IDisposable
 {
     public const int MaximumOccupants = 4;
     public const float TileCapacity = 1000;
@@ -656,23 +658,21 @@ public class UrbTile
                         //by dividing the value of the scent by the number of tiles that
                         //were expected to get touched.
                         //This "base" value seems to be somewhat strong even so.
-                        var tmpTag = currentTerrainScents[s].tagList[(int) currentTag];
+                        var tmpTag = currentTerrainScents[s].readOnlyList[(int) currentTag];
                         tmpTag.value = value * ScentDiffusion;
-                        currentTerrainScents[s].tagList[(int) currentTag] = tmpTag;
-                        
+                        currentTerrainScents[s].readOnlyList[(int) currentTag] = tmpTag;
+                        currentTerrainScents[s].dirty |= (tmpTag.value > 0);
                         currentTag = AgentScentCache.GetScentTag(++idx);
                     }
 
-                    if (!terrainFilter.dirty)
-                    {
-                        continue;
-                    }
-
-                    terrainFilter.dirty = false;
                     terrainFilter.OnUpdate();
-                    yield return ScentThrottle.PerformanceThrottle();
-
-                    ScentDirty = ScentDirty || terrainFilter.dirty;
+                    
+                    if (terrainFilter.dirty)
+                    {
+                        terrainFilter.dirty = false;
+                        yield return ScentThrottle.PerformanceThrottle();
+                        ScentDirty |= terrainFilter.dirty;
+                    }
                 }
                 if (ScentDirty)
                 {
@@ -709,14 +709,14 @@ public class UrbTile
                 for (int s = 0; s < adj.SizeLimit; s++)
                 {
                     var sendScent = TerrainFilter[terrainType][s];
-                    if (sendScent.dirty == false)
-                    {
-                        continue;
-                    }
+                    // if (sendScent.dirty == false)
+                    // {
+                    //     continue;
+                    // }
 
                     sentScent = true;
                     var filter = adj.TerrainFilter[terrainType][s];
-                    var res = filter.ReceiveScent(sendScent.tagList, ScentDiffusion);
+                    var res = filter.ReceiveScent(sendScent.readOnlyList, ScentDiffusion);
                     //This PROBABLY is not actually where we want to run the OnUpdate for that filter
                     s_DiffuseScent_p.End();
                     yield return res;
@@ -730,6 +730,17 @@ public class UrbTile
         s_DiffuseScent_p.End();
     }
 
+    public void Dispose()
+    {
+        for (int i = 0; i < TerrainFilter.Length; i++)
+        {
+            for (int ii = 0; ii < TerrainFilter[i].Length; ii++)
+            {
+                TerrainFilter[i][ii].Dispose();
+            }
+        }
+    }
+    
     #region Obsolete or obsoleting
     // Was once used by FunctionalCoroutine in UrbSmellSource
     // public void AddScent(UrbScentTag tag, float value)
