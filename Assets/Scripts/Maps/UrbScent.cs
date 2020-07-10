@@ -2,6 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Schema;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Entities;
+using Unity.Jobs;
 using Unity.Profiling;
 using UnityEngine;
 using UrbUtility;
@@ -21,97 +25,140 @@ public enum UrbScentTag
     MaxScentTag
 }
 
+public struct scentTagComponent : IComponentData
+{
+    public float value;
+    public bool dirty;
+}
+
+//If we move to ECS for sure, This would be inheriting a SystemBase
 public class UrbScent
 {
     public const float ScentDecay = 0.5f;
-    const float DecayLimit = 0.0001f;
+    public const float DecayLimit = 0.0001f;
     public const float ScentDiffusion = 0.95f;
     public const float ScentInterval = 0.9f;
-    const uint MaxTag = (uint)UrbScentTag.MaxScentTag;
-    float[] Tags;
-    bool[] DirtyTags;
+    public const uint MaxTag = (uint)UrbScentTag.MaxScentTag;
 
+    public NativeArray<scentTagComponent> tagList;
+    
+    //Can't nest Native components together. 
+    public NativeArray<scentTagComponent> input;
+
+    public float DiffusionRate = ScentDiffusion;
     public bool dirty = false;
-
-    public float this[UrbScentTag i] {
-        get { return this[(int)i]; }
-        set { this[(int)i] = value;
-            
-        }
-    }
-
-    public float this[int i] {
-        get { return this.Tags[i]; }
-        set {
-            this.Tags[i] = value;
-            if (value > 0)
-            {
-                dirty = true;
-                DirtyTags[i] = true;
-                return;
-            }
-            DirtyTags[i] = false;
-
-        }
-    }
-
+    public bool hasInput = false;
+    
+    protected JobHandle currentDecayJob;
+    protected JobHandle currentRcvScentJob;
+    
+    DecayScentJob decayJob;
+    PassScentJob receiveScentJob;
+    
     public UrbScent()
     {
-        Tags = new float[MaxTag];
-        DirtyTags = new bool[MaxTag];
-        for (int i = 0; i < MaxTag; i++)
+        tagList = new NativeArray<scentTagComponent>((int)MaxTag, Allocator.Persistent);
+        input = new NativeArray<scentTagComponent>((int)MaxTag, Allocator.Persistent);
+        decayJob = new DecayScentJob()
         {
-            Tags[i] = 0;
-            DirtyTags[i] = false;
-        }
+            scentTag = tagList,
+        };
+        receiveScentJob = new PassScentJob();
+        receiveScentJob.Diffusion = DiffusionRate;
+        
+        currentDecayJob = new JobHandle();
+        currentRcvScentJob = new JobHandle();
     }
-
-    static ProfilerMarker s_DecayScent_p = new ProfilerMarker("UrbScent.DecayScent");
-    public IEnumerator DecayScent()
+    
+    //protected override void when doing this the "correct" way.
+    public void OnUpdate()
     {
-        s_DecayScent_p.Begin();
-        for (int i = 0; i < MaxTag; i++)
+        if (!currentDecayJob.IsCompleted)
         {
-            if (DirtyTags[i])
-            {
-                if (Tags[i] > DecayLimit)
-                {
-                    this[i] = Tags[i] * ScentDecay;
-                }
-                else
-                {
-                    this[i] = 0.0f;
-                }
-                
-            }
+            currentDecayJob.Complete();
         }
-        s_DecayScent_p.End();
-        yield return ScentThrottle.PerformanceThrottle();
+
+        currentDecayJob = decayJob.Schedule(tagList.Length, 12);
+        
+        if (hasInput)
+        {
+            hasInput = false;
+            receiveScentJob.Diffusion = DiffusionRate;
+            receiveScentJob.input.CopyFrom(input);
+            currentRcvScentJob = receiveScentJob.Schedule(input.Length, 12);
+        }
+        
+        JobHandle.ScheduleBatchedJobs();
     }
 
-    public static UrbThrottle ScentThrottle = new UrbThrottle(7);
-
-    static ProfilerMarker s_ReceiveScent_p = new ProfilerMarker("UrbScent.ReceiveScent");
-
-    public IEnumerator ReceiveScent(UrbScent input, float Diffusion = 1.0f)
+    public IEnumerator ReceiveScent(NativeArray<scentTagComponent> newInput, float diffusion)
     {
-        s_ReceiveScent_p.Begin();
-        for (int i = 0; i < MaxTag; i++)
+        if (currentRcvScentJob.IsCompleted == false || hasInput)
         {
-            if (!input.DirtyTags[i])
+            yield return new WaitUntil(() => ((!hasInput) && currentRcvScentJob.IsCompleted));
+        }
+        
+        DiffusionRate = diffusion;
+        input.CopyFrom(newInput);
+        hasInput = true;
+    }
+    
+    [BurstCompile]
+    public struct DecayScentJob : IJobParallelFor
+    {
+        public NativeArray<scentTagComponent> scentTag;
+        public void Execute(int index)
+        {
+            var tag = scentTag[index];
+            if (!tag.dirty)
             {
-                continue;
+                return;
             }
-            
-            if (Tags[i] < input.Tags[i] * Diffusion)
+        
+            if (tag.value > DecayLimit)
             {
-                this[i] = input.Tags[i] * Diffusion;
+                tag.value *= ScentDecay;
+            }
+            else
+            {
+                tag.value = 0.0f;
+                tag.dirty = false;
             }
         }
-
-        s_ReceiveScent_p.End();
-        yield return ScentThrottle.PerformanceThrottle();
     }
+
+    [BurstCompile]
+    public struct PassScentJob : IJobParallelFor
+    {
+        [ReadOnly] public float Diffusion;
+    
+        [ReadOnly] public NativeArray<scentTagComponent> input;
+        public NativeArray<scentTagComponent> output;
+
+        public void Execute(int i)
+        {
+            float diffused = 0.0f;
+            scentTagComponent current;
+
+            var tag = input[i];
+
+            if (!tag.dirty)
+            {
+                return;
+            }
+
+            diffused = tag.value * Diffusion;
+            current = output[i];
+
+            if (current.value < diffused)
+            {
+                current.value = diffused;
+            }
+
+            output[i] = current;
+        }
+    }
+
 }
 
 
