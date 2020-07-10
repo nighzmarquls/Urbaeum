@@ -53,7 +53,7 @@ public class UrbScent
     protected JobHandle currentRcvScentJob;
     
     DecayScentJob decayJob;
-    PassScentJob receiveScentJob;
+    ReceiveScentJob receiveScentJob;
     
     public UrbScent()
     {
@@ -63,7 +63,7 @@ public class UrbScent
         {
             scentTag = tagList,
         };
-        receiveScentJob = new PassScentJob();
+        receiveScentJob = new ReceiveScentJob();
         receiveScentJob.Diffusion = DiffusionRate;
         
         currentDecayJob = new JobHandle();
@@ -80,22 +80,22 @@ public class UrbScent
 
         currentDecayJob = decayJob.Schedule(tagList.Length, 12);
         
-        if (hasInput)
+        if (currentRcvScentJob.IsCompleted && hasInput)
         {
-            hasInput = false;
             receiveScentJob.Diffusion = DiffusionRate;
             receiveScentJob.input.CopyFrom(input);
             currentRcvScentJob = receiveScentJob.Schedule(input.Length, 12);
+            hasInput = false;
         }
         
         JobHandle.ScheduleBatchedJobs();
     }
 
     public IEnumerator ReceiveScent(NativeArray<scentTagComponent> newInput, float diffusion)
-    {
-        if (currentRcvScentJob.IsCompleted == false || hasInput)
+    { 
+        while (!currentRcvScentJob.IsCompleted)
         {
-            yield return new WaitUntil(() => ((!hasInput) && currentRcvScentJob.IsCompleted));
+            yield return new WaitUntil(() => (currentRcvScentJob.IsCompleted));
         }
         
         DiffusionRate = diffusion;
@@ -128,7 +128,7 @@ public class UrbScent
     }
 
     [BurstCompile]
-    public struct PassScentJob : IJobParallelFor
+    public struct ReceiveScentJob : IJobParallelFor
     {
         [ReadOnly] public float Diffusion;
     
