@@ -15,15 +15,7 @@ public class UrbPathfinder : UrbBehaviour
     public UrbScentTag GoalTag = UrbScentTag.Goal;
     public int Size = 0;
     public UrbPathTerrain PassableTerrain = UrbPathTerrain.Land;
-
-    protected UrbThinker mThinker;
-
-    public override void OnEnable()
-    {
-        mThinker = GetComponent<UrbThinker>();
-        base.OnEnable();
-    }
-
+    
     public override bool ShouldInterval => false;
 
     public UrbTile GetNextGoal()
@@ -31,11 +23,26 @@ public class UrbPathfinder : UrbBehaviour
         UrbTile currentTile = mAgent.CurrentTile;
         UrbTile[] Adjacent = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
 
-        UrbTile goalTile = currentTile;
+        if (Adjacent == null || Adjacent.Length == 0)
+        {
+            return currentTile;
+        }
+        
         int TerrainType = (int)PassableTerrain;
-        float bestValue = (mThinker == null)? currentTile.TerrainFilter[TerrainType][Size][GoalTag] : mThinker.EvaluateTile(currentTile, TerrainType, Size);
 
-        if (Adjacent == null) return goalTile;
+        float bestValue;
+        if (IsMindNull)
+        {
+            bestValue = currentTile.TerrainFilter[TerrainType][Size][GoalTag];
+        }
+        else
+        {
+            bestValue = Mind.EvaluateTile(currentTile, TerrainType, Size);
+        }
+        
+        UrbTile goalTile = currentTile;
+        float currentValue = 0.0f;
+        
         for(int t = 0; t < Adjacent.Length; t++)
         {
             if (Adjacent[t] == null)
@@ -58,9 +65,15 @@ public class UrbPathfinder : UrbBehaviour
                 continue;
             }
 
-
-            float currentValue = (mThinker == null) ? Adjacent[t].TerrainFilter[TerrainType][Size][GoalTag] : mThinker.EvaluateTile(Adjacent[t], TerrainType, Size);
-
+            if (IsMindNull)
+            {
+                currentValue = Adjacent[t].TerrainFilter[TerrainType][Size][GoalTag];
+            }
+            else
+            {
+                currentValue = Mind.EvaluateTile(Adjacent[t], TerrainType, Size);
+            }
+            
             if (currentValue <= 0)
             {
                 continue;
