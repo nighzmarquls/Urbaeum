@@ -36,6 +36,16 @@ public class UrbBody : UrbBase
         base.OnEnable();
     }
 
+    public bool BodyEmpty()
+    {
+        if(BodyComposition == null)
+        {
+            return true;
+        }
+
+        return BodyComposition.Emptiness > 0.9f; //TODO: Fix this;
+    }
+
     public bool BodyCritical()
     {
         if(BodyComposition == null)

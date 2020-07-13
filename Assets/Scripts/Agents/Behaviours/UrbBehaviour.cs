@@ -13,6 +13,7 @@ public class UrbBehaviour : UrbBase
     public virtual UrbUrgeCategory UrgeSatisfied { get { return UrbUrgeCategory.None; } }
 
     public virtual bool ShouldInterval { get { return true; } }
+    public virtual bool LivingBehaviour { get { return true; } }
 
     public virtual bool ContactBehaviour { get { return true; } }
     public virtual bool SenseBehaviour { get { return false; } }
@@ -45,6 +46,7 @@ public class UrbBehaviour : UrbBase
         {
             StartCoroutine(mCoroutine);
         }
+
         if(DeathBehaviour)
         {
             mAgent.AddDeathBehaviour(this);
@@ -140,7 +142,7 @@ public class UrbBehaviour : UrbBase
 
     protected virtual bool ValidToInterval()
     {
-        return !mAgent.WasDestroyed && mAgent.isActiveAndEnabled && mAgent.CurrentMap != null;
+        return !mAgent.WasDestroyed && mAgent.isActiveAndEnabled && mAgent.CurrentMap != null && (LivingBehaviour)? mAgent.Alive : true;
     }
 
     protected UrbUtility.UrbThrottle BehaviourThrottle = new UrbUtility.UrbThrottle();

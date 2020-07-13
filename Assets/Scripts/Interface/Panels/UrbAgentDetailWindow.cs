@@ -35,7 +35,7 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
         if (mAgent.WasDestroyed)
         {
             TargetAgent = null;
-            return "Dead";
+            return "Lost";
         }
 
         string LocalName = mAgent.gameObject.name.Split('(')[0];
@@ -44,16 +44,16 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
         UrbSmellSource Smell = mAgent.SmellSource;
 
         string returnText =
-            "Name: " + LocalName + "\n" +
+            "Name: " + LocalName + ((mAgent.Alive)?  "\n" : " (Deceased) \n") +
             "Mass: " + Mass + "\n" +
             "Mass Per Tile:" + MassPerTile + "\n";
 
-        if (mAgent.HasMetabolism)
+        if (mAgent.HasMetabolism && mAgent.Alive)
         {
             returnText += "Energy: " + mAgent.Metabolism.EnergyBudget + "\n";
         }
 
-        if (!mAgent.IsMindNull)
+        if (!mAgent.IsMindNull && mAgent.Alive)
         {
             UrbThinker Thinker = mAgent.Mind;
             string Thoughts = "Thoughts- \n";
@@ -82,7 +82,7 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             }
         }
 
-        if (mAgent.IsBreeder)
+        if (mAgent.IsBreeder )
         {
             UrbBreeder Breeder = mAgent.Breeder;
             if (Breeder.Gestating)

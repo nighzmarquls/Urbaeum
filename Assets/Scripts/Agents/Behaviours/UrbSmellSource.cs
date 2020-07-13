@@ -9,40 +9,10 @@ public class UrbSmellSource : UrbBehaviour
 
     public UrbScentTag[] SmellTag;
     public float SmellStrength = 1.0f;
-
-    // protected UrbTile[] TileCache;
-    // protected UrbTile LastSmellTile = null;
-
-    // public void FixedUpdate()
-    // {
-    //     if(mAgent.HasBody && mAgent.Body.BodyComposition != null)
-    //     {
-    //         SmellTag = mAgent.Body.BodyComposition.GetScent();
-    //         SmellStrength = mAgent.MassPerTile;
-    //     }
-    //     
-    //     if (LastSmellTile != mAgent.CurrentTile)
-    //     {
-    //         mAgent.Tileprint.GetAllPrintTiles()
-    //             mAgent.Tileprint.TileCount
-    //         TileCache = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
-    //     }
-    //     
-    //     for(int s = 0; s < TileCache.Length; s++)
-    //     {
-    //         if (TileCache[s] == null)
-    //         {
-    //             continue;
-    //         }
-    //         for (int t = 0; t < SmellTag.Length; t++)
-    //         {
-    //             TileCache[s].AddScent(SmellTag[t], SmellStrength / TileCache.Length);
-    //         }
-    //     }
-    // }
+    public override bool LivingBehaviour => false;
 
     // Obsolete. Scents now pull from the occupants list
-     public override IEnumerator FunctionalCoroutine()
+    public override IEnumerator FunctionalCoroutine()
      {
          if(mAgent.HasBody && mAgent.mBody.BodyComposition != null)
          {

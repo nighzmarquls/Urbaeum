@@ -204,8 +204,9 @@ GameObject:
   m_Component:
   - component: {fileID: 917231937711402369}
   - component: {fileID: 1350997035409419008}
+  - component: {fileID: 3802229736158217712}
   m_Layer: 0
-  m_Name: BaseDisplay
+  m_Name: BaseHillDisplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -250,13 +251,13 @@ MonoBehaviour:
   maxFaceRatio: 1.5
   minFaceRatio: 0.25
   featureOffset: 0.001
-  defultHeight: 1
+  defultHeight: 3
   FeatureTemplate: {fileID: 1633300013852019239, guid: 7a42b7a4d2de7df4d91f4169f8980462,
     type: 3}
   mColors:
     PrimaryColor:
-      Line: {r: 0, g: 0, b: 0, a: 0}
-      Fill: {r: 0, g: 0, b: 0, a: 0}
+      Line: {r: 1, g: 1, b: 1, a: 1}
+      Fill: {r: 1, g: 1, b: 1, a: 1}
     SecondaryColor:
       Line: {r: 0, g: 0, b: 0, a: 0}
       Fill: {r: 0, g: 0, b: 0, a: 0}
@@ -265,7 +266,7 @@ MonoBehaviour:
       Fill: {r: 0, g: 0, b: 0, a: 0}
     FaceColor: {r: 0, g: 0, b: 0, a: 0}
     HighlightColor: {r: 0, g: 0, b: 0, a: 0}
-  BodySprite: BaseSphere
+  BodySprite: BaseHill
   FaceSprite: 
   PrimaryFaceFeatureSprites: []
   PrimaryForeFeatureSprites: []
@@ -285,6 +286,17 @@ MonoBehaviour:
   BodyPivot: {fileID: 917231937232593375}
   FacePivot: {fileID: 917231936056925677}
   EffectDisplay: {fileID: 5951778547996027948}
+--- !u!210 &3802229736158217712
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 917231937711402368}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
 --- !u!1 &992538525665502827
 GameObject:
   m_ObjectHideFlags: 0
@@ -294,7 +306,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1661663223812267372}
-  - component: {fileID: 7107237881406112107}
+  - component: {fileID: 582158892929907322}
   m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
@@ -319,8 +331,8 @@ Transform:
   m_Father: {fileID: 917231937711402369}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!58 &7107237881406112107
-CircleCollider2D:
+--- !u!70 &582158892929907322
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -333,8 +345,8 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0.46}
-  serializedVersion: 2
-  m_Radius: 0.5
+  m_Size: {x: 1, y: 1}
+  m_Direction: 0
 --- !u!1 &5692956831753024472
 GameObject:
   m_ObjectHideFlags: 0
