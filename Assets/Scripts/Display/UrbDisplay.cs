@@ -30,9 +30,13 @@ public class UrbDisplay : UrbBase
     }
 
     public int SortingOrder = 0;
+    
     public float maxFaceRatio = 1.5f;
     public float minFaceRatio = 0.25f;
     public float featureOffset = 0.001f;
+
+    [SerializeField][Range(0, 3)]
+    protected  float defultHeight = 1;
 
     [SerializeField]
     protected UrbDisplayFeature FeatureTemplate;
@@ -511,6 +515,7 @@ public class UrbDisplay : UrbBase
         DisplayFeature.SpritePath = FeatureSprite;
         Feature.transform.position += (Vector3.forward * -offset);
         DisplayFeature.SortingOrder = SortingOrder;
+        DisplayFeature.Height = defultHeight;
         return DisplayFeature;
     }
 

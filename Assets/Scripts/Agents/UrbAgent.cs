@@ -416,6 +416,8 @@ public class UrbAgent : UrbBase
         Display.Express(Expression);
     }
 
+    public bool Alive { get; protected set; } = true;
+
     public void Die()
     {
         Express(UrbDisplayFace.Expression.Dead);
@@ -427,6 +429,7 @@ public class UrbAgent : UrbBase
                 DeathBehaviours[d].ExecuteTileBehaviour();
             }
         }
+        Alive = false;
         Remove();
     }
 
@@ -445,8 +448,6 @@ public class UrbAgent : UrbBase
         if (IsCurrentMapNull)
         {
             logger.Log("missing a map!", gameObject);
-            // s_TickToMind_p.End();
-            // Destroy(gameObject);
             return;
         }
 
@@ -455,7 +456,7 @@ public class UrbAgent : UrbBase
             logger.Log("Agent has no Tile!");
         }
         
-        if (!IsMindNull)
+        if (!IsMindNull && Alive)
         {
             Mind.CheckUrges();
             Mind.ChooseBehaviour();
@@ -466,13 +467,23 @@ public class UrbAgent : UrbBase
         s_TickToBody_p.Begin();
         if(HasBody)
         {
-            if(mBody.BodyCritical())
+            if (Alive)
             {
-                Die();
+                if (mBody.BodyCritical())
+                {
+                    Die();
+                }
+                //TODO: Move this into some other behaviour/into a different cadence.
+                mBody.RecoverUtilization();
             }
-
-            //TODO: Move this into some other behaviour/into a different cadence.
-            mBody.RecoverUtilization();
+            else
+            {
+                Express(UrbDisplayFace.Expression.Dead);
+                if (mBody.BodyEmpty())
+                {
+                    Remove();
+                }
+            }
 
             if (BodyDisplay != null)
             {

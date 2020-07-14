@@ -174,6 +174,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3686328861754737085}
   - component: {fileID: 4172628268889631586}
+  - component: {fileID: 5164128479654894363}
   m_Layer: 0
   m_Name: Face
   m_TagString: Untagged
@@ -211,6 +212,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FeaturePath: Sprites/Modular/Faces
   mLineColor: {r: 1, g: 1, b: 1, a: 0}
-  mLineRenderer: {fileID: 7696866143951115002}
   mFillColor: {r: 1, g: 1, b: 1, a: 0}
+  mLineRenderer: {fileID: 7696866143951115002}
+  mOverlayRenderer: {fileID: 0}
   mFillRenderer: {fileID: 6576481986348190562}
+  mMaskRenderer: {fileID: 0}
+--- !u!210 &5164128479654894363
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8328366797081045686}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
