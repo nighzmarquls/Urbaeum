@@ -1072,6 +1072,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: AgentEventLog
       objectReference: {fileID: 0}
+    - target: {fileID: 3589649615401216775, guid: 0d432cd665b378bd7ba0a47d234d41eb,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4824039879071503642, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}
       propertyPath: m_IsActive
@@ -1150,17 +1155,17 @@ PrefabInstance:
     - target: {fileID: 9104381072964362422, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 260
+      value: -410.8
       objectReference: {fileID: 0}
     - target: {fileID: 9104381072964362422, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -346
+      value: 227
       objectReference: {fileID: 0}
     - target: {fileID: 9104381072964362422, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 600
+      value: 400
       objectReference: {fileID: 0}
     - target: {fileID: 9104381072964362422, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}
@@ -1170,22 +1175,22 @@ PrefabInstance:
     - target: {fileID: 9104381072964362422, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9104381072964362422, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9104381072964362422, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9104381072964362422, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9104381072964362422, guid: 0d432cd665b378bd7ba0a47d234d41eb,
         type: 3}

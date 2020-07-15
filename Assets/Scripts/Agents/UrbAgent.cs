@@ -119,16 +119,24 @@ public class UrbAgent : UrbBase
             return mBody.BodyComposition.UsedCapacity;
         } }
 
-    public float MassPerTile { get {
-            if(tileprint.TileCount > 1)
+    public float MassPerTile {
+        get
+        {
+            if (!HasBody)
             {
-                return Mass / ((mBody.Height > 1)? tileprint.TileCount*mBody.Height : (float)tileprint.TileCount );
+                return 0;
+            }
+
+            if (tileprint.TileCount > 1)
+            {
+                return Mass / ((mBody.Height > 1) ? tileprint.TileCount * mBody.Height : (float) tileprint.TileCount);
             }
             else
             {
                 return Mass / ((mBody.Height > 1) ? mBody.Height : 1.0f);
             }
-    } }
+        }
+    }
 
     [TextArea(0, 5)]
     public string TileprintString;

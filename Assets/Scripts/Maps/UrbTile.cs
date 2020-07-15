@@ -23,7 +23,6 @@ public class UrbTile
 
     bool ScentDirty = false;
 
-    protected List<UrbSmellSource> SmellySources = new List<UrbSmellSource>();
     protected ScentList AgentScentCache = new ScentList(5);
     
     public UrbPathTerrain[] TerrainTypes;
@@ -54,11 +53,13 @@ public class UrbTile
             for (int o = 0; o < Occupants.Count; o++)
             {
                 Capacity -= Occupants[o].MassPerTile;
-                if (Capacity <= 0)
-                {
-                    return 0;
-                }
             }
+            
+            if (Capacity <= 0)
+            {
+                return 0;
+            }
+            
             return Capacity;
         }
     }

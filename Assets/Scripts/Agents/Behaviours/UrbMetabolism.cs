@@ -18,12 +18,14 @@ public class UrbMetabolism : UrbBehaviour
 
     protected UrbRecipe[] ReserveToGrowth;
     protected UrbRecipe[] FoodToReserves;
-
-    UrbEater mEater;
-
+    
     public float EnergyBudget {
         get {
-            return (mAgent.mBody.BodyComposition[BodyEnergyReserveStorage] - EnergyDebt);
+            if (!HasBody)
+            {
+                return 0;
+            }
+            return (mBody.BodyComposition[BodyEnergyReserveStorage] - EnergyDebt);
         }
     }
 
@@ -32,14 +34,13 @@ public class UrbMetabolism : UrbBehaviour
 
     public override void OnEnable()
     {
-        mEater = GetComponent<UrbEater>();
+        base.OnEnable();
+     
         InitializeGrowthRecipes();
-        if(mEater != null)
+        if(IsEater)
         {
             InitializeReserveRecipes();
         }
-        
-        base.OnEnable();
         
         if (HasBody && mBody.HasEnableBeenCalled == false)
         {
@@ -66,9 +67,9 @@ public class UrbMetabolism : UrbBehaviour
     }
     protected void InitializeReserveRecipes()
     {
-        FoodToReserves = new UrbRecipe[mEater.FoodSubstances.Length];
+        FoodToReserves = new UrbRecipe[Eater.FoodSubstances.Length];
 
-        for (int e = 0; e < mEater.FoodSubstances.Length; e++)
+        for (int e = 0; e < Eater.FoodSubstances.Length; e++)
         { 
             UrbRecipe Recipe = new UrbRecipe();
             Recipe.Ingredients = new UrbSubstance[1];
@@ -76,10 +77,9 @@ public class UrbMetabolism : UrbBehaviour
 
             //TODO: Define Nutrition requirements somewhere.
             Recipe.Ingredients[0] = new UrbSubstance();
-            Recipe.Ingredients[0].Substance = mEater.FoodSubstances[e];
+            Recipe.Ingredients[0].Substance = Eater.FoodSubstances[e];
             Recipe.Ingredients[0].SubstanceAmount = 1.0f;
-
-
+            
             FoodToReserves[e] = Recipe;
         }
     }
@@ -141,34 +141,31 @@ public class UrbMetabolism : UrbBehaviour
 
         float Growth = 0.0f;
 
-        if (mEater != null && mEater.Stomach != null)
+        if (!IsEater || Eater.Stomach == null)
         {
-            for (int e = 0; e < mEater.FoodSubstances.Length; e++)
-            {
-
-                if (mEater.Stomach[mEater.FoodSubstances[e]] <= 0)
-                {
-                    continue;
-                }
-
-                Growth += mEater.Stomach.MixRecipe(FoodToReserves[e], GrowthRate);
-
-                float GrowthSuccess = mEater.Stomach.TransferTo(mAgent.mBody.BodyComposition, FoodToReserves[e].Product, Growth);
-
-                if (GrowthSuccess < Growth)
-                {
-                    mEater.Stomach.RemoveSubstance(FoodToReserves[e].Product, Growth - GrowthSuccess);
-                }
-
-                if (Growth >= GrowthRate)
-                {
-                    break;
-                }
-            }
+            return mBody.BodyComposition.AddSubstance(BodyEnergyReserveStorage, GrowthRate);
         }
-        else
+        
+        for (int e = 0; e < Eater.FoodSubstances.Length; e++)
         {
-            Growth += mAgent.mBody.BodyComposition.AddSubstance(BodyEnergyReserveStorage, GrowthRate);
+            if (Eater.Stomach[Eater.FoodSubstances[e]] <= 0)
+            {
+                continue;
+            }
+
+            Growth += Eater.Stomach.MixRecipe(FoodToReserves[e], GrowthRate);
+
+            float GrowthSuccess = Eater.Stomach.TransferTo(mBody.BodyComposition, FoodToReserves[e].Product, Growth);
+
+            if (GrowthSuccess < Growth)
+            {
+                Eater.Stomach.RemoveSubstance(FoodToReserves[e].Product, Growth - GrowthSuccess);
+            }
+
+            if (Growth >= GrowthRate)
+            {
+                return Growth;
+            }
         }
 
         return Growth;
@@ -193,17 +190,19 @@ public class UrbMetabolism : UrbBehaviour
                 break;
             }
 
-            if (mAgent.mBody.BodyComposition[BodyGrowthRecipe[g].Substance] < BodyGrowthRecipe[g].SubstanceAmount)
+            if (!(mAgent.mBody.BodyComposition[BodyGrowthRecipe[g].Substance] < BodyGrowthRecipe[g].SubstanceAmount))
             {
-                if (BodyEnergyReserveStorage == UrbSubstanceTag.None)
-                {
-                    Growth += mAgent.mBody.BodyComposition.AddSubstance(BodyGrowthRecipe[g].Substance, Amount);
-                }
-                else
-                {
-                    Growth += mAgent.mBody.BodyComposition.MixRecipe(ReserveToGrowth[g], Amount);
-                    SpendEnergy(Growth);
-                }
+                continue;
+            }
+
+            if (BodyEnergyReserveStorage == UrbSubstanceTag.None)
+            {
+                Growth += mAgent.mBody.BodyComposition.AddSubstance(BodyGrowthRecipe[g].Substance, Amount);
+            }
+            else
+            {
+                Growth += mAgent.mBody.BodyComposition.MixRecipe(ReserveToGrowth[g], Amount);
+                SpendEnergy(Growth);
             }
         }
 

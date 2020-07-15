@@ -45,22 +45,17 @@ public class UrbPathfinder : UrbBehaviour
         
         for(int t = 0; t < Adjacent.Length; t++)
         {
-            if (Adjacent[t] == null)
+            if (Adjacent[t] == null || Adjacent[t].Blocked)
             {
                 continue;
             }
 
-            if(Adjacent[t].Blocked)
+            if (Adjacent[t].FreeCapacity < mAgent.MassPerTile)
             {
                 continue;
             }
 
-            if(Adjacent[t].FreeCapacity < mAgent.MassPerTile)
-            {
-                continue;
-            }
-
-            if(!Adjacent[t].TerrainPassable(PassableTerrain))
+            if (!Adjacent[t].TerrainPassable(PassableTerrain))
             {
                 continue;
             }
@@ -79,13 +74,11 @@ public class UrbPathfinder : UrbBehaviour
                 continue;
             }
 
-                
             if (currentValue >= bestValue)
             {
                 bestValue = currentValue;
                 goalTile = Adjacent[t];
             }
-
         }
 
         return goalTile;

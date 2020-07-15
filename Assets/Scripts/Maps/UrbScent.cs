@@ -115,7 +115,7 @@ public class UrbScent
 }
 
 
-//This class should be of typename T but there's no way to enforce
+//This class should be of typename T but there's no way to enforce it's 
 //that T is always compatible with basic arithmetic ops
 //so I'm assuming that we only ever want floats as our values
 //this can't possibly go wrong.
