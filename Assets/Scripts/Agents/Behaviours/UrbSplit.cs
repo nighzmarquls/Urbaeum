@@ -51,12 +51,12 @@ public class UrbSplit : UrbBehaviour
                     continue;
                 }
 
-                if (Tile.FreeCapacity < PossibleProduct.RequiredSpace)
+                if (PossibleProduct.RequiredSpace > Tile.RemainingCapacity)
                 {
                     continue;
                 }
 
-                if (AvailableMass < PossibleProduct.ProductRequiredMass)
+                if (PossibleProduct.ProductRequiredMass > AvailableMass)
                 {
                     break;
                 }

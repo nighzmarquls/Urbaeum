@@ -278,7 +278,7 @@ public class UrbBreeder : UrbBehaviour
 
         for (int t = 0; t < SearchCache.Length; t++)
         {
-            if (SearchCache[t] == null || SearchCache[t].Blocked || !SearchCache[t].TerrainPassable(RequiredOffspringTerrain) || SearchCache[t].FreeCapacity < OffspringRequiredSpace)
+            if (SearchCache[t] == null || SearchCache[t].Blocked || !SearchCache[t].TerrainPassable(RequiredOffspringTerrain) || SearchCache[t].RemainingCapacity < OffspringRequiredSpace)
             {
                 continue;
             }

@@ -50,7 +50,7 @@ public class UrbPathfinder : UrbBehaviour
                 continue;
             }
 
-            if (Adjacent[t].FreeCapacity < mAgent.MassPerTile)
+            if (mAgent.MassPerTile > Adjacent[t].RemainingCapacity)
             {
                 continue;
             }

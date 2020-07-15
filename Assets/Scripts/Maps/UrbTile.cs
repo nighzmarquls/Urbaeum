@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class UrbTile
 {
@@ -46,24 +48,39 @@ public class UrbTile
     }
 
     protected float ScentDiffusion = UrbScent.ScentDiffusion;
-
-    public float FreeCapacity {
-        get {
-            float Capacity = TileCapacity;
-            for (int o = 0; o < Occupants.Count; o++)
+    protected int LastCapacityCalculationFrame = 0;
+    protected float _remainingCapacity = TileCapacity;
+    public float RemainingCapacity {
+        get
+        {
+            //Helps ensure that we only calculating RemainingCapacity once per frame.
+            if (LastCapacityCalculationFrame != Time.frameCount)
             {
-                Capacity -= Occupants[o].MassPerTile;
+                CalculateRemainingCapacity();
             }
             
-            if (Capacity <= 0)
-            {
-                return 0;
-            }
-            
-            return Capacity;
+            return _remainingCapacity;
         }
     }
 
+    //This is also called from OnAgentEnter and OnAgentLeave
+    void CalculateRemainingCapacity()
+    {
+        LastCapacityCalculationFrame = Time.frameCount;
+        float Capacity = TileCapacity;
+        for (int o = 0; o < Occupants.Count; o++)
+        {
+            Capacity -= Occupants[o].MassPerTile;
+        }
+            
+        if (Capacity <= 0)
+        {
+            Capacity = 0;
+        }
+            
+        _remainingCapacity = Capacity;
+    }
+    
     public int SizeLimit { get { return PathableSize; } }
 
     public int X { get { return XAddress; } }
@@ -92,10 +109,11 @@ public class UrbTile
     {
         if (Occupants.Count <= 0)
         {
+            Blocked = false;
             return;
         }
-
-        float Free = FreeCapacity / TileCapacity;
+        
+        float Free = RemainingCapacity / TileCapacity;
         if (Free <= 0)
         {
             ScentDirty = false;
@@ -416,9 +434,7 @@ public class UrbTile
     {
         s_OnAgentArrive_p.Begin(input);
         Contents.Add(input);
-
-   
-
+        
         input.Tileprint.ArriveAtTile(this, input);
         input.CurrentTile = this;
         
@@ -435,6 +451,7 @@ public class UrbTile
             ScentDirty = true;
         }
 
+        CalculateRemainingCapacity();
         UpdateClearance();
 
         if (input.Shuffle)
@@ -458,6 +475,7 @@ public class UrbTile
             ScentDirty = true;
         }
 
+        CalculateRemainingCapacity();
         UpdateClearance();
 
         if (input.Shuffle)

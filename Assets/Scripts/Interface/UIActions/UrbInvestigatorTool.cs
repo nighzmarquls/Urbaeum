@@ -45,11 +45,6 @@ public class UrbInvestigatorTool : UrbUserAction
 
     }
 
-    public override void SelectAction()
-    {
-        base.SelectAction();
-    }
-
     public virtual void HideDisplay()
     {
         for(int i = 0; i < InvestigationDisplay.Length; i++)
@@ -74,8 +69,8 @@ public class UrbInvestigatorTool : UrbUserAction
     public virtual Color GetColorFromTile(UrbTile Tile)
     {
         Color TileColor = DetectionColor;
-
-        TileColor.a = 1 - (Tile.FreeCapacity/UrbTile.TileCapacity);
+        
+        TileColor.a = 1 - (Tile.RemainingCapacity / UrbTile.TileCapacity);
 
         return TileColor;
     }
@@ -94,21 +89,5 @@ public class UrbInvestigatorTool : UrbUserAction
         }
 
         base.MouseOver(input);
-    }
-
-    public override void MouseEnter(UrbTile input)
-    {
-
-        base.MouseEnter(input);
-    }
-
-    public override void MouseExit(UrbTile input)
-    {
-        base.MouseExit(input);
-    }
-
-    public override void UnselectAction()
-    {
-        base.UnselectAction();
     }
 }
