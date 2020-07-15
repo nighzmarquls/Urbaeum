@@ -167,7 +167,7 @@ public class UrbSystemIO : MonoBehaviour
         return LoadedAgent;
     }
 
-    private void OnEnable()
+    public void OnEnable()
     {
         if (Instance == null)
         {
@@ -184,7 +184,7 @@ public class UrbSystemIO : MonoBehaviour
         Destroy(this);
     }
 
-    private void OnDisable()
+    public void OnDisable()
     {
         Instance = null;
         HasInstance = false;
