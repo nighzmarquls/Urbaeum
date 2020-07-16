@@ -14,6 +14,8 @@ public class UrbMetabolism : UrbBehaviour
     public UrbSubstanceTag BodyEnergyReserveStorage;
     public float GrowthRate = 10.0f;
 
+    public bool MetabolismReady = false;
+
     protected float EnergyDebt = 0;
 
     protected UrbRecipe[] ReserveToGrowth;
@@ -46,6 +48,7 @@ public class UrbMetabolism : UrbBehaviour
         {
             mBody.OnEnable();  
         }
+        MetabolismReady = true;
     }
 
     protected void InitializeGrowthRecipes()
@@ -92,7 +95,7 @@ public class UrbMetabolism : UrbBehaviour
 
     public override IEnumerator FunctionalCoroutine()
     {
-        if (!HasEnableBeenCalled)
+        if (!HasEnableBeenCalled || !MetabolismReady)
         {
             Debug.Log("Attempting to update without full states initialized");
             yield return new WaitForFixedUpdate();
