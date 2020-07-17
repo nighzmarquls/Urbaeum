@@ -36,11 +36,12 @@ public class UrbMetabolism : UrbBehaviour
 
     public override void OnEnable()
     {
+        MetabolismReady = false;
         base.OnEnable();
-     
         InitializeGrowthRecipes();
         if(IsEater)
         {
+            Debug.Log(mAgent.ID + " Metabolism OnEnable");
             InitializeReserveRecipes();
         }
         
@@ -97,7 +98,6 @@ public class UrbMetabolism : UrbBehaviour
     {
         if (!HasEnableBeenCalled || !MetabolismReady)
         {
-            Debug.Log("Attempting to update without full states initialized");
             yield return new WaitForFixedUpdate();
         }
 

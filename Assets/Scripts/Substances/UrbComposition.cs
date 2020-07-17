@@ -6,7 +6,7 @@ using UnityEngine.Assertions.Comparers;
 
 public class UrbComposition
 {
-    protected UrbComposition ContainingComposion;
+    protected UrbComposition ContainingComposition;
     
     public UrbMembrane Membrane { get; protected set; }
 
@@ -16,7 +16,7 @@ public class UrbComposition
 
     public void SetSize(float Size)
     {
-        if (ContainingComposion == null)
+        if (ContainingComposition == null)
         {
             if (Size == 1)
             {
@@ -169,9 +169,10 @@ public class UrbComposition
 
     public void AddComposition(UrbComposition input)
     {
-        input.ContainingComposion = this;
+        input.ContainingComposition = this;
         input.Membrane.ChangeComposition(this);
         input.MaxCapacity = input.UsedCapacity + AvailableCapacity;
+        UsedCapacity += input.UsedCapacity;
         Compositions.Add(input);
     }
 
@@ -179,8 +180,9 @@ public class UrbComposition
     {
         if (Compositions.Contains(input))
         {
+            UsedCapacity -= input.UsedCapacity;
             input.Membrane.ChangeComposition(input);
-            input.ContainingComposion = null;
+            input.ContainingComposition = null;
         }
         return Compositions.Remove(input);
     }
@@ -248,9 +250,9 @@ public class UrbComposition
 
     public float AddSubstance(UrbSubstanceTag Tag, float Amount)
     {
-        if (ContainingComposion != null)
+        if (ContainingComposition != null)
         {
-            MaxCapacity = ContainingComposion.AvailableCapacity + UsedCapacity;
+            MaxCapacity = ContainingComposition.AvailableCapacity + UsedCapacity;
         }
 
         if (Amount <= 0.0f)
@@ -278,9 +280,9 @@ public class UrbComposition
         
         UsedCapacity += TransferAmount;
     
-        if(ContainingComposion != null)
+        if(ContainingComposition != null)
         {
-            ContainingComposion.UsedCapacity += TransferAmount;
+            ContainingComposition.UsedCapacity += TransferAmount;
         }
         return TransferAmount;
     }
@@ -302,9 +304,9 @@ public class UrbComposition
             return 0.0f;
         }
 
-        if (ContainingComposion != null)
+        if (ContainingComposition != null)
         {
-            MaxCapacity = ContainingComposion.AvailableCapacity + UsedCapacity;
+            MaxCapacity = ContainingComposition.AvailableCapacity + UsedCapacity;
         }
 
         float TransferAmount = Amount;
@@ -336,9 +338,9 @@ public class UrbComposition
             TransferAmount = 0;
         }
         UsedCapacity -= TransferAmount;
-        if (ContainingComposion != null)
+        if (ContainingComposition != null)
         {
-            ContainingComposion.UsedCapacity -= TransferAmount;
+            ContainingComposition.UsedCapacity -= TransferAmount;
         }
         return TransferAmount;
     }
