@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 
 [RequireComponent(typeof(UrbAgent))]
@@ -145,10 +146,12 @@ public class UrbRecoverBodyAction : UrbAction
 
         float Result = Mathf.Min(Instigator.mBody.Utilization, Test(Instigator));
 
-        if (Instigator.Metabolism != null)
+        if (Instigator.HasMetabolism)
         {
             Instigator.Metabolism.SpendEnergy(Result);
         }
+
+        Assert.IsFalse(float.IsInfinity(Result) || float.IsNaN(Result));
 
         return Result;
     }

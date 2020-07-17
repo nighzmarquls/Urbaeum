@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -252,6 +253,8 @@ public class UrbThinker : UrbBase
             TileValue -= RestUrge;
         }
 
+        Assert.IsFalse(float.IsInfinity(TileValue) || float.IsNaN(TileValue));
+        
         return TileValue;
     }
 
