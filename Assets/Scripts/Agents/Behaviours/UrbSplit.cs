@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 
 [System.Serializable]
@@ -23,10 +24,10 @@ public class UrbSplit : UrbBehaviour
             Debug.LogWarning("Attempting Split with no Split Products on " + gameObject.name);
             return;
         }
-
+        
         UrbTile[] SplitTileTargets = mAgent.OccupiedTiles;
 
-        if(SplitTileTargets.Length == 0)
+        if(SplitTileTargets == null || SplitTileTargets.Length == 0)
         {
             SplitTileTargets = mAgent.Tileprint.GetAllPrintTiles(mAgent);
         }

@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 using UrbUtility;
@@ -92,19 +94,8 @@ public class UrbAgent : UrbBase
         UrbAgentManager.UnregisterAgent(this);
         base.OnDestroy();
     }
-
-    public float TimeMultiplier {
-        get {
-            if (CurrentMap == null)
-            {
-                return 0;
-            }
-            return CurrentMap.TimeMultiplier;
-        }
-    }
-
+    
     public Vector3 Location {
-
         get { return transform.position; }
 
         set {
@@ -317,8 +308,8 @@ public class UrbAgent : UrbBase
     {
         if(ID == 0)
         {
-            LASTID++;
-            ID = LASTID;
+            //Multi-threaded paranoia.
+            ID = Interlocked.Increment(ref LASTID);
         }
         Display = GetComponentInChildren<UrbDisplay>();
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 using UnityEngine.Assertions.Comparers;
 
@@ -32,11 +33,10 @@ public class UrbComposition
     public float Emptiness {
         get {
             var emptiness = AvailableCapacity / MaxCapacity;
-            if (float.IsNaN(emptiness))
-            {
-                return 1;
-            }
-
+            
+            Assert.IsFalse(float.IsInfinity(emptiness));
+            Assert.IsFalse(float.IsNaN(emptiness));
+            
             return emptiness;
         }
     }
@@ -45,21 +45,21 @@ public class UrbComposition
         get
         {
             var fullness = UsedCapacity / MaxCapacity;
-            if (float.IsNaN(fullness))
-            {
-                return 1;
-            }
+            
+            Assert.IsFalse(float.IsNaN(fullness));
+            Assert.IsFalse(float.IsInfinity(fullness));
+
             return fullness;
         }
     }
 
     public float AvailableCapacity {
         get {
+
             var availCapacity = MaxCapacity - UsedCapacity;
-            if (float.IsNaN(availCapacity))
-            {
-                return 1;
-            }
+            
+            Assert.IsFalse(float.IsNaN(availCapacity));
+            Assert.IsFalse(float.IsInfinity(availCapacity));
 
             return availCapacity;
         }
@@ -112,6 +112,9 @@ public class UrbComposition
             return;
         }
         
+        Assert.IsFalse(float.IsInfinity(UsedCapacity));
+        Assert.IsFalse(float.IsNaN(UsedCapacity));
+        
         for (int i = 0; i < CompositionRecipe.Length; i++)
         {
             if (Substances.ContainsKey(CompositionRecipe[i].Substance))
@@ -124,6 +127,9 @@ public class UrbComposition
             }
             UsedCapacity += CompositionRecipe[i].SubstanceAmount;
         }
+        
+        Assert.IsFalse(float.IsInfinity(UsedCapacity));
+        Assert.IsFalse(float.IsNaN(UsedCapacity));
     }
 
     public float GetProportionOfTotal(UrbSubstanceTag[] Tags)
@@ -172,7 +178,15 @@ public class UrbComposition
         input.ContainingComposition = this;
         input.Membrane.ChangeComposition(this);
         input.MaxCapacity = input.UsedCapacity + AvailableCapacity;
+        
+        Assert.IsFalse(float.IsInfinity(input.MaxCapacity));
+        Assert.IsFalse(float.IsNaN(input.MaxCapacity));
+        
         UsedCapacity += input.UsedCapacity;
+        
+        Assert.IsFalse(float.IsInfinity(UsedCapacity));
+        Assert.IsFalse(float.IsNaN(UsedCapacity));
+        
         Compositions.Add(input);
     }
 

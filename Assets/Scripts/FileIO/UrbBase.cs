@@ -87,18 +87,14 @@ public class UrbBase : MonoBehaviour
 
         SetUrbComponents();
         
+        IsMindNull = Mind == null;
+        
         IsEater = Eater != null;
         IsBreeder = Breeder != null;
         IsSmelly = SmellSource != null;
-        IsMindNull = Mind == null;
+        
         HasAgent = mAgent != null;
         HasBody = mBody != null;
-        //Strange situation where UrbBody isn't getting enabled
-        if (HasBody && !mBody.HasEnableBeenCalled)
-        {
-            mBody.OnEnable();
-        }
-        
         HasMetabolism = Metabolism != null;
         
         LogMe = false;

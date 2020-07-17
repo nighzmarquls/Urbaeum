@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 
 [System.Serializable]
@@ -90,10 +91,16 @@ public class UrbSubstances
             Quantity += Recipe.Ingredients[i].SubstanceAmount;
         }
 
+        Assert.IsFalse(float.IsInfinity(Quantity));
+        Assert.IsFalse(float.IsNaN(Quantity));
+        
         for (int i = 0; i < Recipe.Ingredients.Length; i++)
         {
             Proportions[i].Substance = Recipe.Ingredients[i].Substance;
             Proportions[i].SubstanceAmount = Recipe.Ingredients[i].SubstanceAmount/Quantity;
+            
+            Assert.IsFalse(float.IsInfinity(Proportions[i].SubstanceAmount));
+            Assert.IsFalse(float.IsNaN(Proportions[i].SubstanceAmount));
         }
 
         return Proportions;

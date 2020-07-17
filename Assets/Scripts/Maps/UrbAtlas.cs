@@ -16,8 +16,6 @@ public class UrbAtlas : MonoBehaviour
     private UrbMap SkyMap;
 
     // Start is called before the first frame update
-
-    
     public float TimeMultiplier {
         set {
             for(int i = 0; i < Maps.Count;i++)

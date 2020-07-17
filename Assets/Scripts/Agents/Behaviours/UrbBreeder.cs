@@ -257,7 +257,7 @@ public class UrbBreeder : UrbBehaviour
             yield break;
         }
         
-        yield return new WaitForSeconds(Gestation * mAgent.TimeMultiplier);
+        yield return new WaitForSeconds(Gestation);
 
         if (!ValidToInterval())
         {
@@ -316,7 +316,7 @@ public class UrbBreeder : UrbBehaviour
             }
             else
             {
-                yield return new WaitForSeconds(Interval* mAgent.TimeMultiplier);
+                yield return new WaitForSeconds(Interval);
             }
         }
         Gestating = false;
