@@ -41,7 +41,6 @@ public class UrbMetabolism : UrbBehaviour
         InitializeGrowthRecipes();
         if(IsEater)
         {
-            Debug.Log(mAgent.ID + " Metabolism OnEnable");
             InitializeReserveRecipes();
         }
         
@@ -57,9 +56,10 @@ public class UrbMetabolism : UrbBehaviour
         ReserveToGrowth = new UrbRecipe[BodyGrowthRecipe.Length];
 
         //We don't need a wholly-new-struct every time b/c they're copy by value. 
-        UrbRecipe Recipe = new UrbRecipe();
+
         for (int g = 0; g < BodyGrowthRecipe.Length; g++)
         {
+            UrbRecipe Recipe = new UrbRecipe();
             Recipe.Ingredients = new UrbSubstance[1];
             Recipe.Product = BodyGrowthRecipe[g].Substance ;
 
@@ -232,13 +232,6 @@ public class UrbMetabolism : UrbBehaviour
             UrbEncoder.GetArrayFromSubstances("BodyGrowthRecipe" , BodyGrowthRecipe),
         };
 
-        Data.RecipeArrays = new UrbRecipeArrayData[]
-        {
-            new UrbRecipeArrayData{ Name = "ReserveToGrowth" , Value = ReserveToGrowth},
-            new UrbRecipeArrayData{ Name = "FoodToReserves" , Value = FoodToReserves }
-
-        };
-
         return Data;
     }
 
@@ -247,9 +240,11 @@ public class UrbMetabolism : UrbBehaviour
         EnergyDebt = UrbEncoder.GetField("EnergyDebt", Data);
         BodyEnergyReserveStorage = UrbEncoder.GetEnum<UrbSubstanceTag>("BodyEnergyReserveStorage", Data);
         BodyGrowthRecipe = UrbEncoder.GetSubstancesFromArray("BodyGrowthRecipe", Data);
-        ReserveToGrowth = UrbEncoder.GetRecipeArray("ReserveToGrowth", Data);
-        FoodToReserves = UrbEncoder.GetRecipeArray("FoodToReserves", Data);
-
+        InitializeGrowthRecipes();
+        if (IsEater)
+        {
+            InitializeReserveRecipes();
+        }
         return true;
     }
 }
