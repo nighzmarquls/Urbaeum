@@ -1,10 +1,14 @@
-﻿using UnityEngine;
+﻿using Unity.Assertions;
+using UnityEngine;
 using Unity.Profiling;
 public class UrbAgentSpawner 
 {
     static ProfilerMarker s_SpawnAgent_prof = new ProfilerMarker("AgentSpawner.SpawnAgent");
     public static bool SpawnAgent(UrbAgent TestAgent, UrbTile Tile, out GameObject spawned, UrbObjectData Data = null)
     {
+        Assert.IsNotNull(Tile);
+        Assert.IsNotNull(Tile.Occupants);
+        
         s_SpawnAgent_prof.Begin();
 
         if (Tile.Occupants.Count >= UrbTile.MaximumOccupants)
@@ -82,6 +86,7 @@ public class UrbSpawnAction : UrbUserAction
     public UrbAgent AgentTemplate;
     public override void MouseClick(UrbTile currentCursorTile)
     {
+        
         if(!UrbAgentSpawner.SpawnAgent(AgentTemplate,currentCursorTile, out _))
         {
             Debug.LogWarning("Failed to spawn agent from click");

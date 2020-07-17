@@ -110,6 +110,10 @@ public class UrbAgent : UrbBase
                 return 0;
             }
 
+            var usedCap = mBody.BodyComposition.UsedCapacity;
+            Assert.IsFalse(float.IsInfinity(usedCap));
+            Assert.IsFalse(float.IsNaN(usedCap));
+            
             return mBody.BodyComposition.UsedCapacity;
         } }
 
@@ -446,6 +450,9 @@ public class UrbAgent : UrbBase
     static ProfilerMarker s_TickToDisplay_p = new ProfilerMarker("UrbAgent.TickDisplay");
     public void Tick()
     {
+        Assert.IsFalse(float.IsInfinity(Mass));
+        Assert.IsFalse(float.IsNaN(Mass));
+        
         s_TickToMind_p.Begin(this);
         if (IsPaused)
         {

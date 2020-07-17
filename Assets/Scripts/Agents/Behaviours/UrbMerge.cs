@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -115,6 +116,10 @@ public class UrbMerge : UrbBehaviour
             {
                 return 0;
             }
+            
+            Assert.IsFalse(float.IsNaN(base.BehaviourEvaluation));
+            Assert.IsFalse(float.IsInfinity(base.BehaviourEvaluation));
+            
             return base.BehaviourEvaluation;
         }
         protected set => base.BehaviourEvaluation = value; }
@@ -130,8 +135,10 @@ public class UrbMerge : UrbBehaviour
 
         logger.Log("Met conditions for merging on tile, attempting to merge", this);
 
-        GameObject Spawned = null;
-        if (!UrbAgentSpawner.SpawnAgent(MergeProduct, mAgent.CurrentTile, out Spawned))
+        Assert.IsNotNull(mAgent);
+        Assert.IsNotNull(mAgent.CurrentTile);
+        
+        if (!UrbAgentSpawner.SpawnAgent(MergeProduct, mAgent.CurrentTile, out var Spawned))
         {
             logger.Log("Spawning agent failed during merge event", this);
         }

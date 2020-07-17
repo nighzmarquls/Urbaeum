@@ -38,10 +38,8 @@ public class UrbThinker : UrbBase
     protected UrbBreeder mBreeder;
     public float BreedUrge { get; protected set; }
 
-    protected UrbEater mEater;
     public float HungerUrge { get; protected set; }
 
-    protected UrbMetabolism mMetabolism;
     public float RestUrge { get; protected set; }
 
     public float SafetyUrge { get; protected set; } = 0.0f;
@@ -59,19 +57,14 @@ public class UrbThinker : UrbBase
         mPathfinder = GetComponent<UrbPathfinder>();
         
         mMovement = GetComponent<UrbMovement>();
-
         mPerception = GetComponent<UrbPerception>();
 
         mBreeder = GetComponent<UrbBreeder>();
         BreedUrge = 0;
-        mEater = GetComponent<UrbEater>();
         HungerUrge = 0;
-        mMetabolism = GetComponent<UrbMetabolism>();
         RestUrge = 0;
         SafetyUrge = 0;
         
-        IsmMetabolismNull = mMetabolism == null;
-        IsmEaterNotNull = mEater != null;
         IsmBreederNotNull = mBreeder != null;
         
         base.OnEnable();
@@ -129,14 +122,12 @@ public class UrbThinker : UrbBase
     }
     
     static ProfilerMarker s_CheckUrges_p = new ProfilerMarker("UrbThinker.CheckUrges");
-    bool IsmEaterNotNull;
-    bool IsmMetabolismNull;
 
     public void CheckUrges()
     {
         using (s_CheckUrges_p.Auto())
         {
-            if (HasBody && mBody.BodyComposition == null)
+            if (!HasBody || !mBody.HasComposition)
             {
                 return;
             }
@@ -166,20 +157,20 @@ public class UrbThinker : UrbBase
                 }
             }
 
-            if (IsmEaterNotNull)
+            if (IsEater)
             {
-                float UrgeChange = 0.5f - mEater.Stomach.Fullness;
+                float UrgeChange = 0.5f - Eater.Stomach.Fullness;
                 HungerUrge = UrgeChange;
                 CanEat = UrgeChange > 0.0f;
-                RestUrge = mEater.Stomach.Fullness;
+                RestUrge = Eater.Stomach.Fullness;
             }
 
            
-            if (IsmMetabolismNull)
+            if (!HasMetabolism)
             {
                 return;
             }
-            if (mMetabolism.Starving)
+            if (Metabolism.Starving)
             {
                 if (CanBreed)
                 {
@@ -202,7 +193,7 @@ public class UrbThinker : UrbBase
                 }
             }
 
-            if (!mMetabolism.Healing)
+            if (!Metabolism.Healing)
             {
                 SafetyUrge = Mathf.Max(0.0f,SafetyUrge);
                 return;
@@ -229,9 +220,9 @@ public class UrbThinker : UrbBase
         if (HungerUrge > 0)
         {
             HungerUrge = Mathf.Min(1, HungerUrge);
-            for(int f = 0; f < mEater.FoodScents.Length; f++)
+            for(int f = 0; f < Eater.FoodScents.Length; f++)
             {
-                TileValue += Tile.TerrainFilter[TerrainType][Size][mEater.FoodScents[f]] * HungerUrge;
+                TileValue += Tile.TerrainFilter[TerrainType][Size][Eater.FoodScents[f]] * HungerUrge;
             }
 
         }

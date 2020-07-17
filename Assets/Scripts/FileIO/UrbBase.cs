@@ -1,4 +1,7 @@
-﻿using Unity.Profiling;
+﻿using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
+using Unity.Assertions;
+using Unity.Profiling;
 using Unity.Serialization;
 using UnityEngine;
 using UrbUtility;
@@ -14,7 +17,13 @@ public class UrbBase : MonoBehaviour
     [DontSerialize] public UrbBreeder Breeder { get; protected set; }
     
     [DontSerialize] public UrbBody mBody { get; protected set; }
-    [DontSerialize] public UrbMetabolism Metabolism { get; private set; }
+
+    [DontSerialize]
+    public UrbMetabolism Metabolism
+    {
+        get; 
+        private set;
+    }
     
     [DontSerialize] public UrbSmellSource SmellSource { get; protected set; }
     
@@ -46,6 +55,8 @@ public class UrbBase : MonoBehaviour
         {
             logger.ToggleDebug();
         }
+        
+        ValidateUrbComponents();
     }
     
     public bool WasDestroyed { get; protected set;  } = false;
@@ -57,7 +68,7 @@ public class UrbBase : MonoBehaviour
 
         UrbComponentData Data = new UrbComponentData
         {
-            Type = this.GetType().ToString(),
+            Type = GetType().ToString(),
         };
         s_UrbBaseGetCompData_p.End();
         return Data;
@@ -102,8 +113,26 @@ public class UrbBase : MonoBehaviour
         
         WasDestroyed = false;
         enabled = true;
+
+        ValidateUrbComponents();
     }
     
+    [Conditional("UNITY_ASSERTIONS")]
+    void ValidateUrbComponents()
+    {
+        //Keeping these checks only to the most commonly broken and / or problematic assertions
+        //In order to reduce perf impact in debug mode.
+        if (HasMetabolism)
+        {
+            Assert.IsNotNull(Metabolism);
+        }
+
+        if (HasAgent)
+        {
+            Assert.IsNotNull(mAgent);
+        }
+    }
+
     void SetUrbComponents()
     {
         Metabolism = GetComponent<UrbMetabolism>();

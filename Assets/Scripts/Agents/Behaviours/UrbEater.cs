@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -25,11 +26,8 @@ public class UrbEater : UrbBehaviour
         DetectedFood = new List<UrbBody>();
 
         base.OnEnable();
-        if (mAgent.mBody.BodyComposition == null)
-        {
-            mAgent.mBody.OnEnable();
-        }
-
+        Assert.IsNotNull(mAgent.mBody.BodyComposition);
+        
         mAgent.mBody.BodyComposition.AddComposition(Stomach);
         mAgent.AddAction(BiteAttack);
     }
@@ -175,6 +173,9 @@ public class UrbBiteAttack : UrbAttack
     {
         float Teeth = target.mBody.BodyComposition[UrbSubstanceTag.Teeth];
 
+        Assert.IsFalse(float.IsInfinity(Teeth));
+        Assert.IsFalse(float.IsNaN(Teeth));
+        
         return Mathf.Max(0,Teeth + MobilityTest(target.mBody) + Modifier);
     }
 
