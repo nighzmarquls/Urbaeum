@@ -82,10 +82,7 @@ public class UrbSubstances
 
     public static UrbSubstance[] GetIngredientProportions(UrbRecipe Recipe)
     {
-        /*if(Recipe.Ingredients == null)
-        {
-            return new UrbRecipeIngredient[0];
-        }*/
+        
         UrbSubstance[] Proportions = new UrbSubstance[Recipe.Ingredients.Length];
         float Quantity = 0;
         for (int i = 0; i < Recipe.Ingredients.Length; i++)

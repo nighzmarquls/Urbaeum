@@ -44,7 +44,8 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
         UrbSmellSource Smell = mAgent.SmellSource;
 
         string returnText =
-            "Name: " + LocalName + ((mAgent.Alive)?  "\n" : " (Deceased) \n") +
+            "Name: " + LocalName + ((mAgent.Alive) ? "\n" : " (Deceased) \n") +
+            "Map: " + mAgent.CurrentMap.gameObject.name + "\n" +
             "Mass: " + Mass + "\n" +
             "Mass Per Tile:" + MassPerTile + "\n";
 

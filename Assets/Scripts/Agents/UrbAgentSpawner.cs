@@ -10,7 +10,7 @@ public class UrbAgentSpawner
         if (Tile.Occupants.Count >= UrbTile.MaximumOccupants)
         {
             spawned = null;
-            Debug.Log("Failed to spawn agent because Tile hit max occupancy!", TestAgent);
+            //Debug.Log("Failed to spawn agent because Tile hit max occupancy!", TestAgent);
             s_SpawnAgent_prof.End();
             return false;
         }
@@ -18,7 +18,7 @@ public class UrbAgentSpawner
         if (TestAgent.WasDestroyed)
         {
             spawned = null;
-            Debug.Log("Failed to spawn agent because TestAgent was null!", TestAgent);
+            //Debug.Log("Failed to spawn agent because TestAgent was null!", TestAgent);
             s_SpawnAgent_prof.End();
             return false;
         }
@@ -28,7 +28,7 @@ public class UrbAgentSpawner
         if(TestPrint.TilePrintCollisionCheck(Tile))
         {
             spawned = null;
-            Debug.Log("Failed to spawn agent because of TestPrint check on Tile!");
+            //Debug.Log("Failed to spawn agent because of TestPrint check on Tile!");
             s_SpawnAgent_prof.End();
             return false;
         }
@@ -36,7 +36,7 @@ public class UrbAgentSpawner
         Vector3 SpawnLocation = Tile.Location;
         if (!TestAgent.enabled)
         {
-            Debug.Log("TestAgent not enabled!");
+            //Debug.Log("TestAgent not enabled!");
         }
         
         spawned = Object.Instantiate(TestAgent.gameObject, SpawnLocation, Quaternion.identity);

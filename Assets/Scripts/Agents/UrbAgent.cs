@@ -9,7 +9,10 @@ using UrbUtility;
 public class UrbAgent : UrbBase
 {
     public static int TotalAgents;
-    
+
+    public static long LASTID = 0;
+    public long ID { get; protected set; } = 0;
+
     public bool HasPathfinder { get; protected set; } = false;
     const float LocationThreshold = 0.01f;
 
@@ -312,6 +315,11 @@ public class UrbAgent : UrbBase
 
     public override void OnEnable()
     {
+        if(ID == 0)
+        {
+            LASTID++;
+            ID = LASTID;
+        }
         Display = GetComponentInChildren<UrbDisplay>();
 
         if (!HasDisplay)

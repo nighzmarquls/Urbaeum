@@ -84,8 +84,23 @@ public class UrbAtlas : MonoBehaviour
         {
             return null;
         }
+        UrbTile Result = null;
+        bool EmptySkyTile = true;
+        if (SkyMap != null)
+        {
+            Result = SkyMap.GetInboundsTile(Location);
 
-        UrbTile Result = LandMap.GetInboundsTile(Location);
+
+            if(Result != null && Result.Occupants != null && Result.Occupants.Count > 0)
+            {
+                EmptySkyTile = false;
+            }
+        }
+
+        if (EmptySkyTile)
+        {
+            Result = LandMap.GetInboundsTile(Location);
+        }
 
         return Result;
     }
