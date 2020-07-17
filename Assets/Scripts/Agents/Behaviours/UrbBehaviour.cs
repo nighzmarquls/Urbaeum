@@ -41,7 +41,8 @@ public class UrbBehaviour : UrbBase
         IsEater = Eater != null;
         
         base.OnEnable();
-        
+        //ensure that base OnEnable is called before we start running
+        //the coroutines.
         mCoroutine = IntervalCoroutine();
 
         if (ShouldInterval && isActiveAndEnabled)

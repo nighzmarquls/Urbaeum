@@ -205,11 +205,7 @@ public class UrbMetabolism : UrbBehaviour
             }
             else
             {
-                var currentBod = mAgent.mBody;
-                var composition = currentBod.BodyComposition;
-                var currentGrowth = ReserveToGrowth[g];
-                
-                Growth += composition.MixRecipe(currentGrowth, Amount);
+                Growth += mAgent.mBody.BodyComposition.MixRecipe(ReserveToGrowth[g], Amount);
                 SpendEnergy(Growth);
             }
         }
