@@ -57,9 +57,10 @@ public class UrbMetabolism : UrbBehaviour
         ReserveToGrowth = new UrbRecipe[BodyGrowthRecipe.Length];
 
         //We don't need a wholly-new-struct every time b/c they're copy by value. 
-        UrbRecipe Recipe = new UrbRecipe();
         for (int g = 0; g < BodyGrowthRecipe.Length; g++)
         {
+            UrbRecipe Recipe = new UrbRecipe();
+
             Recipe.Ingredients = new UrbSubstance[1];
             Recipe.Product = BodyGrowthRecipe[g].Substance ;
 

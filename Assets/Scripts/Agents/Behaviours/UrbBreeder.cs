@@ -64,17 +64,16 @@ public class UrbBreeder : UrbBehaviour
 
     protected void SetOffspringData(UrbAgent Offspring)
     {
-        var OffspringBreeder = Offspring.Breeder;
-        if (!Offspring.IsBreeder || !OffspringBreeder)
+        if (Offspring == null || !Offspring.IsBreeder)
         {
             return;
         }
         
         UrbObjectData[] ChildOffspringData = new UrbObjectData[OffspringData.Length];
-
+        
         OffspringData.CopyTo(ChildOffspringData, 0);
 
-        OffspringBreeder.OffspringData = ChildOffspringData;
+        Offspring.Breeder.OffspringData = ChildOffspringData;
     }
 
     protected void EncodeOffspringData()
