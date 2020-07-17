@@ -354,6 +354,7 @@ public class UrbAgent : UrbBase
         }
 
         AgentLocalName = gameObject.name;
+        OccupiedTiles = Tileprint.GetAllPrintTiles(this);
     }
 
     bool Removing = false;
@@ -508,10 +509,12 @@ public class UrbAgent : UrbBase
             if (massChange > MassChangeToReorder)
             {
                 LastCheckedMass = Mass;
-                CurrentTile.UpdateClearance();
-                if (Shuffle)
-                {
-                    CurrentTile?.VisualShuffle();
+                if (CurrentTile != null) {
+                    CurrentTile.UpdateClearance();
+                    if (Shuffle)
+                    {
+                        CurrentTile?.VisualShuffle();
+                    }
                 }
             }
 

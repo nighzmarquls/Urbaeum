@@ -34,7 +34,7 @@ public class UrbAgentSpawner
         }
         
         Vector3 SpawnLocation = Tile.Location;
-        if (TestAgent.enabled)
+        if (!TestAgent.enabled)
         {
             Debug.Log("TestAgent not enabled!");
         }
@@ -44,7 +44,6 @@ public class UrbAgentSpawner
         if (Data != null)
         {
             UrbEncoder.Write(Data, spawned);
-            //Debug.Log(JsonUtility.ToJson(Data, true));
         }
         
         if (spawned.activeSelf == false)

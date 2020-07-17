@@ -37,11 +37,13 @@ public class UrbBehaviour : UrbBase
 
     public override void OnEnable()
     {
-        mCoroutine = IntervalCoroutine();
         Eater = GetComponent<UrbEater>();
         IsEater = Eater != null;
         
         base.OnEnable();
+        
+        mCoroutine = IntervalCoroutine();
+
         if (ShouldInterval && isActiveAndEnabled)
         {
             StartCoroutine(mCoroutine);
