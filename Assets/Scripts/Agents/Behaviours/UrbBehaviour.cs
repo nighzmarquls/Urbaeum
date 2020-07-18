@@ -68,24 +68,57 @@ public class UrbBehaviour : UrbBase
     }
 
     UrbTile LastOriginTile = null;
+    bool CacheLinked = false;
     UrbTile[] CachedSearchTile = null;
+    UrbTile[] CachedSelfTile = null;
+    UrbTile[] CachedAdjacent = null;
+
+    protected bool CacheCheck(bool GetLinked)
+    {
+        return LastOriginTile == null || LastOriginTile != mAgent.CurrentTile || GetLinked != CacheLinked;
+    }
+
+    protected void CacheTiles(bool GetLinked)
+    {
+        UrbTile[] Self = mAgent.Tileprint.GetAllPrintTiles(mAgent);
+
+        UrbTile[] Adjacent = mAgent.Tileprint.GetBorderingTiles(mAgent, GetLinked);
+
+        UrbTile[] SearchTiles = new UrbTile[Adjacent.Length + Self.Length];
+
+        Self.CopyTo(SearchTiles, 0);
+
+        Adjacent.CopyTo(SearchTiles, Self.Length);
+
+        LastOriginTile = mAgent.CurrentTile;
+        CachedSearchTile = SearchTiles;
+        CachedSelfTile = Self;
+        CachedAdjacent = Adjacent;
+    }
+
+    protected UrbTile[] GetAdjacentTiles(bool GetLinked)
+    {
+        if (CacheCheck(GetLinked))
+        {
+            CacheTiles(GetLinked);
+        }
+        return CachedAdjacent;
+    }
+
+    protected UrbTile[] GetSelfTiles(bool GetLinked)
+    {
+        if (CacheCheck(GetLinked))
+        {
+            CacheTiles(GetLinked);
+        }
+        return CachedSelfTile;
+    }
 
     protected UrbTile[] GetSearchTiles(bool GetLinked)
     {
-        if (LastOriginTile == null || LastOriginTile != mAgent.CurrentTile)
+        if (CacheCheck(GetLinked))
         {
-            UrbTile[] Self = mAgent.Tileprint.GetAllPrintTiles(mAgent);
-
-            UrbTile[] Adjacent = mAgent.Tileprint.GetBorderingTiles(mAgent, GetLinked);
-
-            UrbTile[] SearchTiles = new UrbTile[Adjacent.Length + Self.Length];
-
-            Self.CopyTo(SearchTiles, 0);
-
-            Adjacent.CopyTo(SearchTiles, Self.Length);
-
-            LastOriginTile = mAgent.CurrentTile;
-            CachedSearchTile = SearchTiles;
+            CacheTiles(GetLinked);
         }
         return CachedSearchTile;
     }

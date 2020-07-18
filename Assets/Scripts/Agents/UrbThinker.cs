@@ -13,6 +13,7 @@ public enum UrbUrgeCategory
     Hunger = 2,
     Safety = 4,
     Rest = 8,
+    Work = 16
 }
 
 [RequireComponent(typeof(UrbAgent))]
