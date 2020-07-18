@@ -138,7 +138,7 @@ public class UrbAtlas : MonoBehaviour
 
     public void ResumeBehaviours()
     {
-        Assert.IsFalse(IsPaused);
+        Assert.IsTrue(IsPaused);
 
         IsPaused = false;
 

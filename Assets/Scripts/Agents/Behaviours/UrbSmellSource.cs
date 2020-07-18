@@ -23,26 +23,25 @@ public class UrbSmellSource : UrbBehaviour
         base.OnEnable(); 
     }
 
-    // Obsolete. Scents now pull from the occupants list
     public override IEnumerator FunctionalCoroutine()
-     {
-         Assert.IsFalse(IsPaused);
-         Assert.IsTrue(HasBody && mBody.HasComposition);
+    {
+        Assert.IsFalse(IsPaused);
+        Assert.IsTrue(HasBody && mBody.HasComposition);
 
-         //SmellSources are derived from aspects of the Body 
-         _smellTag = mBody.BodyComposition.GetScent();
-         SmellStrength = mAgent.MassPerTile;
-    
-         // if (LastSmellTile != mAgent.CurrentTile)
-         // {
-         //     TileCache = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
-         // }
-         
-         if (Interval < UrbScent.ScentInterval)
-         {
-             yield return new WaitForSeconds(UrbScent.ScentInterval - Interval);
-         }
-     }
+        //SmellSources are derived from aspects of the Body 
+        _smellTag = mBody.BodyComposition.GetScent();
+        SmellStrength = mAgent.MassPerTile;
+
+        // if (LastSmellTile != mAgent.CurrentTile)
+        // {
+        //     TileCache = mAgent.Tileprint.GetBorderingTiles(mAgent, true);
+        // }
+
+        if (Interval < UrbScent.ScentInterval)
+        {
+            yield return new WaitForSeconds(UrbScent.ScentInterval - Interval);
+        }
+    }
 
     public override UrbComponentData GetComponentData()
     {
