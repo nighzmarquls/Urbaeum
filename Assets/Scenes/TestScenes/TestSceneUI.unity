@@ -899,9 +899,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e43103237fa946b4b99a541b50da0579, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CameraSpeed: 10
-  CameraZoomSpeed: 10
-  MinZoomSize: 0.5
+  CameraSpeed: 8
+  CameraZoomSpeed: 15
+  MinZoomSize: 1.25
   ScreenPushPixelBuffer: 60
   CameraStartLocation: {x: 0, y: 0, z: 0}
 --- !u!1001 &356006240961405946
