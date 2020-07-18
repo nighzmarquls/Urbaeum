@@ -28,17 +28,7 @@ public class UrbAgent : UrbBase
 
     public bool IsMergeable { get; private set; } = false;
 
-    UrbDisplay _display = null; 
-    public UrbDisplay Display
-    {
-        get { return _display; }
-        private set
-        {
-            _display = value;
-            // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
-            HasDisplay = _display != null;
-        }
-    }
+    public UrbDisplay Display { get; private set; }
     public bool HasDisplay { get; private set; }
 
     protected string AgentLocalName;
@@ -79,22 +69,6 @@ public class UrbAgent : UrbBase
 
     protected Vector3 TargetLocation;
     
-    protected override void OnDestroy()
-    {
-        if (CurrentTile != null && CurrentTile.Occupants != null)
-        {
-            CurrentTile.Occupants.Remove(this);
-        }
-        //generally we don't actually care if 
-        //the underlying objects are non-null
-        //only if it's null and we don't know about it
-        IsCurrentMapNull = true;
-        CurrentTile = null;
-        CurrentMap = null;
-        UrbAgentManager.UnregisterAgent(this);
-        base.OnDestroy();
-    }
-    
     public Vector3 Location {
         get { return transform.position; }
 
@@ -111,8 +85,7 @@ public class UrbAgent : UrbBase
             }
 
             var usedCap = mBody.BodyComposition.UsedCapacity;
-            Assert.IsFalse(float.IsInfinity(usedCap));
-            Assert.IsFalse(float.IsNaN(usedCap));
+            Assert.IsFalse(float.IsInfinity(usedCap) || float.IsNaN(usedCap));
             
             return mBody.BodyComposition.UsedCapacity;
         } }
@@ -141,11 +114,7 @@ public class UrbAgent : UrbBase
     protected UrbTileprint tileprint;
     public UrbTileprint Tileprint {
         get {
-            if(tileprint != null)
-            {
-                return tileprint;
-            }
-            tileprint = new UrbTileprint(TileprintString);
+            Assert.IsNotNull(tileprint);
             return tileprint;
         }
     }
@@ -308,34 +277,44 @@ public class UrbAgent : UrbBase
         }
     }
 
+    
+#region Unity Lifetime Create methods
+    public override void Awake()
+    {
+        Display = GetComponentInChildren<UrbDisplay>();
+        Assert.IsNotNull(Display, "UrbAgents require a Display to be attached");
+        
+        _camera = Camera.main;
+        Assert.IsNotNull(_camera);
+        
+        mSpriteRenderer = GetComponent<SpriteRenderer>();
+        BodyDisplay = GetComponent<UrbBodyDisplay>();
+
+        tileprint = new UrbTileprint(TileprintString);
+        
+        base.Awake();
+    }
+#endregion
+    
     public override void OnEnable()
     {
+        Assert.IsTrue(HasAwakeBeenCalled);
+        
         if(ID == 0)
         {
             //Multi-threaded paranoia.
             ID = Interlocked.Increment(ref LASTID);
         }
-        Display = GetComponentInChildren<UrbDisplay>();
-
-        if (!HasDisplay)
-        {
-            logger.LogError("No DisplayObject Present: Make sure a Display Object is attached!", gameObject);
-        }
 
         BirthTime = Time.time;
         
-        mSpriteRenderer = GetComponent<SpriteRenderer>();
-        Camera = Camera.main;
-        if (Camera == null)
+        this.transform.rotation = _camera.transform.rotation;
+
+        if (tileprint == null)
         {
-            Debug.LogError("Camera for UrbAgent is NULL", this);
-            return;
+            
         }
         
-        this.transform.rotation = Camera.transform.rotation;
-        tileprint = new UrbTileprint(TileprintString);
-        
-        BodyDisplay = GetComponent<UrbBodyDisplay>();
         LastCheckedMass = 0;
 
         UrbMerges = GetComponents<UrbMerge>();
@@ -345,9 +324,9 @@ public class UrbAgent : UrbBase
             IsMergeable = true;
         }
         
-        
         UrbAgentManager.RegisterAgent(this);
-        IsPaused = UrbAgentManager.IsPaused;
+        IsPaused = ShouldPause;
+        
         base.OnEnable();
 
         if (gameObject.name.Contains("("))
@@ -359,7 +338,35 @@ public class UrbAgent : UrbBase
         AgentLocalName = gameObject.name;
         OccupiedTiles = Tileprint.GetAllPrintTiles(this);
     }
+    
+    // Update is called once per frame
+    public override void Update()
+    {
+        s_UpdateUrbAgent_p.Begin(this);
+        Tick();
+        s_UpdateUrbAgent_p.End();
+        base.Update();
+    }
 
+#region Unity End-Of-Life
+    protected override void OnDestroy()
+    {
+        if (CurrentTile != null && CurrentTile.Occupants != null)
+        {
+            CurrentTile.Occupants.Remove(this);
+        }
+        //generally we don't actually care if 
+        //the underlying objects are non-null
+        //only if it's null and we don't know about it
+        IsCurrentMapNull = true;
+        CurrentTile = null;
+        CurrentMap = null;
+        UrbAgentManager.UnregisterAgent(this);
+        base.OnDestroy();
+    }
+#endregion
+
+    
     bool Removing = false;
     public void Remove(bool reorder = true)
     {
@@ -386,42 +393,11 @@ public class UrbAgent : UrbBase
         }
         Destroy(gameObject);
     }
-
-    public bool IsPaused { get; protected set; } = false;
-
-    public bool Pause {
-        get { return IsPaused; }
-        set
-        {
-            if (value == IsPaused)
-            {
-                return;
-            }
-            
-            UrbBehaviour[] AgentBehaviours = GetComponents<UrbBehaviour>();
-            if (value)
-            {
-                for (int i = 0; i < AgentBehaviours.Length; i++)
-                {
-                    AgentBehaviours[i].PauseBehaviour();
-                }
-            }
-            else
-            {
-                for (int i = 0; i < AgentBehaviours.Length; i++)
-                {
-                    AgentBehaviours[i].ResumeBehaviour();
-                }
-            }
-
-            IsPaused = value;
-        }
-    }
-
+    
     const float MassChangeToReorder = 10f;
     const float RepositionInterval = 0.1f;
     float NextReposition = 0;
-    Camera Camera;
+    Camera _camera;
 
     public void Express(UrbDisplayFace.Expression Expression)
     {
@@ -450,8 +426,7 @@ public class UrbAgent : UrbBase
     static ProfilerMarker s_TickToDisplay_p = new ProfilerMarker("UrbAgent.TickDisplay");
     public void Tick()
     {
-        Assert.IsFalse(float.IsInfinity(Mass));
-        Assert.IsFalse(float.IsNaN(Mass));
+        Assert.IsFalse(float.IsInfinity(Mass) || float.IsNaN(Mass));
         
         s_TickToMind_p.Begin(this);
         if (IsPaused)
@@ -547,14 +522,6 @@ public class UrbAgent : UrbBase
     }
     static ProfilerMarker s_UpdateUrbAgent_p = new ProfilerMarker("UrbAgent.Update");
     
-    // Update is called once per frame
-    public override void Update()
-    {
-        s_UpdateUrbAgent_p.Begin(this);
-        Tick();
-        s_UpdateUrbAgent_p.End();
-    }
-
     public override UrbComponentData GetComponentData()
     {
         UrbComponentData Data = base.GetComponentData();
@@ -579,4 +546,37 @@ public class UrbAgent : UrbBase
         TileprintString = UrbEncoder.GetString("TileprintString", Data);
         return true;
     }
+    
+    #region Deprecated Properties/Methods
+    
+    // public bool Pause {
+    //     get { return IsPaused; }
+    //     set
+    //     {
+    //         if (value == IsPaused)
+    //         {
+    //             return;
+    //         }
+    //         
+    //         UrbBehaviour[] AgentBehaviours = GetComponents<UrbBehaviour>();
+    //         if (value)
+    //         {
+    //             for (int i = 0; i < AgentBehaviours.Length; i++)
+    //             {
+    //                 AgentBehaviours[i].PauseBehaviour();
+    //             }
+    //         }
+    //         else
+    //         {
+    //             for (int i = 0; i < AgentBehaviours.Length; i++)
+    //             {
+    //                 AgentBehaviours[i].ResumeBehaviour();
+    //             }
+    //         }
+    //
+    //         IsPaused = value;
+    //     }
+    // }
+    
+    #endregion
 }

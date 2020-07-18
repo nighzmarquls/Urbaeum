@@ -3,6 +3,7 @@ using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 
+[RequireComponent(typeof(UrbBody))]
 [RequireComponent(typeof(UrbAgent))]
 public class UrbEater : UrbBehaviour
 {
@@ -26,11 +27,19 @@ public class UrbEater : UrbBehaviour
         DetectedFood = new List<UrbBody>();
 
         base.OnEnable();
-        Assert.IsNotNull(mAgent.mBody.BodyComposition);
         
-        mAgent.mBody.BodyComposition.AddComposition(Stomach);
+        Assert.IsNotNull(mBody);
+        Assert.IsNotNull(mBody.BodyComposition);
+        
+        mBody.BodyComposition.AddComposition(Stomach);
         mAgent.AddAction(BiteAttack);
     }
+
+    public override void Update()
+    {
+        base.Update();
+    }
+    
     static ProfilerMarker s_TileEvaluateCheck_p = new ProfilerMarker("UrbEater.TileEvaluateCheck");
 
     public override float TileEvaluateCheck(UrbTile Target, bool Contact = false)
@@ -173,8 +182,7 @@ public class UrbBiteAttack : UrbAttack
     {
         float Teeth = target.mBody.BodyComposition[UrbSubstanceTag.Teeth];
 
-        Assert.IsFalse(float.IsInfinity(Teeth));
-        Assert.IsFalse(float.IsNaN(Teeth));
+        Assert.IsFalse(float.IsInfinity(Teeth) || float.IsNaN(Teeth));
         
         return Mathf.Max(0,Teeth + MobilityTest(target.mBody) + Modifier);
     }

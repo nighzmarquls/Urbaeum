@@ -1,24 +1,37 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 
-[RequireComponent(typeof(UrbAgent))]
+[RequireComponent(typeof(UrbAgent), typeof(UrbBody))]
 public class UrbSmellSource : UrbBehaviour
 {
-
-    public UrbScentTag[] SmellTag;
-    public float SmellStrength = 1.0f;
+    UrbScentTag[] _smellTag;
+    public UrbScentTag[] SmellTag {
+        get {
+            Assert.IsNotNull(_smellTag);
+            return _smellTag;
+        }}
+    public float SmellStrength { get; protected set; }  = 1.0f;
     public override bool LivingBehaviour => false;
+
+    public override void OnEnable()
+    {
+        _smellTag = mBody.BodyComposition.GetScent();
+        SmellStrength = mAgent.MassPerTile;
+        base.OnEnable(); 
+    }
 
     // Obsolete. Scents now pull from the occupants list
     public override IEnumerator FunctionalCoroutine()
      {
-         if(mAgent.HasBody && mAgent.mBody.BodyComposition != null)
-         {
-             SmellTag = mAgent.mBody.BodyComposition.GetScent();
-             SmellStrength = mAgent.MassPerTile;
-         }
+         Assert.IsFalse(IsPaused);
+         Assert.IsTrue(HasBody && mBody.HasComposition);
+
+         //SmellSources are derived from aspects of the Body 
+         _smellTag = mBody.BodyComposition.GetScent();
+         SmellStrength = mAgent.MassPerTile;
     
          // if (LastSmellTile != mAgent.CurrentTile)
          // {
@@ -35,23 +48,26 @@ public class UrbSmellSource : UrbBehaviour
     {
         UrbComponentData Data = base.GetComponentData();
 
-        Data.Fields = new UrbFieldData[]
-        {
-            new UrbFieldData{ Name = "SmellStrength", Value = SmellStrength}
-        };
+        //SmellStrength is (currently) computed based on MassPerTile.
+        // Data.Fields = new UrbFieldData[]
+        // {
+        //     new UrbFieldData{ Name = "SmellStrength", Value = SmellStrength}
+        // };
 
-        Data.StringArrays = new UrbStringArrayData[]
-        {
-            UrbEncoder.EnumsToArray<UrbScentTag>("SmellTag",SmellTag) 
-        };
+        //SmellTag is (currently) computed based on the Body
+        // Data.StringArrays = new UrbStringArrayData[]
+        // {
+        //     UrbEncoder.EnumsToArray<UrbScentTag>("SmellTag",SmellTag) 
+        // };
         
         return Data;
     }
 
     public override bool SetComponentData(UrbComponentData Data)
     {
-        SmellStrength = UrbEncoder.GetField("SmellStrength", Data);
-        SmellTag = UrbEncoder.GetEnumArray<UrbScentTag>("SmellTag", Data);
+        //SmellStrength is (currently) computed based on MassPerTile.
+        // SmellStrength = UrbEncoder.GetField("SmellStrength", Data);
+        // SmellTag = UrbEncoder.GetEnumArray<UrbScentTag>("SmellTag", Data);
 
         return true;
     }

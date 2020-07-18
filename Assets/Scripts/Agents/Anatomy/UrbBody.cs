@@ -19,11 +19,12 @@ public class UrbBody : UrbBase
             return 0;
         }
     }
-    public float Height = 1;
+
+    public float Height { get; protected set; }  = 1;
 
     protected static UrbRecoverBodyAction RecoverAction = new UrbRecoverBodyAction();
 
-    public override void OnEnable()
+    public override void Awake()
     {
         if (BodyComposition == null)
         {
@@ -32,18 +33,18 @@ public class UrbBody : UrbBase
             HasComposition = true;
         }
         
-        mAgent = GetComponent<UrbAgent>();
+        base.Awake();
+    }
+    
+    public override void OnEnable()
+    {
+        Assert.IsNotNull(BodyComposition);
         BodyComposition.SetSize(mAgent.Tileprint.TileCount * Height);
         base.OnEnable();
     }
 
     public bool BodyEmpty()
     {
-        if(BodyComposition == null)
-        {
-            return true;
-        }
-
         return BodyComposition.Emptiness > 0.9f; //TODO: Fix this;
     }
 

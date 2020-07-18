@@ -6,13 +6,23 @@ public class UrbCameraControls : MonoBehaviour
 {
     protected static UrbAgent CameraFocus;
     protected static bool CameraIsFocused;
-    public static UrbAgent Focus { get { return CameraFocus; }
+    public static UrbAgent Focus {
+        get
+        {
+            return CameraFocus;
+        }
         set {
             CameraIsFocused = value != null;
             CameraFocus = value;
         }
     }
 
+    public void ClearFocus()
+    {
+        CameraIsFocused = false;
+        CameraFocus = null;
+    }
+    
     public float CameraSpeed = 1.0f;
     public float CameraZoomSpeed = 1.0f;
     public float MinZoomSize = 1.25f;
@@ -110,13 +120,16 @@ public class UrbCameraControls : MonoBehaviour
         mCamera.orthographicSize = GetZoomTarget();
         if (CameraMoveInput.magnitude > 0)
         {
-            Focus = null;
+            ClearFocus();
             this.transform.position += (CameraMoveInput * (Time.unscaledDeltaTime * AdjustedCameraSpeed));
         }
         //Temporary until we have non-ui shortcuts.
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            Focus = null;
+            if (CameraIsFocused)
+            {
+                ClearFocus();
+            }
             RecenterCamera();
         }
 
@@ -124,7 +137,7 @@ public class UrbCameraControls : MonoBehaviour
         {
             Vector3 FocusLocation = Focus.transform.position;
             FocusLocation.z = this.transform.position.z;
-            this.transform.position = FocusLocation;
+            transform.position = FocusLocation;
         }
     }
 }

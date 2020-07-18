@@ -19,14 +19,10 @@ public class UrbComposition
     {
         if (ContainingComposition == null)
         {
-            if (Size == 1)
-            {
-                MaxCapacity = 1000;
-            }
-            else
-            {
-                MaxCapacity = 1000 * (Size);
-            }
+            var toAssert = float.IsNaN(Size) || float.IsInfinity(Size);
+            Assert.IsFalse(toAssert, "Size must be valid float");
+            Assert.IsFalse(Size <= 0, "Size cannot be <= 0.");
+            MaxCapacity = 1000 * Size;
         }
     }
 
@@ -34,8 +30,7 @@ public class UrbComposition
         get {
             var emptiness = AvailableCapacity / MaxCapacity;
             
-            Assert.IsFalse(float.IsInfinity(emptiness));
-            Assert.IsFalse(float.IsNaN(emptiness));
+            Assert.IsFalse(float.IsInfinity(emptiness) || float.IsNaN(emptiness));
             
             return emptiness;
         }
@@ -45,9 +40,10 @@ public class UrbComposition
         get
         {
             var fullness = UsedCapacity / MaxCapacity;
+
+            var toAssert = float.IsNaN(fullness) || float.IsInfinity(fullness);
             
-            Assert.IsFalse(float.IsNaN(fullness));
-            Assert.IsFalse(float.IsInfinity(fullness));
+            Assert.IsFalse(toAssert, "Fullness must be valid value");
 
             return fullness;
         }
@@ -58,8 +54,7 @@ public class UrbComposition
 
             var availCapacity = MaxCapacity - UsedCapacity;
             
-            Assert.IsFalse(float.IsNaN(availCapacity));
-            Assert.IsFalse(float.IsInfinity(availCapacity));
+            Assert.IsFalse(float.IsNaN(availCapacity) || float.IsInfinity(availCapacity));
 
             return availCapacity;
         }
@@ -112,8 +107,7 @@ public class UrbComposition
             return;
         }
         
-        Assert.IsFalse(float.IsInfinity(UsedCapacity));
-        Assert.IsFalse(float.IsNaN(UsedCapacity));
+        Assert.IsFalse(float.IsInfinity(UsedCapacity) || float.IsNaN(UsedCapacity));
         
         for (int i = 0; i < CompositionRecipe.Length; i++)
         {
@@ -128,8 +122,7 @@ public class UrbComposition
             UsedCapacity += CompositionRecipe[i].SubstanceAmount;
         }
         
-        Assert.IsFalse(float.IsInfinity(UsedCapacity));
-        Assert.IsFalse(float.IsNaN(UsedCapacity));
+        Assert.IsFalse(float.IsInfinity(UsedCapacity) || float.IsNaN(UsedCapacity));
     }
 
     public float GetProportionOfTotal(UrbSubstanceTag[] Tags)
@@ -179,13 +172,11 @@ public class UrbComposition
         input.Membrane.ChangeComposition(this);
         input.MaxCapacity = input.UsedCapacity + AvailableCapacity;
         
-        Assert.IsFalse(float.IsInfinity(input.MaxCapacity));
-        Assert.IsFalse(float.IsNaN(input.MaxCapacity));
+        Assert.IsFalse(float.IsInfinity(input.MaxCapacity) || float.IsNaN(input.MaxCapacity));
         
         UsedCapacity += input.UsedCapacity;
         
-        Assert.IsFalse(float.IsInfinity(UsedCapacity));
-        Assert.IsFalse(float.IsNaN(UsedCapacity));
+        Assert.IsFalse(float.IsInfinity(UsedCapacity) || float.IsNaN(UsedCapacity));
         
         Compositions.Add(input);
     }
@@ -298,6 +289,9 @@ public class UrbComposition
         {
             ContainingComposition.UsedCapacity += TransferAmount;
         }
+        
+        Assert.IsFalse(float.IsInfinity(TransferAmount) || float.IsNaN(TransferAmount));
+
         return TransferAmount;
     }
 
@@ -345,7 +339,7 @@ public class UrbComposition
                 Substances[Tag] = 0;
                 Dirty = true;
             } 
-           // Debug.Log("After Quantity Check " + TransferAmount);
+            // Debug.Log("After Quantity Check " + TransferAmount);
         }
         else
         {
@@ -356,6 +350,9 @@ public class UrbComposition
         {
             ContainingComposition.UsedCapacity -= TransferAmount;
         }
+        
+        Assert.IsFalse(float.IsInfinity(TransferAmount) || float.IsNaN(TransferAmount));
+
         return TransferAmount;
     }
 
@@ -366,9 +363,9 @@ public class UrbComposition
             return 0.0f;
         }
 
-        float TransferAmount = Mathf.Min(Amount, Target.AvailableCapacity);
+        //float TransferAmount = Mathf.Min(Amount, Target.AvailableCapacity);
 
-        TransferAmount = RemoveSubstance(Tag, Amount);
+        float TransferAmount = RemoveSubstance(Tag, Amount);
 
         if(TransferAmount > 0)
         {
@@ -379,6 +376,8 @@ public class UrbComposition
             //Debug.Log( Tag.ToString() + " Not Available to Transfer.");
         }
 
+        Assert.IsFalse(float.IsInfinity(TransferAmount) || float.IsNaN(TransferAmount));
+        
         return TransferAmount;
     }
 
@@ -401,6 +400,8 @@ public class UrbComposition
             }
         }
 
+        Assert.IsFalse(float.IsInfinity(Result) || float.IsNaN(Result));
+        
         return Result;
     }
 
@@ -411,6 +412,8 @@ public class UrbComposition
         TransferTo(Target, Recipe.Product, Result);
 
         Result = Target.DecomposeRecipe(Recipe, Result);
+
+        Assert.IsFalse(float.IsInfinity(Result) || float.IsNaN(Result));
 
         return Result;
     }
@@ -449,6 +452,8 @@ public class UrbComposition
             Result = 0.0f;
         }
 
+        Assert.IsFalse(float.IsInfinity(Result) || float.IsNaN(Result));
+
         return Result;    
     }
 
@@ -477,6 +482,9 @@ public class UrbComposition
             float Amount = Substances[tags[t]];
             Result += TransferTo(Target, tags[t], Amount);
         }
+        
+        Assert.IsFalse(float.IsInfinity(Result) || float.IsNaN(Result));
+
         return Result;
     }
 

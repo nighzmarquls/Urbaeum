@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using Unity.Assertions;
 using Unity.Profiling;
@@ -12,14 +13,13 @@ public class UrbBase : MonoBehaviour
 
     #region OptionalComponents
     //Optional Urb Components which may find themselves on a given UrbAgent 
-    [DontSerialize]     public UrbEater Eater { get; protected set; }
+    [DontSerialize] public UrbEater Eater { get; protected set; }
 
     [DontSerialize] public UrbBreeder Breeder { get; protected set; }
     
     [DontSerialize] public UrbBody mBody { get; protected set; }
 
-    [DontSerialize]
-    public UrbMetabolism Metabolism
+    [DontSerialize] public UrbMetabolism Metabolism
     {
         get; 
         private set;
@@ -28,7 +28,8 @@ public class UrbBase : MonoBehaviour
     [DontSerialize] public UrbSmellSource SmellSource { get; protected set; }
     
     [DontSerialize] public UrbAgent mAgent { get; protected set; }
-    [DontSerialize] public UrbThinker Mind;
+    [DontSerialize] public UrbThinker Mind { get; protected set; }
+
     #endregion
     #region OptionalComponentIndicators
     
@@ -40,24 +41,17 @@ public class UrbBase : MonoBehaviour
     
     [DontSerialize] public bool IsEater { get; protected set; }
     [DontSerialize] public bool HasAgent { get; protected set; }
-    
-    [DontSerialize] public bool IsMindNull;
-    [DontSerialize] public bool HasMetabolism;
+
+    [DontSerialize] public bool IsMindNull { get; protected set; }
+    [DontSerialize] public bool HasMetabolism { get; protected set; }
     #endregion
 
+    [DontSerialize] public bool HasAwakeBeenCalled { get; protected set; }
     [DontSerialize] public bool HasEnableBeenCalled { get; protected set; }
     [DontSerialize] public bool LogMe = false;
-
-    
-    public virtual void Update()
-    {
-        if (LogMe != logger.shouldBeLogging)
-        {
-            logger.ToggleDebug();
-        }
-        
-        ValidateUrbComponents();
-    }
+    [DontSerialize] public bool ValidateMe = false;
+    [DontSerialize] public static bool ShouldPause;
+    [DontSerialize] public bool IsPaused { get; protected set; }
     
     public bool WasDestroyed { get; protected set;  } = false;
     
@@ -73,28 +67,23 @@ public class UrbBase : MonoBehaviour
         s_UrbBaseGetCompData_p.End();
         return Data;
     }
-
-    protected virtual void OnDestroy()
-    {
-        enabled = false;
-        WasDestroyed = true;
-        
-        IsEater = false;
-        IsBreeder = false;
-        IsSmelly = false;
-        
-        HasBody = false;
-    }
-
+    
     public virtual bool SetComponentData(UrbComponentData Data)
     {
         //Debug.Log(this.GetType() + " Using Base SetComponentData");
         return true;
     }
-    
-    public virtual void OnEnable()
+
+    //The method call orders go:
+    //Awake -> Start -> OnEnable -> Update
+    //OnEnable for resetting Urb states.
+    //Awake // Start for setting references to components that need to communicate
+#region Start-Of-Lifetime methods
+    public virtual void Awake()
     {
-        HasEnableBeenCalled = true;
+        Assert.IsFalse(HasAwakeBeenCalled);
+        
+        HasAwakeBeenCalled = true;
 
         SetUrbComponents();
         
@@ -111,11 +100,51 @@ public class UrbBase : MonoBehaviour
         LogMe = false;
         logger.logEnabled = false;
         
-        WasDestroyed = false;
-        enabled = true;
-
         ValidateUrbComponents();
     }
+    
+    public virtual void OnEnable()
+    {
+        Assert.IsTrue(HasAwakeBeenCalled);
+        Assert.IsFalse(HasEnableBeenCalled);
+        HasEnableBeenCalled = true;
+        enabled = true;
+        WasDestroyed = false;
+    }
+#endregion
+
+    public virtual void Update()
+    {
+        if (LogMe != logger.shouldBeLogging)
+        {
+            logger.ToggleDebug();
+        }
+
+        if (ValidateMe)
+        {
+            ValidateUrbComponents();
+        }
+    }
+    
+#region End-Of-Lifetime methods
+    public virtual void OnDisable()
+    {
+        HasEnableBeenCalled = false;
+        //TODO: Object-pool-y value resets.
+    }
+
+    protected virtual void OnDestroy()
+    {
+        enabled = false;
+        WasDestroyed = true;
+        
+        IsEater = false;
+        IsBreeder = false;
+        IsSmelly = false;
+        
+        HasBody = false;
+    }
+#endregion
     
     [Conditional("UNITY_ASSERTIONS")]
     void ValidateUrbComponents()
@@ -130,6 +159,11 @@ public class UrbBase : MonoBehaviour
         if (HasAgent)
         {
             Assert.IsNotNull(mAgent);
+        }
+
+        if (IsSmelly)
+        {
+            Assert.IsNotNull(SmellSource);
         }
     }
 

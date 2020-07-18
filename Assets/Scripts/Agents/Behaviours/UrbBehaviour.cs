@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -21,23 +23,28 @@ public class UrbBehaviour : UrbBase
 
     public void PauseBehaviour()
     {
-        if (mCoroutine == null || !isActiveAndEnabled)
-            return;
+        Assert.IsNotNull(mCoroutine);
+        Assert.IsTrue(isActiveAndEnabled);
+        Assert.IsFalse(IsPaused);
 
         StopCoroutine(mCoroutine);
+
+        IsPaused = true;
     }
 
     public void ResumeBehaviour()
     {
-        if (mCoroutine == null || !isActiveAndEnabled)
-            return;
+        Assert.IsNotNull(mCoroutine);
+        Assert.IsTrue(isActiveAndEnabled);
+        Assert.IsTrue(IsPaused);
 
         StartCoroutine(mCoroutine);
+        
+        IsPaused = false;
     }
 
     public override void OnEnable()
     {
-        
         base.OnEnable();
         //ensure that base OnEnable is called before we start running
         //the coroutines.
@@ -52,6 +59,12 @@ public class UrbBehaviour : UrbBase
         {
             mAgent.AddDeathBehaviour(this);
         }
+    }
+
+    public override void OnDisable()
+    {
+        StopCoroutine(mCoroutine);
+        base.OnDisable();
     }
 
     UrbTile LastOriginTile = null;
@@ -90,7 +103,23 @@ public class UrbBehaviour : UrbBase
         RegisteredTiles.CopyTo(ExpandedArray, 0);
         RegisteredTiles = ExpandedArray;
     }
-    
+
+    public override void Update()
+    {
+        if (ShouldPause != IsPaused)
+        {
+            if (ShouldPause)
+            {
+                PauseBehaviour();
+            }
+            else
+            {
+                ResumeBehaviour();
+            }
+        }
+        base.Update();
+    }
+
     static ProfilerMarker s_RegisterTileBehaviour_p = new ProfilerMarker("UrbBehavior.RegisterTileBehaviour");
     public virtual void RegisterTileForBehaviour(float Evaluation ,UrbTile Target, int Index)
     {

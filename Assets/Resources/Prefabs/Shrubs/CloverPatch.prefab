@@ -107,7 +107,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b2e0f7c83d69948a96dc66fccbac5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   BirthTime: 0
   IsCurrentMapNull: 1
   Shuffle: 0
@@ -127,7 +131,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d973e6a44621c2a4ba41b85a65aa5087, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   Modifications:
   - DisplayDrivingSubstance: 3
     SubstanceSizeRatio: 0
@@ -159,7 +167,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b2f4988372b7c64a95866759bfbf429, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
   BodyGrowthRecipe:
   - Substance: 3
@@ -170,6 +182,7 @@ MonoBehaviour:
     SubstanceAmount: 20
   BodyEnergyReserveStorage: 0
   GrowthRate: 10
+  MetabolismReady: 0
 --- !u!114 &-3102135804067309858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,7 +195,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d2d170163064e42bda7b740df8716e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   BodyRecipe: []
   SkinRecipe: 
   CriticalBodyPartAmounts:
@@ -201,10 +218,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abaab3ca621fbad4b92f163726cb68c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
   SmellTag: 01000000
-  SmellStrength: 10
+  SmellStrength: 50
 --- !u!114 &5778968908294350008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,7 +238,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e57e4b4dcd9f0a46b73d7ff26cab5e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   Interval: 10
   MinimumMergeCount: 2
   MinimumMass: 3780
@@ -237,7 +262,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e57e4b4dcd9f0a46b73d7ff26cab5e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   Interval: 10
   MinimumMergeCount: 2
   MinimumMass: 5250
@@ -257,7 +286,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 595bc0b273ea0d64c9696083da17f405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   Interval: 4
   PerceptionPrintString: 
   ContactPrintString: 
@@ -273,7 +306,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89760c5a60a1c48469e26698ab374520, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
 --- !u!114 &3071519546060316335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -286,7 +323,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fb352cbb9e235d46a8e3c997f5983a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   Interval: 4
   MateRequirement: 0
   MateCrowding: 8
@@ -295,6 +336,7 @@ MonoBehaviour:
   Gestation: 2
   DispersalDistance: 1
   BreedType: 0
+  RequiredOffspringTerrain: 0
   MateScents: 
   RivalScents: 
   GestationRecipe:
@@ -316,7 +358,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 374d2cd86a4aa5049851bbd69f35cb94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mind: {fileID: 0}
+  IsMindNull: 0
+  HasMetabolism: 0
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
   PossibleProducts:
   - ProductRequiredMass: 40

@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 using Debug_1 = Debug;
 
@@ -44,9 +45,9 @@ public class UrbMetabolism : UrbBehaviour
             InitializeReserveRecipes();
         }
         
-        if (HasBody && mBody.HasEnableBeenCalled == false)
+        if (HasBody)
         {
-            mBody.OnEnable();  
+            Assert.IsNotNull(mBody); 
         }
         MetabolismReady = true;
     }

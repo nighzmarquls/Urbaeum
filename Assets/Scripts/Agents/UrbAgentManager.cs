@@ -59,20 +59,17 @@ public class UrbAgentManager
 
     public static void SetPauseOnAllAgents(bool Pause)
     { 
-        if (IsPaused == Pause)
-        {
-            return;
-        }
+        // if (IsPaused == Pause)
+        // {
+        //     return;
+        // }
         
         IsPaused = Pause;
-        if (Agents == null)
-        {
-            return;
-        }
+        UrbBase.ShouldPause = Pause;
         
-        for (int i = 0; i < Agents.Count; i++)
-        {
-            Agents[i].Pause = Pause;
-        }
+        // for (int i = 0; i < Agents.Count; i++)
+        // {
+        //     Agents[i].Pause = Pause;
+        // }
     }
 }

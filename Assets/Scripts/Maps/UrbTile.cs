@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -597,6 +598,8 @@ public class UrbTile
                 continue;
             }
 
+            Assert.IsNotNull(occupant.SmellSource);
+            
             foreach (var tag in occupant.SmellSource.SmellTag)
             {
                 AgentScentCache.AddScent(tag, occupant.SmellSource.SmellStrength / occupant.Tileprint.TileCount);

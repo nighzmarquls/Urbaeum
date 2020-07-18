@@ -1,19 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Text))]
 public class FPSCounter : MonoBehaviour
 {
     Text mText;
-
-    bool IsmTextNull;
-
+    
     // Start is called before the first frame update
     void Start()
     {
         mText = GetComponent<Text>();
-        IsmTextNull = mText == null;
+        Assert.IsNotNull(mText);
         StartCoroutine(CountCoroutine());
     }
 
@@ -21,10 +21,6 @@ public class FPSCounter : MonoBehaviour
     {
         while (true)
         {
-            if (IsmTextNull)
-            {
-                yield return null;
-            }
             yield return new WaitForSecondsRealtime(0.08f);
             float FPS = Mathf.Round( (1 / Time.deltaTime));
  
@@ -46,8 +42,6 @@ public class FPSCounter : MonoBehaviour
             }
 
             mText.text = FPS.ToString();
-
-
         }
     }
 }

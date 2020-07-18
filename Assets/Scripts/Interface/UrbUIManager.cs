@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 
+[RequireComponent(typeof(UrbAtlas))]
 public class UrbUIManager : MonoBehaviour
 {
     public static UrbUIManager Instance { get; protected set; }
@@ -30,7 +32,7 @@ public class UrbUIManager : MonoBehaviour
             Time.timeScale = value;
         }
     }
-
+    
     public static void SetCurrentAction(UrbUserAction Action)
     {
         if (Instance == null)
@@ -82,10 +84,8 @@ public class UrbUIManager : MonoBehaviour
         {
             return;
         }
-
-
+        
         Instance.CurrentAction.MouseOver(Instance.CurrentCursorTile);
-
     }
 
     public static bool MouseOver { get; protected set; } = false;
@@ -93,6 +93,7 @@ public class UrbUIManager : MonoBehaviour
     public static void OnMapMouseEnter()
     {
         MouseOver = true;
+        // Debug.Log("OnMapMouse Enter");
         if (MapActionInvalid)
         {
             return;
@@ -102,6 +103,8 @@ public class UrbUIManager : MonoBehaviour
 
     public static void OnMapMouseExit()
     {
+        // Debug.Log("OnMapMouse Exit");
+
         MouseOver = false;
         if (MapActionInvalid)
         {
@@ -109,10 +112,12 @@ public class UrbUIManager : MonoBehaviour
         }
         Instance.CurrentAction.MouseExit(Instance.CurrentCursorTile);
     }
-
-
-    private void OnEnable()
+    
+    public void OnEnable()
     {
+        mainCam = Camera.main;
+        Assert.IsNotNull(mainCam);
+        
         if (Instance == null)
         {
             Instance = this;
@@ -135,6 +140,8 @@ public class UrbUIManager : MonoBehaviour
     }
 
     private Vector3 LastMousePosition = Vector3.zero;
+    Camera mainCam;
+
     protected void GetMouseTile()
     {
         float Distance = (LastMousePosition - Input.mousePosition).magnitude;
@@ -146,13 +153,12 @@ public class UrbUIManager : MonoBehaviour
         
         LastMousePosition = Input.mousePosition;
 
-        Ray mouseray = Camera.main.ScreenPointToRay(LastMousePosition);
+        Ray mouseray = mainCam.ScreenPointToRay(LastMousePosition);
         Vector3 Location = mouseray.origin + (mouseray.direction * (Vector3.Distance(mouseray.origin, transform.position)));
         CurrentCursorTile = Atlas.GetTile(Location);
-
     }
 
-    private void OnDisable()
+    public void OnDisable()
     {
         if (Instance == this)
         {
@@ -179,7 +185,6 @@ public class UrbUIManager : MonoBehaviour
         }
 
         UrbAgentManager.SetPauseOnAllAgents(Pause);
-        
     }
 
     public void Update()

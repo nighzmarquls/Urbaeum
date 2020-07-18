@@ -31,7 +31,7 @@ public abstract class UrbDisplayWindow : MonoBehaviour
 
     public virtual void OnEnable()
     {
-        Debug.Log("Enabling UrbDisplayWindow");
+        // Debug.Log("Enabling UrbDisplayWindow");
         
         if (AllowDragging)
         {
@@ -47,7 +47,7 @@ public abstract class UrbDisplayWindow : MonoBehaviour
         CanClose = CloseInput != null;
         if (CanClose)
         {
-            Debug.Log("Added CloseInput UserAction to Window");
+            // Debug.Log("Added CloseInput UserAction to Window");
             CloseInput.UserAction = new UrbDisplayWindowClose { OwningWindow = this };
         }
 

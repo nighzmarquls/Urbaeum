@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 
 public class UrbAtlas : MonoBehaviour
@@ -103,9 +104,11 @@ public class UrbAtlas : MonoBehaviour
         return Result;
     }
 
-    bool IsPaused;
+    bool IsPaused = true;
     public void StartBehaviours()
     {
+        Assert.IsTrue(IsPaused);
+
         IsPaused = false;
 
         for (int i = 0; i < Maps.Count; i++)
@@ -119,10 +122,8 @@ public class UrbAtlas : MonoBehaviour
 
     public void PauseBehaviours()
     {
-        if(IsPaused)
-        {
-            return;
-        }
+        Assert.IsFalse(IsPaused);
+
         IsPaused = true;
 
         for (int i = 0; i < Maps.Count; i++)
@@ -137,10 +138,7 @@ public class UrbAtlas : MonoBehaviour
 
     public void ResumeBehaviours()
     {
-        if (!IsPaused)
-        {
-            return;
-        }
+        Assert.IsFalse(IsPaused);
 
         IsPaused = false;
 
@@ -151,6 +149,5 @@ public class UrbAtlas : MonoBehaviour
                 StartCoroutine(Maps[i].MapCoroutines[c]);
             }
         }
-        
     }
 }

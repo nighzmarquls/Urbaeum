@@ -25,7 +25,7 @@ public class UrbEventLogger : UrbDisplayWindow
     
     public override void OnEnable()
     {
-        Debug.Log("Enabling UrbEventLogger");
+        // Debug.Log("Enabling UrbEventLogger");
         base.OnEnable();
     }
 

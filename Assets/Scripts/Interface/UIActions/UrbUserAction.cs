@@ -44,7 +44,7 @@ public class UrbUserAction
     {
         InitializeMapDisplaySprite();
 
-        Debug.Log("Selected Action " + Name);
+        Debug.Log("Player-Selected Action " + Name);
         UrbUIManager.SetCurrentAction(this);
     }
 

@@ -117,8 +117,7 @@ public class UrbMerge : UrbBehaviour
                 return 0;
             }
             
-            Assert.IsFalse(float.IsNaN(base.BehaviourEvaluation));
-            Assert.IsFalse(float.IsInfinity(base.BehaviourEvaluation));
+            Assert.IsFalse(float.IsNaN(base.BehaviourEvaluation) || float.IsInfinity(base.BehaviourEvaluation));
             
             return base.BehaviourEvaluation;
         }
@@ -135,8 +134,7 @@ public class UrbMerge : UrbBehaviour
 
         logger.Log("Met conditions for merging on tile, attempting to merge", this);
 
-        Assert.IsNotNull(mAgent);
-        Assert.IsNotNull(mAgent.CurrentTile);
+        Assert.IsFalse(mAgent.CurrentTile == null);
         
         if (!UrbAgentSpawner.SpawnAgent(MergeProduct, mAgent.CurrentTile, out var Spawned))
         {

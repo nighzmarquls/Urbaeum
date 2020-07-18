@@ -42,7 +42,6 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
         string LocalName = mAgent.gameObject.name.Split('(')[0];
         string Mass = mAgent.Mass.ToString();
         string MassPerTile = mAgent.MassPerTile.ToString();
-        UrbSmellSource Smell = mAgent.SmellSource;
 
         string returnText =
             "Name: " + LocalName + ((mAgent.Alive) ? "\n" : " (Deceased) \n") +
@@ -60,10 +59,10 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             UrbThinker Thinker = mAgent.Mind;
             string Thoughts = "Thoughts- \n";
 
-            Thoughts += (Thinker.SafetyUrge > 0) ? "Safety Desire: " + Thinker.SafetyUrge + "\n" : "";
-            Thoughts += (Thinker.BreedUrge > 0) ? "Breed Desire: " + Thinker.BreedUrge + "\n" : "";
-            Thoughts += (Thinker.HungerUrge > 0) ? "Hunger Desire: " + Thinker.HungerUrge + "\n" : "";
-            Thoughts += (Thinker.RestUrge > 0) ? "Rest Desire: " + Thinker.RestUrge + "\n" : "";
+            Thoughts += (Thinker.SafetyUrge > 0) ? "\tSafety Desire: " + Thinker.SafetyUrge + "\n" : "";
+            Thoughts += (Thinker.BreedUrge > 0) ? "\tBreed Desire: " + Thinker.BreedUrge + "\n" : "";
+            Thoughts += (Thinker.HungerUrge > 0) ? "\tHunger Desire: " + Thinker.HungerUrge + "\n" : "";
+            Thoughts += (Thinker.RestUrge > 0) ? "\tRest Desire: " + Thinker.RestUrge + "\n" : "";
 
             returnText += Thoughts;
         }
@@ -72,28 +71,54 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
         {
             UrbBody Body = mAgent.mBody;
             string BodyAnatomy = "Body- \n";
-            if (Body.BodyComposition != null)
+            if (Body.HasComposition)
             {
                 UrbSubstance[] Ingredients = Body.BodyComposition.GetCompositionIngredients();
 
                 for (int b = 0; b < Ingredients.Length; b++)
                 {
-                    BodyAnatomy += Ingredients[b].Substance.ToString() + ":" + Ingredients[b].SubstanceAmount + "\n";
+                    BodyAnatomy += "\t" + Ingredients[b].Substance.ToString() + ":" + Ingredients[b].SubstanceAmount + "\n";
                 }
                 returnText += BodyAnatomy;
             }
         }
 
+        if (mAgent.IsSmelly)
+        {
+            UrbSmellSource smellSource = mAgent.SmellSource;
+
+            returnText += "EmittingSmells- \n";
+            returnText += $"\t SmellStrength: {smellSource.SmellStrength} \n";
+            returnText += $"\t Smells: [";
+
+            for (int i = 0; i < smellSource.SmellTag.Length; i++)
+            {
+                var scentTag = smellSource.SmellTag[i];
+                returnText += $"{scentTag.ToString()}";
+                if (i + 1 < smellSource.SmellTag.Length)
+                {
+                    returnText += ", ";
+                }
+                else
+                {
+                    returnText += " ]\n";
+                }
+            }
+            
+        }
+        
         if (mAgent.IsBreeder )
         {
             UrbBreeder Breeder = mAgent.Breeder;
+            returnText += "Breeder- ";
+            
             if (Breeder.Gestating)
             {
-                returnText += "Pregnant \n";
+                returnText += $"\tPregnant: {Breeder.Gestating} \n";
             }
-            else if (Breeder.CanBreed)
+            else
             {
-                returnText += "Capable of breeding \n";
+                returnText += $"\t CanBreed: {Breeder.CanBreed} \n";
             }
         }
         
@@ -103,7 +128,7 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             string FavoriteFood = "Diet- \n";
             for (int f = 0; f < Eater.FoodSubstances.Length; f++)
             {
-                FavoriteFood += Eater.FoodSubstances[f].ToString() + "\n";
+                FavoriteFood += "\t" + Eater.FoodSubstances[f].ToString() + "\n";
             }
             if (Eater.Stomach != null)
             {
@@ -114,7 +139,7 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
                 {
                     if (Ingredients[b].SubstanceAmount > 0)
                     {
-                        StomachContents += Ingredients[b].Substance.ToString() + ":" + Ingredients[b].SubstanceAmount + "\n";
+                        StomachContents += "\t" + Ingredients[b].Substance.ToString() + ":" + Ingredients[b].SubstanceAmount + "\n";
                     }
                 }
                 returnText += FavoriteFood + StomachContents;
@@ -132,7 +157,6 @@ public class UrbGetAgentDetails : UrbUserAction
     public override string MapDisplayAssetPath => "";
     public override void MouseClick(UrbTile currentCursorTile)
     {
-
         Ray mouseray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Vector3 Location = mouseray.origin;
 
