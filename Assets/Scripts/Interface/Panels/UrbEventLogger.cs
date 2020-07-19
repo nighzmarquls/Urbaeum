@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Text), typeof(Text))]
 public class UrbEventLogger : UrbDisplayWindow
 {
-    static readonly string TitleText;
-    static readonly string[] EventMessages = new string[10];
-    //Idea is to use this to create a "scrolling" log on each update cycle
-    static int idxOfNextMessage;
-    public bool AgentAssigned { get; protected set; } = false;
-    protected UrbAgent mAgent = null;
+    int lastMessageUpdateTime;
+    string messagePool;
+    
+    public static bool AgentAssigned { get; protected set; } = false;
+    protected static UrbAgent mAgent = null;
 
-    public UrbAgent TargetAgent
+    public static UrbAgent TargetAgent
     {
         get { return mAgent; } set { mAgent = value; AgentAssigned = value != null; }
     }
@@ -25,18 +25,32 @@ public class UrbEventLogger : UrbDisplayWindow
     
     public override void OnEnable()
     {
-        // Debug.Log("Enabling UrbEventLogger");
+        Assert.IsNotNull(HeaderText);
+        Assert.IsNotNull(BodyText);
         base.OnEnable();
     }
 
     public override void OnClose()
-    {
+    { 
     }
     
     // Update is called once per frame
     void Update()
     {
         HeaderText.text = "Frame number: " + Time.frameCount;
+
+        if (!AgentAssigned)
+        {
+            return;
+        }
+        
+        //TODO: Tune the logging to minimize actions.
+        var changeFrame = TargetAgent.LastEventLogUpdateFrame();
+        if (changeFrame > lastMessageUpdateTime)
+        {
+            lastMessageUpdateTime = changeFrame;
+            BodyText.text = TargetAgent.ReadEventLog();
+        }
     }
 
     public override void OnMinimize()

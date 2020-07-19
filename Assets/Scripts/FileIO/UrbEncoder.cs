@@ -163,7 +163,6 @@ public class UrbEncoder
         {
             if (Data.StringArrays[i].Name.CompareTo(Name) == 0)
             {
-
                 T[] Output = new T[Data.StringArrays[i].Value.Length];
 
                 for(int a = 0; a < Data.StringArrays[i].Value.Length; a++)

@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
+using Unity.Assertions;
 using Object = UnityEngine.Object;
 
 //This allows us to keep Debug logs inside of our Release builds
@@ -66,10 +68,13 @@ namespace UrbUtility
     //It didn't work the way I expected... Will revisit later.
     public class UrbLogger : Logger
     {
+        public int LastChangeFrame { get; protected set;  }
+        readonly StringBuilder logPool = new StringBuilder(1000, 2000);
         public UrbLogger(ILogHandler logHandler) : base(logHandler)
         {
         }
 
+        public bool isWatching { get; protected set; } = false;
         public volatile bool shouldBeLogging  = false;
         [Conditional("DEBUG")]
         public void ToggleDebug()
@@ -77,21 +82,72 @@ namespace UrbUtility
             shouldBeLogging = !shouldBeLogging;
         }
 
-        [Conditional("DEBUG")]
-        public void Log(string message, Object context)
+        public void StartWatching()
         {
+            Assert.IsFalse(isWatching);
+            isWatching = true;
+        }
+
+        public void StopWatching()
+        {
+            Assert.IsTrue(isWatching);
+            isWatching = false;
+        }
+
+        [Conditional("DEBUG")]
+        public void DebugLog(string message, Object context)
+        {
+#if DEBUG
             if (shouldBeLogging)
             {
                 logHandler.LogFormat(LogType.Log, context, message);
             }
+#endif
         }
+
+        public string GetEventLog()
+        {
+            return logPool.ToString();
+        }
+        
+        /// <summary>
+        /// Logs an event and appends newline character to end of string.
+        /// </summary>
+        /// <param name="message">The text to put to the log</param>
+        public void EventLogLine(string message)
+        {
+            if (!isWatching)
+            {
+                return;
+            }
+
+            Assert.IsTrue(message.Length > 0);
+            Assert.IsFalse(message.Length > logPool.MaxCapacity);
+
+            LastChangeFrame = Time.frameCount;
+
+            //Jank as hell - this will cause the whole EventLog to reset.
+            if ((message.Length + logPool.Length) > logPool.MaxCapacity)
+            {
+                DebugLog($"Message Length: {message.Length} + pool Length exceeds MaxCapacity. Logpool reset.", null);
+                logPool.Length = 0;
+            }
+
+            logPool.Append(message);
+        }
+        
+        //TODO: Watching and Logging should be fundamentally different actions
+        //Watching implies high-level lifecycle event that generally updates less than once per frame.
+        public void Log(string message, Object context)
+        {
+            DebugLog(message, context);
+            EventLogLine(message);
+        }
+
         [Conditional("DEBUG")]
         public void Log(string message)
         {
-            if (shouldBeLogging)
-            {
-                logHandler.LogFormat(LogType.Log, null, message);
-            }
+            DebugLog(message, null);
         }
         
         public void Error(string message, Object context)

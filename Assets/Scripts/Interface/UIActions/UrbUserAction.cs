@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 
 public class UrbUserAction
@@ -11,6 +12,7 @@ public class UrbUserAction
     public virtual string Description { get; set; } = "";
     public virtual string MapDisplayAssetPath { get; set; } = "Sprites/blank";
     public virtual Sprite MapDisplaySprite { get; set; } = null;
+    public bool MapDisplayInitialized { get; protected set; }
 
     protected GameObject MapDisplay = null;
 
@@ -22,21 +24,27 @@ public class UrbUserAction
             MapDisplay.name = "DisplayPivot";
             SpriteRenderer Renderer = MapDisplay.AddComponent<SpriteRenderer>();
             Renderer.sortingOrder = 10;
-            Sprite DisplaySprite = (MapDisplaySprite == null)? Resources.Load<Sprite>(MapDisplayAssetPath) : MapDisplaySprite;
+            Sprite DisplaySprite = (MapDisplaySprite == null) ? Resources.Load<Sprite>(MapDisplayAssetPath) : MapDisplaySprite;
             Renderer.sprite = DisplaySprite;
         }
 
         if (MapDisplay != null)
         {
+            Assert.IsFalse(MapDisplayInitialized);
+
             MapDisplay.SetActive(true);
+            MapDisplayInitialized = true;
         }
     }
 
     protected virtual void UninitializeMapDisplaySprites()
     {
-        if (MapDisplay != null)
+        if (MapDisplayInitialized)
         {
+            Assert.IsTrue(MapDisplayInitialized);
+
             MapDisplay.SetActive(false);
+            MapDisplayInitialized = false;
         }
     }
 
@@ -51,8 +59,6 @@ public class UrbUserAction
     public virtual void UnselectAction() {
         UninitializeMapDisplaySprites();
     }
-
-    public virtual void RecenterCameraAction() {} 
     
     public virtual void MouseClick(UrbTile currentCursorTile) { }
 
@@ -67,7 +73,7 @@ public class UrbUserAction
             return;
         }
 
-        if (MapDisplay != null)
+        if (MapDisplayInitialized)
         {
             MapDisplay.transform.position = input.Location;
             MapDisplay.transform.localScale = new Vector3(input.OwningMap.TileSize, input.OwningMap.TileSize, input.OwningMap.TileSize);

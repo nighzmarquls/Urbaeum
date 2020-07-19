@@ -22,9 +22,12 @@ public class UrbUIManager : MonoBehaviour
 
     public UrbAtlas Atlas;
 
+    Vector3 LastMousePosition = Vector3.zero;
+    static Camera mainCam;
+    static bool isDisabled = true;
     static bool MapActionInvalid
     {
-        get { return Instance == null || Instance.Atlas == null || Instance.CurrentAction == null || Instance.CurrentCursorTile == null; }//|| Instance.IsPaused; }
+        get { return (isDisabled) || Instance.CurrentAction == null || Instance.CurrentCursorTile == null; }//|| Instance.IsPaused; }
     }
 
     public float TimeMultiplier {
@@ -47,6 +50,9 @@ public class UrbUIManager : MonoBehaviour
 
         Instance.CurrentAction = Action;
     }
+
+    #region MouseEvents
+    public static bool MouseOver { get; protected set; } = false;
 
     public static void OnMapMouseClick()
     {
@@ -87,9 +93,7 @@ public class UrbUIManager : MonoBehaviour
         
         Instance.CurrentAction.MouseOver(Instance.CurrentCursorTile);
     }
-
-    public static bool MouseOver { get; protected set; } = false;
-
+    
     public static void OnMapMouseEnter()
     {
         MouseOver = true;
@@ -100,7 +104,6 @@ public class UrbUIManager : MonoBehaviour
         }
         Instance.CurrentAction.MouseEnter(Instance.CurrentCursorTile);
     }
-
     public static void OnMapMouseExit()
     {
         // Debug.Log("OnMapMouse Exit");
@@ -112,6 +115,9 @@ public class UrbUIManager : MonoBehaviour
         }
         Instance.CurrentAction.MouseExit(Instance.CurrentCursorTile);
     }
+#endregion
+
+#region LifetimeEvents
     
     public void OnEnable()
     {
@@ -121,27 +127,45 @@ public class UrbUIManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-
+            
             Atlas = GetComponent<UrbAtlas>();
 
+            Assert.IsNotNull(Atlas);
+            
             if (!string.IsNullOrEmpty(OverlayPrintString))
             {
                 OverlayPrint = new UrbTileprint(OverlayPrintString);
             }
+
+            isDisabled = false;
         }
         else
         {
-            if (Debug.isDebugBuild || Debug.developerConsoleVisible)
-            {
-                Debug.LogWarning("UrbUI Manager OnEnable self-destruct");
-            }
+            Debug.LogWarning("UrbUI Manager OnEnable self-destruct");
             Destroy(this);
         }
     }
 
-    private Vector3 LastMousePosition = Vector3.zero;
-    Camera mainCam;
-
+    public void Update()
+    {
+        if (MouseOver)
+        {
+            GetMouseTile();
+            OnMapMouseOver();
+        }
+    }
+    
+    public void OnDisable()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+            isDisabled = true;
+        }
+    }
+    
+#endregion
+    
     protected void GetMouseTile()
     {
         float Distance = (LastMousePosition - Input.mousePosition).magnitude;
@@ -157,15 +181,7 @@ public class UrbUIManager : MonoBehaviour
         Vector3 Location = mouseray.origin + (mouseray.direction * (Vector3.Distance(mouseray.origin, transform.position)));
         CurrentCursorTile = Atlas.GetTile(Location);
     }
-
-    public void OnDisable()
-    {
-        if (Instance == this)
-        {
-            Instance = null;
-        }
-    }
-
+    
     public bool IsPaused { get; protected set; } = false;
     public void SetPause(bool Pause)
     {
@@ -185,15 +201,6 @@ public class UrbUIManager : MonoBehaviour
         }
 
         UrbAgentManager.SetPauseOnAllAgents(Pause);
-    }
-
-    public void Update()
-    {
-        if (MouseOver)
-        {
-            GetMouseTile();
-            OnMapMouseOver();
-        }
     }
 }
 

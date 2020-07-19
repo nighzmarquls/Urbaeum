@@ -10,7 +10,9 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
 
     public bool AgentAssigned { get; protected set; } = false;
     protected UrbAgent mAgent = null;
-    public UrbAgent TargetAgent { get { return mAgent; } set { mAgent = value; AgentAssigned = value != null; } }
+    public UrbAgent TargetAgent { 
+        get { return mAgent; }
+        set { mAgent = value; AgentAssigned = value != null; } }
     
     public Text DisplayText;
     public override void OnEnable()
@@ -168,6 +170,7 @@ public class UrbGetAgentDetails : UrbUserAction
             {
                 UrbAgentDetailWindow Window = Object.Instantiate(UrbUIManager.Instance.AgentDisplayPrefab, UrbUIManager.Instance.WindowManager.transform);
                 Window.TargetAgent = SelectedAgent;
+                UrbEventLogger.TargetAgent = SelectedAgent;
             }
         }
 

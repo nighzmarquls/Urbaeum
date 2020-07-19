@@ -9,7 +9,7 @@ using UrbUtility;
 
 public class UrbBase : MonoBehaviour
 {
-    protected readonly UrbLogger logger = new UrbLogger(UnityEngine.Debug.unityLogger.logHandler);
+    protected UrbLogger logger;
 
     #region OptionalComponents
     //Optional Urb Components which may find themselves on a given UrbAgent 
@@ -98,13 +98,14 @@ public class UrbBase : MonoBehaviour
         HasMetabolism = Metabolism != null;
         
         LogMe = false;
-        logger.logEnabled = false;
-        
-        ValidateUrbComponents();
     }
     
     public virtual void OnEnable()
     {
+        ValidateUrbComponents();
+        //Logger is not guaranteed to exist until this point.
+        logger.logEnabled = false;
+
         Assert.IsTrue(HasAwakeBeenCalled);
         Assert.IsFalse(HasEnableBeenCalled);
         HasEnableBeenCalled = true;
@@ -149,6 +150,8 @@ public class UrbBase : MonoBehaviour
     [Conditional("UNITY_ASSERTIONS")]
     void ValidateUrbComponents()
     {
+        Assert.IsNotNull(logger);
+        
         //Keeping these checks only to the most commonly broken and / or problematic assertions
         //In order to reduce perf impact in debug mode.
         if (HasMetabolism)

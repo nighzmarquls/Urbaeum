@@ -26,10 +26,10 @@ public class UrbAgent : UrbBase
     [NonSerialized]
     public UrbMerge[] UrbMerges = null;
 
-    public bool IsMergeable { get; private set; } = false;
+    public bool IsMergeable { get; protected set; } = false;
 
     public UrbDisplay Display { get; private set; }
-    public bool HasDisplay { get; private set; }
+    public bool HasDisplay { get; protected set; }
 
     protected string AgentLocalName;
     public bool IsCurrentMapNull = true;
@@ -48,6 +48,15 @@ public class UrbAgent : UrbBase
         }
     }
 
+    public int LastEventLogUpdateFrame()
+    {
+        return logger.LastChangeFrame;
+    }
+    public string ReadEventLog()
+    {
+        return logger.GetEventLog();
+    }
+    
     protected UrbTile LastTile;
     public UrbTile[] OccupiedTiles { get; protected set; }
 
@@ -87,7 +96,7 @@ public class UrbAgent : UrbBase
             var usedCap = mBody.BodyComposition.UsedCapacity;
             Assert.IsFalse(float.IsInfinity(usedCap) || float.IsNaN(usedCap));
             
-            return mBody.BodyComposition.UsedCapacity;
+            return usedCap;
         } }
 
     public float MassPerTile {
@@ -272,7 +281,7 @@ public class UrbAgent : UrbBase
                 }
             }
 
-            Debug.unityLogger.Log("PickAction", "Could not find any actions to pick!", this);
+            Debug.Log("Could not find any actions to pick!", this);
             return null;
         }
     }
@@ -294,7 +303,6 @@ public class UrbAgent : UrbBase
         
         base.Awake();
     }
-#endregion
     
     public override void OnEnable()
     {
@@ -338,6 +346,7 @@ public class UrbAgent : UrbBase
         AgentLocalName = gameObject.name;
         OccupiedTiles = Tileprint.GetAllPrintTiles(this);
     }
+#endregion
     
     // Update is called once per frame
     public override void Update()
@@ -351,10 +360,11 @@ public class UrbAgent : UrbBase
 #region Unity End-Of-Life
     protected override void OnDestroy()
     {
-        if (CurrentTile != null && CurrentTile.Occupants != null)
-        {
-            CurrentTile.Occupants.Remove(this);
-        }
+        Assert.IsNotNull(CurrentTile);
+        Assert.IsNotNull(CurrentTile.Occupants);
+        
+        CurrentTile.Occupants.Remove(this);
+        
         //generally we don't actually care if 
         //the underlying objects are non-null
         //only if it's null and we don't know about it
