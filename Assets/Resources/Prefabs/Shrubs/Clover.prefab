@@ -108,6 +108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   BirthTime: 7.1027036
   IsCurrentMapNull: 1
   Shuffle: 1
@@ -126,12 +127,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Modifications:
   - DisplayDrivingSubstance: 13
     SubstanceSizeRatio: 1000
     ColorsEffected: 0
     ModificationType: 2
-    ColorApplied: {r: 0, g: 0, b: 0, a: 0}
+    ColorApplied: {r: 1, g: 0, b: 0.9359989, a: 0}
     SubstanceColorRatio: 0
   - DisplayDrivingSubstance: 3
     SubstanceSizeRatio: 500
@@ -164,6 +166,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 0.5
   BodyGrowthRecipe:
   - Substance: 3
@@ -174,6 +177,7 @@ MonoBehaviour:
     SubstanceAmount: 80
   BodyEnergyReserveStorage: 0
   GrowthRate: 10
+  MetabolismReady: 0
 --- !u!114 &-3102135804067309858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,6 +191,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   BodyRecipe:
   - Substance: 2
     SubstanceAmount: 10
@@ -194,7 +199,6 @@ MonoBehaviour:
   CriticalBodyPartAmounts:
   - Substance: 2
     SubstanceAmount: 10
-  Height: 0.25
 --- !u!114 &290428910922112158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -208,9 +212,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
-  SmellTag: 01000000
-  SmellStrength: 10
 --- !u!114 &-5790726441430418755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -224,14 +227,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
-  Interval: 1
+  ValidateMe: 0
+  Interval: 2.5
   MateRequirement: 0
   MateCrowding: 8
-  OffspringCount: 8
+  OffspringCount: 6
   OffspringRequiredSpace: 1000
-  Gestation: 2
-  DispersalDistance: 0
+  Gestation: 4
+  DispersalDistance: 1
   BreedType: 0
+  RequiredOffspringTerrain: 0
   MateScents: 
   RivalScents: 
   GestationRecipe:
@@ -254,11 +259,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
-  Interval: 1
-  MinimumMergeCount: 2
+  ValidateMe: 0
+  Interval: 10
+  MinimumMergeCount: 3
   MinimumMass: 480
-  MinimumTiles: 1
-  MaximumTiles: 4
+  MinimumTiles: 2
+  MaximumTiles: 3
   MergeProduct: {fileID: 4574942228798516744, guid: 09781a599fc8cad4295eb5df370e8be2,
     type: 3}
 --- !u!114 &5382275929819370278
@@ -274,6 +280,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 10
   MinimumMergeCount: 2
   MinimumMass: 3780
@@ -294,6 +301,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 10
   MinimumMergeCount: 2
   MinimumMass: 5250
@@ -314,6 +322,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 2
   PerceptionPrintString: 
   ContactPrintString: 
@@ -330,6 +339,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
 --- !u!1001 &7878978403681955433
 PrefabInstance:
   m_ObjectHideFlags: 0

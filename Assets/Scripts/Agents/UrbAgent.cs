@@ -8,14 +8,14 @@ using Unity.Profiling;
 using UnityEngine;
 using UrbUtility;
 
+[RequireComponent(typeof(UrbDisplay), typeof(SpriteRenderer))]
 public class UrbAgent : UrbBase
 {
     public static int TotalAgents;
-
+    
     public static long LASTID = 0;
     public long ID { get; protected set; } = 0;
 
-    public bool HasPathfinder { get; protected set; } = false;
     const float LocationThreshold = 0.01f;
 
     UrbBodyDisplay BodyDisplay;
@@ -31,7 +31,7 @@ public class UrbAgent : UrbBase
     public UrbDisplay Display { get; private set; }
     public bool HasDisplay { get; protected set; }
 
-    protected string AgentLocalName;
+    public string AgentLocalName { get; protected set; }
     public bool IsCurrentMapNull = true;
     UrbMap _currentMap;
     public UrbMap CurrentMap
@@ -42,9 +42,12 @@ public class UrbAgent : UrbBase
         }
         set
         {
-            _currentMap = value;
-            // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
-            IsCurrentMapNull = _currentMap == null;
+            if (value != _currentMap)
+            {
+                _currentMap = value;
+                // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
+                IsCurrentMapNull = _currentMap == null;
+            }
         }
     }
 
@@ -92,11 +95,9 @@ public class UrbAgent : UrbBase
             {
                 return 0;
             }
-
-            var usedCap = mBody.BodyComposition.UsedCapacity;
-            Assert.IsFalse(float.IsInfinity(usedCap) || float.IsNaN(usedCap));
             
-            return usedCap;
+            //This is Asserted on in the setter of the UsedCapacity.
+            return mBody.BodyComposition.UsedCapacity;
         } }
 
     public float MassPerTile {
@@ -123,48 +124,20 @@ public class UrbAgent : UrbBase
     protected UrbTileprint tileprint;
     public UrbTileprint Tileprint {
         get {
-            Assert.IsNotNull(tileprint);
             return tileprint;
         }
     }
-
-    public Sprite CurrentSprite {
-        get {
-            if(mSpriteRenderer != null)
-            {
-                return mSpriteRenderer.sprite;
-            }
-          
-            mSpriteRenderer = GetComponent<SpriteRenderer>();
-            if (mSpriteRenderer == null)
-            {
-                return null;
-            }
-
-            return mSpriteRenderer.sprite;
-        }
-        set {
-            if (mSpriteRenderer != null)
-            {
-                mSpriteRenderer.sprite = value;
-            }
-            else
-            {
-                mSpriteRenderer = GetComponent<SpriteRenderer>();
-                if (mSpriteRenderer != null)
-                {
-                    mSpriteRenderer.sprite = value;
-                }
-            }
-        }
-    }
-
+    
     //TemplatesMatch tells us if these are the same type of entity or not. 
     public bool TemplatesMatch(UrbAgent input)
     {
-        if(Removing || WasDestroyed || input.WasDestroyed)
+        //Don't trigger this codepath on agents that have been destroyed.
+        Assert.IsFalse(WasDestroyed);
+        Assert.IsFalse(input.WasDestroyed);
+        
+        if (Removing) 
         {
-            logger.Log("Cannot merge component because Agent was removing/Destroyed or input was destroyed", this);
+            Debug.Log("Cannot merge component because Agent was removing/Destroyed or input was destroyed", this);
             return false;
         }
 
@@ -174,10 +147,10 @@ public class UrbAgent : UrbBase
         }
         
         var templatesMatch = string.Compare(AgentLocalName, input.AgentLocalName, true) == 0;
-        
-        if (!templatesMatch)
+
+        if (!templatesMatch && LogMe)
         {
-            logger.Log("Local Name: " + AgentLocalName + " doesn't match input name: " + input.AgentLocalName, this);
+            Debug.Log($"Local Name: {AgentLocalName} != input name: {input.AgentLocalName}", this);
         }
 
         return templatesMatch;
@@ -260,13 +233,13 @@ public class UrbAgent : UrbBase
 
             if (!IsMindNull)
             {
-                logger.Log("Trying to pick an action");
+                logger.Log($"Use Mind to pick action {Test}");
                 return Mind.PickAction(Test, Result, Exclude);
             }
 
             if (AvailableActions == null)
             {
-                logger.Log("No actions available!", this);
+                logger.Log($"No actions are available", this);
                 return null;
             }
 
@@ -276,12 +249,11 @@ public class UrbAgent : UrbBase
                              (Exclude == UrbTestCategory.None || (Exclude & AvailableActions[i].Category) == 0);
                 if (Valid)
                 {
-
                     return AvailableActions[i];
                 }
             }
 
-            Debug.Log("Could not find any actions to pick!", this);
+            Debug.Log($"No actions of type {Test} Found", this);
             return null;
         }
     }
@@ -290,8 +262,12 @@ public class UrbAgent : UrbBase
 #region Unity Lifetime Create methods
     public override void Awake()
     {
+        logger = new UrbLogger(Debug.unityLogger.logHandler);
+        
         Display = GetComponentInChildren<UrbDisplay>();
         Assert.IsNotNull(Display, "UrbAgents require a Display to be attached");
+        HasDisplay = true;
+        Display.logger = logger;
         
         _camera = Camera.main;
         Assert.IsNotNull(_camera);
@@ -307,6 +283,7 @@ public class UrbAgent : UrbBase
     public override void OnEnable()
     {
         Assert.IsTrue(HasAwakeBeenCalled);
+        Assert.IsNotNull(tileprint);
         
         if(ID == 0)
         {
@@ -317,11 +294,6 @@ public class UrbAgent : UrbBase
         BirthTime = Time.time;
         
         this.transform.rotation = _camera.transform.rotation;
-
-        if (tileprint == null)
-        {
-            
-        }
         
         LastCheckedMass = 0;
 
@@ -336,14 +308,8 @@ public class UrbAgent : UrbBase
         IsPaused = ShouldPause;
         
         base.OnEnable();
-
-        if (gameObject.name.Contains("("))
-        {
-            AgentLocalName = gameObject.name.Split('(')[0];
-            return;
-        }
-
-        AgentLocalName = gameObject.name;
+        
+        AgentLocalName = gameObject.name.Split('(')[0];
         OccupiedTiles = Tileprint.GetAllPrintTiles(this);
     }
 #endregion
@@ -358,7 +324,7 @@ public class UrbAgent : UrbBase
     }
 
 #region Unity End-Of-Life
-    protected override void OnDestroy()
+    protected override void OnDisable()
     {
         Assert.IsNotNull(CurrentTile);
         Assert.IsNotNull(CurrentTile.Occupants);
@@ -372,7 +338,7 @@ public class UrbAgent : UrbBase
         CurrentTile = null;
         CurrentMap = null;
         UrbAgentManager.UnregisterAgent(this);
-        base.OnDestroy();
+        base.OnDisable();
     }
 #endregion
 
@@ -428,9 +394,8 @@ public class UrbAgent : UrbBase
             }
         }
         Alive = false;
-        Remove();
     }
-
+    
     static ProfilerMarker s_TickToMind_p = new ProfilerMarker("UrbAgent.TickToMind");
     static ProfilerMarker s_TickToBody_p = new ProfilerMarker("UrbAgent.TickToBody");
     static ProfilerMarker s_TickToDisplay_p = new ProfilerMarker("UrbAgent.TickDisplay");
@@ -485,48 +450,54 @@ public class UrbAgent : UrbBase
                 }
             }
 
-            if (BodyDisplay != null)
-            {
-                BodyDisplay.UpdateDisplay(mBody.BodyComposition);
-            }
+            // if (BodyDisplay != null)
+            // {
+            //     BodyDisplay.UpdateDisplay(mBody.BodyComposition);
+            // }
         }
         
         s_TickToBody_p.End();
 
-        s_TickToDisplay_p.Begin();
         if (HasDisplay && !Display.Invisible)
         {
-            var massChange = Math.Abs(LastCheckedMass - Mass);
-            if (massChange > MassChangeToReorder)
-            {
-                LastCheckedMass = Mass;
-                if (CurrentTile != null) {
-                    CurrentTile.UpdateClearance();
-                    if (Shuffle)
-                    {
-                        CurrentTile?.VisualShuffle();
-                    }
+            CalculateDisplayInfo();
+        }
+    }
+
+    protected void CalculateDisplayInfo()
+    {
+        s_TickToDisplay_p.Begin();
+
+        var massChange = Math.Abs(LastCheckedMass - Mass);
+        if (massChange > MassChangeToReorder)
+        {
+            LastCheckedMass = Mass;
+            if (CurrentTile != null) {
+                CurrentTile.UpdateClearance();
+                if (Shuffle)
+                {
+                    CurrentTile?.VisualShuffle();
                 }
             }
-
-            if (!(Time.time > NextReposition) || !(Display.Significance > UrbDisplay.FeatureSignificance))
-            {
-                s_TickToDisplay_p.End();
-                return;
-            }
-            var position = transform.position;
-
-            if (TargetLocation == position)
-            {
-                s_TickToDisplay_p.End();
-                return;
-            }
-            NextReposition = Time.time + RepositionInterval;
-            Vector3 Direction = (TargetLocation - position);
-
-            position = (Direction.magnitude > LocationThreshold) ? position + (Direction.normalized * Time.deltaTime) : TargetLocation;
-            transform.position = position;
         }
+
+        if (!(Time.time > NextReposition) || !(Display.Significance > UrbDisplay.FeatureSignificance))
+        {
+            s_TickToDisplay_p.End();
+            return;
+        }
+        var position = transform.position;
+
+        if (TargetLocation == position)
+        {
+            s_TickToDisplay_p.End();
+            return;
+        }
+        NextReposition = Time.time + RepositionInterval;
+        Vector3 Direction = (TargetLocation - position);
+
+        position = (Direction.magnitude > LocationThreshold) ? position + (Direction.normalized * Time.deltaTime) : TargetLocation;
+        transform.position = position;
 
         s_TickToDisplay_p.End();
     }
@@ -556,8 +527,23 @@ public class UrbAgent : UrbBase
         TileprintString = UrbEncoder.GetString("TileprintString", Data);
         return true;
     }
+
+    public UrbLogger GetLogger()
+    {
+        Assert.IsNotNull(logger);
+        return logger;
+    }
     
     #region Deprecated Properties/Methods
+    
+    // public Sprite CurrentSprite
+    // {
+    //     get
+    //     {
+    //         Assert.IsNotNull(mSpriteRenderer);
+    //         return mSpriteRenderer.sprite;
+    //     }
+    // }
     
     // public bool Pause {
     //     get { return IsPaused; }

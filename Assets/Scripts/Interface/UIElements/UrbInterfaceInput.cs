@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine;
@@ -52,7 +53,10 @@ public class UrbInterfaceInput : MonoBehaviour
 
     public void ButtonActivation()
     {
-        UserAction?.SelectAction();
+        if (UserAction != null)
+        {
+            UserAction.SelectAction();
+        }
     }
 
     public void ShortcutActivation()

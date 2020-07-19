@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 
 [System.Serializable]
@@ -72,7 +73,6 @@ public class DisplayModification
         {
             ApplyColorModification(Display, SubstanceAmount);
         }
-
     }
 
     protected void ApplyColorModification(UrbDisplay Display, float SubstanceAmount)
@@ -133,6 +133,11 @@ public class UrbBodyDisplay : UrbBase
         }
         set
         {
+            if (value == _disp)
+            {
+                return;
+            }
+            
             _disp = value;
             IsDisplayNull = _disp == null;
         }
@@ -147,20 +152,41 @@ public class UrbBodyDisplay : UrbBase
         View = Camera.main;
         IsViewNotNull = View != null;
         mAgent = GetComponent<UrbAgent>();
+        mBody = GetComponent<UrbBody>();
         base.OnEnable();
+        
+        Assert.IsTrue(HasAgent);
+        Assert.IsTrue(HasBody);
     }
-
-    public void UpdateDisplay(UrbComposition input)
+    
+    public void Start()
     {
-        if (input == null)
+        //plopping the display update here should mean it will be called before update gets called...
+        //but after awake/onenable for the body etc, has been called 
+        displayUpdate();
+    }
+    
+    public override void Update()
+    {
+        if (IsPaused)
         {
             return;
         }
 
-        if (IsDisplayNull && mAgent.WasDestroyed == false)
+        displayUpdate();
+        
+        base.Update();
+    }
+
+    protected void displayUpdate()
+    {
+        if (IsDisplayNull)
         {
             Display = mAgent.Display;
-            return;
+            if (IsDisplayNull)
+            {
+                return;
+            }
         }
 
         if (Display.Invisible)
@@ -174,13 +200,14 @@ public class UrbBodyDisplay : UrbBase
             Display.Significance = Significance;
         }
 
+        Assert.IsNotNull(mBody.BodyComposition);
+
         for (int s = 0; s < Modifications.Length; s++)
         {
-            Modifications[s].ApplyModification(Display, input);
+            Modifications[s].ApplyModification(Display, mBody.BodyComposition);
         }
-
     }
-
+    
     public override UrbComponentData GetComponentData()
     {
         UrbComponentData Data = base.GetComponentData();

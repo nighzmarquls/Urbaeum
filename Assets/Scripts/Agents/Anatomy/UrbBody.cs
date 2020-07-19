@@ -6,7 +6,26 @@ using UnityEngine;
 [RequireComponent(typeof(UrbAgent))]
 public class UrbBody : UrbBase
 {
-    public UrbComposition BodyComposition { get; protected set; }
+
+    UrbComposition _bodyComposition;
+    public UrbComposition BodyComposition {
+        get
+        {
+            if (_bodyComposition == null)
+            {
+                _bodyComposition = new UrbComposition(BodyRecipe);
+                _bodyComposition.Membrane.Layers = SkinRecipe;
+                HasComposition = true;
+            }
+
+            return _bodyComposition;
+        }
+        private set
+        {
+            HasComposition = value != null;
+            _bodyComposition = value;
+        }
+    }
     public bool HasComposition { get; protected set; }
     public UrbSubstance[] BodyRecipe;
     public UrbSubstanceTag[] SkinRecipe;
@@ -26,10 +45,10 @@ public class UrbBody : UrbBase
 
     public override void Awake()
     {
-        if (BodyComposition == null)
+        if (_bodyComposition == null)
         {
-            BodyComposition = new UrbComposition(BodyRecipe);
-            BodyComposition.Membrane.Layers = SkinRecipe;
+            _bodyComposition = new UrbComposition(BodyRecipe);
+            _bodyComposition.Membrane.Layers = SkinRecipe;
             HasComposition = true;
         }
         
@@ -50,7 +69,7 @@ public class UrbBody : UrbBase
 
     public bool BodyCritical()
     {
-        if(BodyComposition == null)
+        if(!HasComposition)
         {
             return false;
         }

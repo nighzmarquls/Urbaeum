@@ -61,9 +61,18 @@ public class UrbBehaviour : UrbBase
         }
     }
 
-    public override void OnDisable()
+    protected override void OnDisable()
     {
-        StopCoroutine(mCoroutine);
+        if (mCoroutine != null)
+        {
+            StopCoroutine(mCoroutine);
+        }
+        
+        if(DeathBehaviour)
+        {
+            mAgent.RemoveDeathBehaviour(this);
+        }
+
         base.OnDisable();
     }
 
@@ -205,7 +214,7 @@ public class UrbBehaviour : UrbBase
 
     protected virtual bool ValidToInterval()
     {
-        return !mAgent.WasDestroyed && mAgent.isActiveAndEnabled && mAgent.CurrentMap != null && (LivingBehaviour)? mAgent.Alive : true;
+        return mAgent.WasDestroyed || !mAgent.isActiveAndEnabled || mAgent.CurrentMap == null || (!LivingBehaviour) || mAgent.Alive;
     }
 
     protected UrbUtility.UrbThrottle BehaviourThrottle = new UrbUtility.UrbThrottle();

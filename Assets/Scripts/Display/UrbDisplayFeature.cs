@@ -82,6 +82,7 @@ public class UrbDisplayFeature : MonoBehaviour
         }
     }
 
+    protected bool _invisible = true;
     public bool Invisible {
         get {
             bool IsInvisible = true;

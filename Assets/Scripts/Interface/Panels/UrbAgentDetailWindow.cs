@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using Unity.Assertions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +13,13 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
     protected UrbAgent mAgent = null;
     public UrbAgent TargetAgent { 
         get { return mAgent; }
-        set { mAgent = value; AgentAssigned = value != null; } }
+        set {
+            if (mAgent != value)
+            {
+                mAgent = value;
+                AgentAssigned = value != null;
+            }
+        } }
     
     public Text DisplayText;
     public override void OnEnable()
@@ -24,24 +31,26 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             TrackAgentInput.UserAction = new UrbTrackAgent { OwningWindow = this };
         }
     }
-    
+
     public void Update()
     {
-        if(AgentAssigned)
+        if (AgentAssigned)
         {
             DisplayText.text = TextSummary();
         }
     }
 
+    //String Concatenation is slow. TODO: use stringbuilder.
+    StringBuilder sb = new StringBuilder(1000);
     string TextSummary()
     {
-        if (mAgent.WasDestroyed)
+        if (mAgent.WasDestroyed || !AgentAssigned)
         {
             TargetAgent = null;
             return "Lost";
         }
 
-        string LocalName = mAgent.gameObject.name.Split('(')[0];
+        string LocalName = mAgent.AgentLocalName;
         string Mass = mAgent.Mass.ToString();
         string MassPerTile = mAgent.MassPerTile.ToString();
 

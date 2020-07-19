@@ -14,27 +14,34 @@ public class UrbUserAction
     public virtual Sprite MapDisplaySprite { get; set; } = null;
     public bool MapDisplayInitialized { get; protected set; }
 
-    protected GameObject MapDisplay = null;
-
+    protected GameObject MapDisplay = new GameObject();
+    
     protected virtual void InitializeMapDisplaySprite()
     {
-        if (MapDisplay == null && (!string.IsNullOrEmpty(MapDisplayAssetPath) || MapDisplaySprite != null))
+        if (!string.IsNullOrEmpty(MapDisplayAssetPath) || MapDisplaySprite != null)
         {
             MapDisplay = new GameObject();
-            MapDisplay.name = "DisplayPivot";
-            SpriteRenderer Renderer = MapDisplay.AddComponent<SpriteRenderer>();
+            var Renderer = MapDisplay.AddComponent<SpriteRenderer>();
+            if (Renderer == null)
+            {
+                return;
+            }
+            
             Renderer.sortingOrder = 10;
             Sprite DisplaySprite = (MapDisplaySprite == null) ? Resources.Load<Sprite>(MapDisplayAssetPath) : MapDisplaySprite;
             Renderer.sprite = DisplaySprite;
         }
 
-        if (MapDisplay != null)
+        if (MapDisplayInitialized)
         {
-            Assert.IsFalse(MapDisplayInitialized);
-
-            MapDisplay.SetActive(true);
-            MapDisplayInitialized = true;
+            return;
         }
+        
+        Assert.IsNotNull(MapDisplay);
+        Assert.IsFalse(MapDisplayInitialized);
+        MapDisplay.name = "DisplayPivot";
+        MapDisplay.SetActive(true);
+        MapDisplayInitialized = true;
     }
 
     protected virtual void UninitializeMapDisplaySprites()

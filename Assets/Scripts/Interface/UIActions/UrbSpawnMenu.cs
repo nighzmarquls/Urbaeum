@@ -11,7 +11,6 @@ public class UrbSpawnMenu : UrbUserAction
 
     protected void InitializeCreatable()
     {
-
         List<UrbSpawnAction> WorkingList = new List<UrbSpawnAction>();
         for(int i = 0; i < UrbSystemIO.Instance.AgentTypes.Count; i++)
         {
@@ -22,11 +21,13 @@ public class UrbSpawnMenu : UrbUserAction
                 continue;
             }
 
+            var template = UrbSystemIO.Instance.AgentTypes[i];
+            var sprite = template.GetComponent<SpriteRenderer>().sprite;
             UrbSpawnAction CreateAction = new UrbSpawnAction {
-                AgentTemplate = UrbSystemIO.Instance.AgentTypes[i],
-                Icon = UrbSystemIO.Instance.AgentTypes[i].CurrentSprite,
-                Name = UrbSystemIO.Instance.AgentTypes[i].gameObject.name,
-                MapDisplaySprite = UrbSystemIO.Instance.AgentTypes[i].CurrentSprite
+                AgentTemplate = template,
+                Icon = sprite,
+                Name = template.gameObject.name,
+                MapDisplaySprite = sprite
             };
             WorkingList.Add(CreateAction);
         }

@@ -9,9 +9,9 @@ using UrbUtility;
 
 public class UrbBase : MonoBehaviour
 {
-    protected UrbLogger logger;
+    public UrbLogger logger { get; set; }
 
-    #region OptionalComponents
+#region OptionalComponents
     //Optional Urb Components which may find themselves on a given UrbAgent 
     [DontSerialize] public UrbEater Eater { get; protected set; }
 
@@ -102,6 +102,12 @@ public class UrbBase : MonoBehaviour
     
     public virtual void OnEnable()
     {
+        if (HasAgent)
+        {
+            logger = mAgent.GetLogger();
+            Assert.IsNotNull(logger);
+        }
+        
         ValidateUrbComponents();
         //Logger is not guaranteed to exist until this point.
         logger.logEnabled = false;
@@ -116,11 +122,6 @@ public class UrbBase : MonoBehaviour
 
     public virtual void Update()
     {
-        if (LogMe != logger.shouldBeLogging)
-        {
-            logger.ToggleDebug();
-        }
-
         if (ValidateMe)
         {
             ValidateUrbComponents();
@@ -128,14 +129,11 @@ public class UrbBase : MonoBehaviour
     }
     
 #region End-Of-Lifetime methods
-    public virtual void OnDisable()
+    protected virtual void OnDisable()
     {
         HasEnableBeenCalled = false;
         //TODO: Object-pool-y value resets.
-    }
-
-    protected virtual void OnDestroy()
-    {
+        
         enabled = false;
         WasDestroyed = true;
         

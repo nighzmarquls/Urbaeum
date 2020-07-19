@@ -20,6 +20,12 @@ public class UrbMovement : UrbBehaviour
         mAgent.AddAction(MoveAction);
     }
 
+    protected override void OnDisable()
+    {
+        mAgent.RemoveAction(MoveAction);
+        base.OnDisable();
+    }
+    
     static ProfilerMarker s_Moving_p = new ProfilerMarker("UrbMovement.Moving");
 
     public IEnumerator Moving(UrbTile Goal)

@@ -25,13 +25,15 @@ public class UrbSmellSource : UrbBehaviour
 
     public override IEnumerator FunctionalCoroutine()
     {
-        Assert.IsFalse(IsPaused);
         Assert.IsTrue(HasBody && mBody.HasComposition);
 
-        //SmellSources are derived from aspects of the Body 
-        _smellTag = mBody.BodyComposition.GetScent();
-        SmellStrength = mAgent.MassPerTile;
-
+        if (!IsPaused)
+        {
+            //SmellSources are derived from aspects of the Body 
+            _smellTag = mBody.BodyComposition.GetScent();
+            SmellStrength = mAgent.MassPerTile;
+        }
+        
         // if (LastSmellTile != mAgent.CurrentTile)
         // {
         //     TileCache = mAgent.Tileprint.GetBorderingTiles(mAgent, true);

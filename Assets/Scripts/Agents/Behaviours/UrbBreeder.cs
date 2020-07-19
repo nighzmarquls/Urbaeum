@@ -41,12 +41,19 @@ public class UrbBreeder : UrbBehaviour
 
     public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Breed;
 
-    public bool CanBreed { get {
-            if (mAgent == null || !mAgent.HasBody || mAgent.mBody.BodyComposition == null)
-                return false;
-
-            return mAgent.mBody.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe);
-        } }
+    public bool CanBreed
+    {
+        get
+        {
+            if (HasAgent && HasBody && mBody.HasComposition)
+            {
+                //TODO: (IMO) Breeding should mean the Agent is well-off, compositionally-speaking
+                //So we should consider choosing a ratio of Composition excess.
+                return mAgent.mBody.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe);
+            }
+            return false;
+        }
+    }
 
     public override void OnEnable()
     {
@@ -59,7 +66,6 @@ public class UrbBreeder : UrbBehaviour
         }
         
         base.OnEnable();
-
     }
 
     protected void SetOffspringData(UrbAgent Offspring)
@@ -163,65 +169,77 @@ public class UrbBreeder : UrbBehaviour
 
     public override void ExecuteTileBehaviour()
     {
-        using (executeTileBehaviour.Auto())
+        executeTileBehaviour.Begin();
+
+        if (IsPaused || !mAgent.Alive)
         {
-            if (MateRequirement == 0)
+            executeTileBehaviour.End();
+            return;
+        }
+
+        if (MateRequirement == 0 && CanBreed)
+        {
+            Gestating = true;
+            executeTileBehaviour.End();
+            base.ExecuteTileBehaviour();
+            return;
+        }
+
+        int MateCount = 0;
+
+        for (int i = 0; i < RegisteredTiles.Length; i++)
+        {
+            if (RegisteredTiles[i] == null)
+                continue;
+
+            if (RegisteredTiles[i].Occupants == null)
+                continue;
+
+            for (int o = 0; o < RegisteredTiles[i].Occupants.Count; o++)
             {
-                Gestating = true;
-                base.ExecuteTileBehaviour();
-                return;
-            }
+                UrbAgent occupant = RegisteredTiles[i].Occupants[o];
 
-            int MateCount = 0;
-
-            for (int i = 0; i < RegisteredTiles.Length; i++)
-            {
-                if (RegisteredTiles[i] == null)
-                    continue;
-                
-                if (RegisteredTiles[i].Occupants == null)
-                    continue;
-
-                for (int o = 0; o < RegisteredTiles[i].Occupants.Count; o++)
+                if (occupant.WasDestroyed)
                 {
-                    if(RegisteredTiles[i].Occupants[o].WasDestroyed)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    UrbBreeder PossibleMate = RegisteredTiles[i].Occupants[o].GetComponent<UrbBreeder>();
-                    if (PossibleMate.WasDestroyed || PossibleMate == this)
-                    {
-                        continue;
-                    }
+                if (!occupant.IsBreeder || occupant.WasDestroyed || occupant == mAgent)
+                {
+                    continue;
+                }
 
-                    if (PossibleMate.BreedType == this.BreedType)
-                    {
+                UrbBreeder PossibleMate = occupant.Breeder;
+                if (PossibleMate.BreedType != BreedType)
+                {
+                    continue;
+                }
 
-                        float Result = LoveAction.Execute(mAgent, PossibleMate.mAgent, 0);
-                        if (Result > 0)
-                        {
-                            mAgent.Express(UrbDisplayFace.Expression.Joy);
-                            Result = LoveAction.Execute(PossibleMate.mAgent, mAgent, 0);
+                float Result = LoveAction.Execute(mAgent, PossibleMate.mAgent, 0);
+                if (Result <= 0)
+                {
+                    continue;
+                }
 
-                            if (Result > 0)
-                            {
-                                PossibleMate.mAgent.Express(UrbDisplayFace.Expression.Joy);
-                                MateCount++;
-                            }
-                        }
+                mAgent.Express(UrbDisplayFace.Expression.Joy);
+                Result = LoveAction.Execute(PossibleMate.mAgent, mAgent, 0);
 
-                    }
+                if (Result <= 0)
+                {
+                    continue;
+                }
+
+                PossibleMate.mAgent.Express(UrbDisplayFace.Expression.Joy);
+                if (++MateCount >= MateRequirement)
+                {
+                    Gestating = true;
+                    break;
                 }
             }
-
-            if (MateCount >= MateRequirement)
-            {
-                Gestating = true;
-            }
-
-            base.ExecuteTileBehaviour();
         }
+        
+        executeTileBehaviour.End();
+        base.ExecuteTileBehaviour();
     }
 
     // Cached Values for Functional Coroutine;
@@ -297,26 +315,19 @@ public class UrbBreeder : UrbBehaviour
                 Delay = Random.Range((int)0, (int)2);
                 NumberOffspring++;
                 mAgent.mBody.BodyComposition.RemoveRecipe(GestationRecipe);
-                if(mAgent.Metabolism != null)
+                if(mAgent.Metabolism != null && OffspringAgent != null)
                 {
-                    if (OffspringAgent != null)
-                    {
-                        mAgent.Metabolism.SpendEnergy(OffspringAgent.Mass);
-                    }
+                    mAgent.Metabolism.SpendEnergy(OffspringAgent.Mass);
                 }
 
                 SetOffspringTemplate(Random.Range(0, OffspringObjects.Length));
-
             }
 
-            if (OffspringCount <= NumberOffspring || mAgent.mBody.BodyComposition.ContainsLessThan(GestationRecipe))
+            yield return new WaitForSeconds(Interval);
+            
+            if (NumberOffspring >= OffspringCount || mAgent.mBody.BodyComposition.ContainsLessThan(GestationRecipe))
             {
-                Gestating = false;
-                yield break;
-            }
-            else
-            {
-                yield return new WaitForSeconds(Interval);
+                break;
             }
         }
         Gestating = false;

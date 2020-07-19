@@ -11,8 +11,36 @@ public class UrbComposition
     
     public UrbMembrane Membrane { get; protected set; }
 
-    public float MaxCapacity { get; protected set; } = 1000;
-    public float UsedCapacity { get; protected set; } = 0;
+    float _maxCapacity = 1000;
+
+    public float MaxCapacity
+    {
+        get { return _maxCapacity; }
+        protected set
+        {
+            //MaxCapacity cannot be zero. So we force it to 1 
+            //in case it does..
+            if (value <= 0)
+            {
+                value = 1;
+            }
+            _maxCapacity = value;
+        }
+    }
+
+    float _usedCapacity = 0;
+    public float UsedCapacity
+    {
+        get
+        {
+            return _usedCapacity;
+        }
+        protected set
+        {
+            Assert.IsFalse(float.IsNaN(value) || float.IsInfinity(value));
+            _usedCapacity = value;
+        }
+    }
     public float Mass => UsedCapacity;
 
     public void SetSize(float Size)
@@ -21,7 +49,7 @@ public class UrbComposition
         {
             var toAssert = float.IsNaN(Size) || float.IsInfinity(Size);
             Assert.IsFalse(toAssert, "Size must be valid float");
-            Assert.IsFalse(Size <= 0, "Size cannot be <= 0.");
+            Assert.IsTrue(Size > 0, "Size must be > 0.");
             MaxCapacity = 1000 * Size;
         }
     }

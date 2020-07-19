@@ -36,8 +36,7 @@ public class UrbThinker : UrbBase
             perceptionExists = _mPerception != null;
         }
     }
-
-    protected UrbBreeder mBreeder;
+    
     public float BreedUrge { get; protected set; }
 
     public float HungerUrge { get; protected set; }
@@ -61,19 +60,16 @@ public class UrbThinker : UrbBase
         mMovement = GetComponent<UrbMovement>();
         mPerception = GetComponent<UrbPerception>();
 
-        mBreeder = GetComponent<UrbBreeder>();
         BreedUrge = 0;
         HungerUrge = 0;
         RestUrge = 0;
         SafetyUrge = 0;
         
-        IsmBreederNotNull = mBreeder != null;
         
         base.OnEnable();
         s_Initialize_p.End();
     }
     static ProfilerMarker s_ChooseBehaviour_p = new ProfilerMarker("UrbThinker.ChooseBehaviour");
-    bool IsmBreederNotNull;
 
     float LastTimeSuccessful = 0;
     public void ChooseBehaviour()
@@ -125,93 +121,156 @@ public class UrbThinker : UrbBase
     
     static ProfilerMarker s_CheckUrges_p = new ProfilerMarker("UrbThinker.CheckUrges");
 
-    public void CheckUrges()
+    public void ClampUrges()
     {
-        using (s_CheckUrges_p.Auto())
+        var toAssert = float.IsNaN(BreedUrge) || float.IsInfinity(BreedUrge);
+        Assert.IsFalse(toAssert, "BreedUrge Must Be Valid float");
+        
+        if (BreedUrge > 1f)
         {
-            if (!HasBody || !mBody.HasComposition)
-            {
-                return;
-            }
+            BreedUrge = 1.0f;
+        }
+        else if (BreedUrge < 0f)
+        {
+            BreedUrge = 0f;
+        }
 
-            bool CanBreed = false;
-            bool CanEat = false;
-            if (IsmBreederNotNull)
-            {
-                if (mBreeder.CanBreed)
-                {
-                    if (!mBreeder.Gestating)
-                    {
-                        BreedUrge = 1.0f;
-                        SafetyUrge = 0.25f;
-                        CanBreed = true;
-                    }
-                    else
-                    {
-                        SafetyUrge = 1.0f;
-                        BreedUrge = 0.0f;
-                    }
-                }
-                else
-                {
-                    SafetyUrge = 0.5f;
-                    BreedUrge -= 0.1f;
-                }
-            }
+        toAssert = float.IsNaN(SafetyUrge) || float.IsInfinity(SafetyUrge);
+        Assert.IsFalse(toAssert, "SafetyUrge Must Be Valid float");
 
-            if (IsEater)
-            {
-                float UrgeChange = 0.5f - Eater.Stomach.Fullness;
-                HungerUrge = UrgeChange;
-                CanEat = UrgeChange > 0.0f;
-                RestUrge = Eater.Stomach.Fullness;
-            }
+        if (SafetyUrge > 1f)
+        {
+            SafetyUrge = 1f;
+        } else if (SafetyUrge < 0f)
+        {
+            SafetyUrge = 0f;
+        }
 
-           
-            if (!HasMetabolism)
-            {
-                return;
-            }
-            if (Metabolism.Starving)
-            {
-                if (CanBreed)
-                {
-                    BreedUrge -= 1.0f;
-                }
 
-                if (CanEat)
-                {
-                    HungerUrge += 1.0f;
-                }
+        if (RestUrge > 1f)
+        {
+            RestUrge = 1f;
+        } 
+        else if (RestUrge < 0f)
+        {
+            RestUrge = 0f;
+        }
+    }
 
-                SafetyUrge -= 0.5f;
-                RestUrge = 0.0f;
-            }
-            else
-            {
-                if (!CanEat && !CanBreed)
-                {
-                    RestUrge = 1.0f;
-                }
-            }
+    //Addjusts breeding urges and returns whether or not agent can breed.
+    protected bool CheckBreedingUrge()
+    {
+        if (!IsBreeder)
+        {
+            return false;
+        }
 
-            if (!Metabolism.Healing)
+        if (!Breeder.CanBreed)
+        {
+            if (SafetyUrge < 0.75f)
             {
-                SafetyUrge = Mathf.Max(0.0f,SafetyUrge);
-                return;
+                SafetyUrge += 0.015f;
             }
             
-            SafetyUrge = 1.0f;
+            BreedUrge = 0.0f;
+            return false;
+        }
+        
+        if (Breeder.Gestating)
+        {
+            BreedUrge = 0.0f;
+            SafetyUrge += 0.025f;
+            return false;
+        }
+        
+        //Once we reach this point, we know we can breed
+        //Let's scale up the urges to breed over time.
+        if (BreedUrge < 1)
+        {
+            BreedUrge += 0.015f;
+        }
 
+        //... And scale down the Safety urge until the
+        if (SafetyUrge > 0.25f)
+        {
+            SafetyUrge -= 0.015f;
+        }
+        
+        return true;
+    }
+
+
+
+    public void CheckUrges()
+    {
+        ClampUrges();
+
+        if (!HasBody || !mBody.HasComposition)
+        {
+            return;
+        }
+
+        bool CanBreed = CheckBreedingUrge();
+        bool CanEat = false;
+
+        if (IsEater)
+        {
+            Assert.IsTrue(Eater.Stomach.MaxCapacity > 0, "To Calculate Fullness, MaxCapacity must be > 0");
+            var fullness = Eater.Stomach.Fullness;
+
+            float UrgeChange = 0.5f - fullness;
+            HungerUrge = UrgeChange;
+            CanEat = UrgeChange > 0.0f;
+            RestUrge = fullness;
+        }
+
+        if (!HasMetabolism)
+        {
+            if (!CanEat && !CanBreed)
+            {
+                RestUrge += .05f;
+            }
+            return;
+        }
+
+        if (Metabolism.Starving)
+        {
             if (CanBreed)
             {
-                BreedUrge -= 0.5f;
+                BreedUrge = 0f;
             }
 
-            if (!CanEat)
+            if (CanEat)
             {
-                RestUrge += 1.0f;
+                HungerUrge = 1.0f;
             }
+
+            SafetyUrge -= 0.5f;
+            RestUrge = 0.0f;
+            return;
+        }
+
+        if (!CanEat && !CanBreed)
+        {
+            RestUrge += .05f;
+        }
+
+        if (!Metabolism.Healing)
+        {
+            SafetyUrge = Mathf.Max(0.0f, SafetyUrge);
+            return;
+        }
+
+        SafetyUrge = 1.0f;
+
+        if (CanBreed)
+        {
+            BreedUrge -= 0.5f;
+        }
+
+        if (!CanEat)
+        {
+            RestUrge += 1.0f;
         }
     }
 
@@ -232,13 +291,13 @@ public class UrbThinker : UrbBase
         if(BreedUrge > 0)
         {
             BreedUrge = Mathf.Min(1, BreedUrge);
-            for (int b = 0; b < mBreeder.MateScents.Length; b++)
+            for (int b = 0; b < Breeder.MateScents.Length; b++)
             {
-                TileValue += Tile.TerrainFilter[TerrainType][Size][mBreeder.MateScents[b]] * BreedUrge;
+                TileValue += Tile.TerrainFilter[TerrainType][Size][Breeder.MateScents[b]] * BreedUrge;
             }
-            for (int b = 0; b < mBreeder.RivalScents.Length; b++)
+            for (int b = 0; b < Breeder.RivalScents.Length; b++)
             {
-                TileValue -= Tile.TerrainFilter[TerrainType][Size][mBreeder.RivalScents[b]] * BreedUrge;
+                TileValue -= Tile.TerrainFilter[TerrainType][Size][Breeder.RivalScents[b]] * BreedUrge;
             }
         }
 

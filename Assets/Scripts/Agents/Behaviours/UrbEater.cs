@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 
-[RequireComponent(typeof(UrbBody))]
 [RequireComponent(typeof(UrbAgent))]
 public class UrbEater : UrbBehaviour
 {
@@ -19,19 +19,35 @@ public class UrbEater : UrbBehaviour
     public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Hunger;
 
     public override bool ShouldInterval => false;
-
-    public override void OnEnable()
+    
+    public override void Awake()
     {
         Stomach = new UrbComposition();
         FoodScents = UrbSubstances.Scent(FoodSubstances);
         DetectedFood = new List<UrbBody>();
 
-        base.OnEnable();
+        base.Awake();
+    }
+
+    //Moving these asserts to Start() is a complete and total hack. 
+    //Until I figure out what the heck is going on with the hecking
+    //ordering here- Awake for the UrbBody should be getting called
+    //before the OnEnable of UrbEater but of course it turns out unity
+    //doesn't guarantee that between separate components?
+    //  WHY, UNITY, WHY!?!
+    //  I'm going to continue being stubborn about using the built-in
+    //methods b/c I feel like this is the better way, long-term, than
+    //making our own from scratch.
+    //  It's still ridiculously stupid.
+    //  https://docs.unity3d.com/Manual/ExecutionOrder.html
+    
+    public void Start()
+    {
+        Assert.IsNotNull(mAgent, "mAgent must not be null");
+        Assert.IsNotNull(mAgent.mBody, "mBody must not be null");
+        Assert.IsNotNull(mAgent.mBody.BodyComposition, "mBody.BodyComposition must not be null");
         
-        Assert.IsNotNull(mBody);
-        Assert.IsNotNull(mBody.BodyComposition);
-        
-        mBody.BodyComposition.AddComposition(Stomach);
+        mAgent.mBody.BodyComposition.AddComposition(Stomach);
         mAgent.AddAction(BiteAttack);
     }
 

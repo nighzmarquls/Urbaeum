@@ -110,6 +110,7 @@ public class UrbDisplay : UrbBase
 
     protected UrbDisplayFeature DisplayBody;
 
+    protected bool _invisible = true;
     public bool Invisible {
         get {
             if (DisplayBody == null)
