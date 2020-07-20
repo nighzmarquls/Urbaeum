@@ -446,6 +446,7 @@ public class UrbAgent : UrbBase
 
         lastUpdate = currentTime;
         
+        //TODO: Move this to the MIND and update there
         if (!IsMindNull && Alive)
         {
             Mind.CheckUrges();

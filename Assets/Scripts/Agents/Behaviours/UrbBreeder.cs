@@ -363,7 +363,7 @@ public class UrbBreeder : UrbBehaviour
 
         if (!Gestating || !CanBreed)
         {
-            yield break;
+            yield return new WaitForSeconds(Interval);
         }
         
         yield return new WaitForSeconds(Gestation);
@@ -391,14 +391,25 @@ public class UrbBreeder : UrbBehaviour
                 continue;
             }
 
-            if (Delay > 0)
+            if (--Delay > 0)
             {
-                Delay--;
                 continue;
             }
 
-            yield return BehaviourThrottle.PerformanceThrottle();
+            if (NumberOffspring >= OffspringCount)
+            {
+                _breedReason = "Too many offspring";
+                break;
+            }
 
+            if (mAgent.mBody.BodyComposition.ContainsLessThan(GestationRecipe))
+            {
+                _breedReason = "Not enough resources to spawn baby";
+                break;
+            }
+            
+            yield return BehaviourThrottle.PerformanceThrottle();
+            
             if (UrbAgentSpawner.SpawnAgent(OffspringAgent, SearchCache[t], out OffspringObject, OffspringData[OffspringChoice]))
             {
                 SetOffspringData(OffspringObject.GetComponent<UrbAgent>());
@@ -413,12 +424,9 @@ public class UrbBreeder : UrbBehaviour
 
                 SetOffspringTemplate(Random.Range(0, OffspringObjects.Length));
             }
-
-            yield return new WaitForSeconds(Interval);
-            
-            if (NumberOffspring >= OffspringCount || mAgent.mBody.BodyComposition.ContainsLessThan(GestationRecipe))
+            else
             {
-                break;
+                logger.LogWarning("Unable to spawn offspring", mAgent);
             }
         }
         Gestating = false;
