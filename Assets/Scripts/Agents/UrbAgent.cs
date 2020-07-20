@@ -335,7 +335,7 @@ public class UrbAgent : UrbBase
     }
 
 #region Unity End-Of-Life
-    protected override void OnDisable()
+    public override void OnDisable()
     {
         Assert.IsNotNull(CurrentTile);
         Assert.IsNotNull(CurrentTile.Occupants);
@@ -406,7 +406,11 @@ public class UrbAgent : UrbBase
         }
         Alive = false;
     }
-    
+
+    float lastUpdate = 0.0f;
+    //MinTimeStep defines the minimum time between updates for a behaviour.
+    //Default to 1/20th of a second
+    public static float MinTimeStep = 0.05f;
     static ProfilerMarker s_TickToMind_p = new ProfilerMarker("UrbAgent.TickToMind");
     static ProfilerMarker s_TickToBody_p = new ProfilerMarker("UrbAgent.TickToBody");
     static ProfilerMarker s_TickToDisplay_p = new ProfilerMarker("UrbAgent.TickDisplay");
@@ -420,9 +424,10 @@ public class UrbAgent : UrbBase
             s_TickToMind_p.End();
             return;
         }
-
+        
         if (IsCurrentMapNull)
         {
+            s_TickToMind_p.End();
             logger.Log("missing a map!", gameObject);
             return;
         }
@@ -431,6 +436,15 @@ public class UrbAgent : UrbBase
         {
             logger.Log("Agent has no Tile!");
         }
+        
+        float currentTime = Time.unscaledTime;
+        if ((currentTime - lastUpdate) < MinTimeStep)
+        {
+            s_TickToMind_p.End();
+            return;
+        }
+
+        lastUpdate = currentTime;
         
         if (!IsMindNull && Alive)
         {
@@ -490,7 +504,7 @@ public class UrbAgent : UrbBase
                 CurrentTile.UpdateClearance();
                 if (Shuffle)
                 {
-                    CurrentTile?.VisualShuffle();
+                    CurrentTile.VisualShuffle();
                 }
             }
         }

@@ -82,7 +82,7 @@ public class UrbMetabolism : UrbBehaviour
             //TODO: Define Nutrition requirements somewhere.
             Recipe.Ingredients[0] = new UrbSubstance();
             Recipe.Ingredients[0].Substance = Eater.FoodSubstances[e];
-            Recipe.Ingredients[0].SubstanceAmount = 1.0f;
+            Recipe.Ingredients[0].SubstanceAmount = 2.0f;
             
             FoodToReserves[e] = Recipe;
         }

@@ -50,11 +50,10 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             return "Lost";
         }
 
-        string LocalName = mAgent.AgentLocalName;
         string MassPerTile = mAgent.MassPerTile.ToString();
 
         string returnText =
-            "Name: " + LocalName + ((mAgent.Alive) ? "\n" : " (Deceased) \n") +
+            $"Name: {mAgent.AgentLocalName}" + ((mAgent.Alive) ? "\n" : " (Deceased) \n") +
             $"Map: {mAgent.CurrentMap.gameObject.name}\n" +
             $"Mass: {mAgent.Mass} / {mAgent.MaxMass}\n" +
             $"Mass Per Tile: {MassPerTile}\n";
@@ -117,18 +116,23 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             
         }
         
-        if (mAgent.IsBreeder )
+        if (mAgent.IsBreeder)
         {
             UrbBreeder Breeder = mAgent.Breeder;
             returnText += "Breeder- ";
             
             if (Breeder.Gestating)
             {
-                returnText += $"\tPregnant: {Breeder.Gestating} \n";
+                returnText += $"\tPregnant: {Breeder.Gestating} - Cannot Breed\n";
             }
             else
             {
-                returnText += $"\t CanBreed: {Breeder.CanBreed} \n";
+                returnText += $"\tCanBreed: {Breeder.CanBreed} - Not Gestating\n";
+
+                if (Breeder.CanBreed)
+                {
+                    returnText += $"\t{Breeder.BreedReason()}\n";
+                }
             }
         }
         

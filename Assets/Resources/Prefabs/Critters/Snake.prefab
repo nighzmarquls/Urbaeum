@@ -179,7 +179,7 @@ MonoBehaviour:
   - Substance: 5
     SubstanceAmount: 100
   - Substance: 6
-    SubstanceAmount: 50
+    SubstanceAmount: 75
   - Substance: 10
     SubstanceAmount: 45
   - Substance: 11
@@ -205,7 +205,7 @@ MonoBehaviour:
   Interval: 0.5
   BodyGrowthRecipe:
   - Substance: 5
-    SubstanceAmount: 200
+    SubstanceAmount: 100
   BodyEnergyReserveStorage: 6
   GrowthRate: 10
   MetabolismReady: 0

@@ -159,10 +159,12 @@ public class UrbBodyDisplay : UrbBase
         Assert.IsTrue(HasBody);
     }
     
-    public void Start()
+    public override void Start()
     {
+        base.Start();
+        
         //plopping the display update here should mean it will be called before update gets called...
-        //but after awake/onenable for the body etc, has been called 
+        //but after awake/onenable for the body etc, have. 
         displayUpdate();
     }
     

@@ -1,7 +1,7 @@
 ﻿using Unity.Assertions;
 using UnityEngine;
 using Unity.Profiling;
-public class UrbAgentSpawner 
+public class UrbAgentSpawner
 {
     static ProfilerMarker s_SpawnAgent_prof = new ProfilerMarker("AgentSpawner.SpawnAgent");
     public static bool SpawnAgent(UrbAgent TestAgent, UrbTile Tile, out GameObject spawned, UrbObjectData Data = null)
@@ -38,11 +38,7 @@ public class UrbAgentSpawner
         }
         
         Vector3 SpawnLocation = Tile.Location;
-        if (!TestAgent.enabled)
-        {
-            //Debug.Log("TestAgent not enabled!");
-        }
-        
+
         spawned = Object.Instantiate(TestAgent.gameObject, SpawnLocation, Quaternion.identity);
         
         if (Data != null)
@@ -54,10 +50,10 @@ public class UrbAgentSpawner
         {
             Debug.Log("the spawned object was inactive!");
         }
-        
+
+        UrbAgent Agent = spawned.GetComponent<UrbAgent>();
         spawned.SetActive(true);
         
-        UrbAgent Agent = spawned.GetComponent<UrbAgent>();
         if (!Agent.enabled)
         {
             //This method should automatically be called by Unity.
@@ -72,7 +68,7 @@ public class UrbAgentSpawner
                 urb.gameObject.SetActive(true);
             }
         }
-
+        
         Tile.OnAgentArrive(Agent);
         UrbAgent.TotalAgents++; 
         

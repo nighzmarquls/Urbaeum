@@ -107,6 +107,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   BirthTime: 0
   IsCurrentMapNull: 1
   Shuffle: 0
@@ -129,6 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Modifications:
   - DisplayDrivingSubstance: 3
     SubstanceSizeRatio: 0
@@ -161,18 +163,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
   BodyGrowthRecipe:
   - Substance: 3
-    SubstanceAmount: 900
+    SubstanceAmount: 1000
   - Substance: 4
-    SubstanceAmount: 20
+    SubstanceAmount: 22
   - Substance: 1
     SubstanceAmount: 10
   - Substance: 3
     SubstanceAmount: 4000
   BodyEnergyReserveStorage: 0
   GrowthRate: 90
+  MetabolismReady: 0
 --- !u!114 &-3102135804067309858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,12 +190,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   BodyRecipe: []
   SkinRecipe: 
   CriticalBodyPartAmounts:
   - Substance: 13
     SubstanceAmount: 1500
-  Height: 0.25
 --- !u!114 &290428910922112158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -205,9 +209,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 10
-  SmellTag: 01000000
-  SmellStrength: 100
 --- !u!114 &1804231709266065300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,6 +224,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 10
   MinimumMergeCount: 2
   MinimumMass: 5250
@@ -241,6 +245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 8
   PerceptionPrintString: 
   ContactPrintString: 
@@ -257,6 +262,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
 --- !u!114 &6921185187161276568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,6 +276,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 9
   MateRequirement: 0
   MateCrowding: 8
@@ -278,6 +285,7 @@ MonoBehaviour:
   Gestation: 2
   DispersalDistance: 1
   BreedType: 0
+  RequiredOffspringTerrain: 0
   MateScents: 
   RivalScents: 
   GestationRecipe:
@@ -300,6 +308,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
   PossibleProducts:
   - ProductRequiredMass: 410

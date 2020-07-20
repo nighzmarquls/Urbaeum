@@ -118,6 +118,12 @@ public class UrbBase : MonoBehaviour
         enabled = true;
         WasDestroyed = false;
     }
+
+    public virtual void Start()
+    {
+        Assert.IsTrue(HasAwakeBeenCalled);
+        Assert.IsTrue(HasEnableBeenCalled);
+    }
 #endregion
 
     public virtual void Update()
@@ -129,7 +135,7 @@ public class UrbBase : MonoBehaviour
     }
     
 #region End-Of-Lifetime methods
-    protected virtual void OnDisable()
+    public virtual void OnDisable()
     {
         HasEnableBeenCalled = false;
         //TODO: Object-pool-y value resets.

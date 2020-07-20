@@ -46,7 +46,17 @@ public class UrbBehaviour : UrbBase
     public override void OnEnable()
     {
         base.OnEnable();
-        //ensure that base OnEnable is called before we start running
+        
+        if(DeathBehaviour)
+        {
+            mAgent.AddDeathBehaviour(this);
+        }
+    }
+
+    //Start is 
+    public override void Start()
+    {
+        //ensure that OnEnable is called BEFORE we start running
         //the coroutines.
         mCoroutine = IntervalCoroutine();
 
@@ -54,14 +64,12 @@ public class UrbBehaviour : UrbBase
         {
             StartCoroutine(mCoroutine);
         }
-
-        if(DeathBehaviour)
-        {
-            mAgent.AddDeathBehaviour(this);
-        }
+        
+        base.Start();
     }
+    
 
-    protected override void OnDisable()
+    public override void OnDisable()
     {
         if (mCoroutine != null)
         {
@@ -163,8 +171,9 @@ public class UrbBehaviour : UrbBase
     }
 
     static ProfilerMarker s_RegisterTileBehaviour_p = new ProfilerMarker("UrbBehavior.RegisterTileBehaviour");
-    public virtual void RegisterTileForBehaviour(float Evaluation ,UrbTile Target, int Index)
+    public virtual void RegisterTileForBehaviour(float Evaluation, UrbTile Target, int Index)
     {
+        Assert.IsNotNull(Target);
         s_RegisterTileBehaviour_p.Begin();
         if(RegisteredTiles == null)
         {
@@ -205,7 +214,22 @@ public class UrbBehaviour : UrbBase
         s_ClearBehavior_p.End();
     }
 
-    public virtual float BehaviourEvaluation { get; protected set; }
+    float _behaviourEval = 0.0f;
+    public virtual float BehaviourEvaluation {
+        get
+        {
+            return _behaviourEval;
+        }
+        protected set
+        {
+            if (value < 0)
+            {
+                value = 0;
+            }
+
+            _behaviourEval = value;
+        } 
+    }
 
     public virtual void ExecuteTileBehaviour()
     {
@@ -214,7 +238,22 @@ public class UrbBehaviour : UrbBase
 
     protected virtual bool ValidToInterval()
     {
-        return mAgent.WasDestroyed || !mAgent.isActiveAndEnabled || mAgent.CurrentMap == null || (!LivingBehaviour) || mAgent.Alive;
+        if (mAgent.WasDestroyed || IsPaused)
+        {
+            return false;
+        }
+
+        if (mAgent.CurrentMap == null)
+        {
+            return false;
+        }
+        
+        if (LivingBehaviour)
+        {
+            return mAgent.Alive;
+        }
+        
+        return LivingBehaviour;
     }
 
     protected UrbUtility.UrbThrottle BehaviourThrottle = new UrbUtility.UrbThrottle();

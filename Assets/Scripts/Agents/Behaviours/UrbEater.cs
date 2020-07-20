@@ -41,7 +41,7 @@ public class UrbEater : UrbBehaviour
     //  It's still ridiculously stupid.
     //  https://docs.unity3d.com/Manual/ExecutionOrder.html
     
-    public void Start()
+    public override void Start()
     {
         Assert.IsNotNull(mAgent, "mAgent must not be null");
         Assert.IsNotNull(mAgent.mBody, "mBody must not be null");
@@ -49,6 +49,8 @@ public class UrbEater : UrbBehaviour
         
         mAgent.mBody.BodyComposition.AddComposition(Stomach);
         mAgent.AddAction(BiteAttack);
+        
+        base.Start();
     }
 
     public override void Update()

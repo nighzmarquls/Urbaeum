@@ -130,7 +130,7 @@ MonoBehaviour:
   ValidateMe: 0
   BodyRecipe:
   - Substance: 6
-    SubstanceAmount: 75
+    SubstanceAmount: 90
   - Substance: 5
     SubstanceAmount: 45
   - Substance: 9
@@ -143,8 +143,6 @@ MonoBehaviour:
   CriticalBodyPartAmounts:
   - Substance: 5
     SubstanceAmount: 45
-  - Substance: 6
-    SubstanceAmount: 1
 --- !u!114 &8693178026798117474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -159,7 +157,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LogMe: 0
   ValidateMe: 0
-  Interval: 2
+  Interval: 1
   BodyGrowthRecipe:
   - Substance: 7
     SubstanceAmount: 100

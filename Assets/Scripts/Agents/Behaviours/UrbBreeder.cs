@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -41,6 +42,8 @@ public class UrbBreeder : UrbBehaviour
 
     public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Breed;
 
+    protected string _breedReason = "Coroutine not run";
+    
     int breedCheckedFrame;
     bool _potentiallyBreed;
     bool _canBreed;
@@ -59,6 +62,8 @@ public class UrbBreeder : UrbBehaviour
                 return false;
             }
             
+            //Defined as an external call, it will be difficult for the compiler/JIT to 
+            //optimize multiple references to the frameCount.
             int currentFrame = Time.frameCount;
             if (breedCheckedFrame == currentFrame)
             {
@@ -69,8 +74,7 @@ public class UrbBreeder : UrbBehaviour
             //So we should consider choosing a ratio of Composition excess.
             _canBreed = mAgent.mBody.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe);
             breedCheckedFrame = currentFrame;
-            
-            return false;
+            return _canBreed;
         }
     }
 
@@ -114,7 +118,31 @@ public class UrbBreeder : UrbBehaviour
 
     protected override bool ValidToInterval()
     {
-        return base.ValidToInterval() && mAgent.CurrentTile != null && OffspringData != null && OffspringData.Length > 0 && mAgent.mBody != null;
+        if (!base.ValidToInterval())
+        {
+            _breedReason = "UrbBase interval invalid";
+            return false;
+        }
+        
+        if (mAgent.CurrentTile == null || OffspringData == null)
+        {
+            _breedReason = "Current Tile/OffSpringData == Null";
+            return false;
+        }
+
+        if (!HasBody)
+        {
+            _breedReason = "HasBody False";
+            return false;
+        }
+
+        if (OffspringData.Length == 0)
+        {
+            _breedReason = "OffspringData len == 0";
+            return false;
+        }
+
+        return true;
     }
 
     static ProfilerMarker s_TileEvaluateCheck_p = new ProfilerMarker("UrbBreeder.TileEvaluateCheck");
@@ -124,17 +152,41 @@ public class UrbBreeder : UrbBehaviour
         //"Temporary" using for now
         using (s_TileEvaluateCheck_p.Auto())
         {
-            if (Gestating || Target?.Occupants == null || Crowd > MateCrowding)
+            if (Gestating)
             {
+                _breedReason = "currently gestating";
                 return 0;
             }
 
+            Assert.IsNotNull(Target, "Target != null");
+            
+            if (Target == null)
+            {
+                _breedReason = "TargetTile is null";
+                return 0;
+            }
+            
+            Assert.IsNotNull(Target.Occupants, "Target.Occupants != null");
+
+            if (Target.Occupants == null)
+            {
+                _breedReason = "Tile Occupants list is null";
+                return 0;
+            }
+
+
+            if (Crowd > MateCrowding)
+            {
+                _breedReason = "Crowd > Mate Crowding";
+                return 0;
+            }
+            
             float Evaluation = (MateRequirement == 0)? mAgent.Mass : 0;
 
             for (int c = 0; c < Target.Occupants.Count; c++)
             {
                 var occupant = Target.Occupants[c];
-                if (occupant.WasDestroyed || !occupant.isActiveAndEnabled)
+                if (occupant.WasDestroyed)
                 {
                     Target.Occupants.Remove(occupant);
                     continue;
@@ -157,6 +209,7 @@ public class UrbBreeder : UrbBehaviour
 
                 if(Crowd >= MateCrowding)
                 {
+                    _breedReason = "Crowd >= MateCrowding";
                     return 0;
                 }
             }
@@ -164,13 +217,23 @@ public class UrbBreeder : UrbBehaviour
         }
     }
 
-    public override float BehaviourEvaluation { get {
+    public override float BehaviourEvaluation
+    {
+        get {
             if (Crowd >= MateCrowding)
             {
                 return 0;
             }
-            return base.BehaviourEvaluation;
-    } protected set => base.BehaviourEvaluation = value; }
+
+            float retVal = base.BehaviourEvaluation;
+            return retVal;
+    }
+        protected set
+        {
+            var val = value;
+            base.BehaviourEvaluation = val;
+        }
+    }
 
     public override void RegisterTileForBehaviour(float Evaluation, UrbTile Target, int Index)
     {
@@ -194,12 +257,14 @@ public class UrbBreeder : UrbBehaviour
 
         if (IsPaused || !mAgent.Alive)
         {
+            _breedReason = "Game paused or agent is dead";
             executeTileBehaviour.End();
             return;
         }
 
         if (MateRequirement == 0 && CanBreed)
         {
+            _breedReason = "MateRequirement is 0 and can breed";
             Gestating = true;
             executeTileBehaviour.End();
             base.ExecuteTileBehaviour();
@@ -263,6 +328,11 @@ public class UrbBreeder : UrbBehaviour
         base.ExecuteTileBehaviour();
     }
 
+    public string BreedReason()
+    {
+        return _breedReason;
+    }
+    
     // Cached Values for Functional Coroutine;
     private UrbTile LastBreedTile = null;
     private UrbTile[] SearchCache;

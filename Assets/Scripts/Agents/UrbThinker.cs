@@ -85,20 +85,17 @@ public class UrbThinker : UrbBase
         bool behaviorChosen = false;
         UrbBehaviour ChosenBehaviour = null;
         float BestEvaluation = 0;
+        UrbBehaviour currentBehaviour = null;
         for(int i = 0; i < mPerception.ContactBehaviours.Length; i++)
         {
-            float Evaluation = EvaluateBehaviour(mPerception.ContactBehaviours[i]);
+            currentBehaviour = mPerception.ContactBehaviours[i];
+            Assert.IsNotNull(currentBehaviour);
+            
+            float Evaluation = EvaluateBehaviour(currentBehaviour);
             if(BestEvaluation < Evaluation)
             {
-                //we don't even want to give null behaviors a chance to do their dirty work
-                //just in case not all of them are null
-                if (mPerception.ContactBehaviours[i] == null)
-                {
-                    continue;
-                }
-                
                 behaviorChosen = true;
-                ChosenBehaviour = mPerception.ContactBehaviours[i];
+                ChosenBehaviour = currentBehaviour;
                 BestEvaluation = Evaluation;
             }
         }
@@ -198,9 +195,7 @@ public class UrbThinker : UrbBase
         
         return true;
     }
-
-
-
+    
     public void CheckUrges()
     {
         ClampUrges();
@@ -320,6 +315,7 @@ public class UrbThinker : UrbBase
 
     public float EvaluateBehaviour(UrbBehaviour Input)
     {
+        Assert.IsNotNull(Input);
         float Evaluation = Input.BehaviourEvaluation;
 
         if (Evaluation <= 0)

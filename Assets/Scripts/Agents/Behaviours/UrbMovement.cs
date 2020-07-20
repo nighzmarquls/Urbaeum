@@ -20,7 +20,7 @@ public class UrbMovement : UrbBehaviour
         mAgent.AddAction(MoveAction);
     }
 
-    protected override void OnDisable()
+    public override void OnDisable()
     {
         mAgent.RemoveAction(MoveAction);
         base.OnDisable();

@@ -172,7 +172,7 @@ MonoBehaviour:
   - Substance: 3
     SubstanceAmount: 100
   - Substance: 4
-    SubstanceAmount: 20
+    SubstanceAmount: 22
   - Substance: 1
     SubstanceAmount: 80
   BodyEnergyReserveStorage: 0
@@ -231,10 +231,10 @@ MonoBehaviour:
   Interval: 2.5
   MateRequirement: 0
   MateCrowding: 8
-  OffspringCount: 6
+  OffspringCount: 4
   OffspringRequiredSpace: 1000
   Gestation: 4
-  DispersalDistance: 1
+  DispersalDistance: 0
   BreedType: 0
   RequiredOffspringTerrain: 0
   MateScents: 
@@ -260,9 +260,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LogMe: 0
   ValidateMe: 0
-  Interval: 10
+  Interval: 8
   MinimumMergeCount: 3
-  MinimumMass: 480
+  MinimumMass: 450
   MinimumTiles: 2
   MaximumTiles: 3
   MergeProduct: {fileID: 4574942228798516744, guid: 09781a599fc8cad4295eb5df370e8be2,

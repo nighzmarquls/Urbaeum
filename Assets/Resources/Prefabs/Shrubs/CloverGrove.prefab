@@ -172,9 +172,9 @@ MonoBehaviour:
   Interval: 1
   BodyGrowthRecipe:
   - Substance: 3
-    SubstanceAmount: 900
+    SubstanceAmount: 1200
   - Substance: 4
-    SubstanceAmount: 20
+    SubstanceAmount: 22
   - Substance: 1
     SubstanceAmount: 10
   - Substance: 3
@@ -201,7 +201,6 @@ MonoBehaviour:
   CriticalBodyPartAmounts:
   - Substance: 13
     SubstanceAmount: 2000
-  Height: 0.25
 --- !u!114 &290428910922112158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,8 +216,6 @@ MonoBehaviour:
   LogMe: 0
   ValidateMe: 0
   Interval: 1
-  SmellTag: 01000000
-  SmellStrength: 200
 --- !u!114 &-2811286552959931199
 MonoBehaviour:
   m_ObjectHideFlags: 0

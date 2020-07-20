@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -64,23 +65,42 @@ public class UrbPerception : UrbBehaviour
             return sBehaviours;
         }
     }
-
+    bool contactsSynced;
+    UrbBehaviour[] Components;
     public override void OnEnable()
     {
-       
+        Components = GetComponents<UrbBehaviour>();
+        contactsSynced = false;
         base.OnEnable();
+    }
+
+    public override void OnDisable()
+    {
+        contactsSynced = false;
+        base.OnDisable();
+    }
+    
+    //The reason this is here is because it has a dependency which is
+    //not necessarily available until after OnEnable, etc, have been called. 
+    protected void SyncContacts()
+    {
         List<UrbBehaviour> ContactList = new List<UrbBehaviour>();
         List<UrbBehaviour> SenseList = new List<UrbBehaviour>();
-
-        UrbBehaviour[] Components = GetComponents<UrbBehaviour>();
-
+        
+        Assert.IsNotNull(mAgent.CurrentTile);
+        
         for (int c = 0; c < Components.Length; c++)
         {
-            if (Components[c].TileEvaluateCheck(mAgent.CurrentTile) > -1f && Components[c].ContactBehaviour)
+            if (!(Components[c].TileEvaluateCheck(mAgent.CurrentTile) > -1f))
+            {
+                continue;
+            }
+
+            if (Components[c].ContactBehaviour)
             {
                 ContactList.Add(Components[c]);
             }
-            if (Components[c].TileEvaluateCheck(mAgent.CurrentTile) > -1f && Components[c].SenseBehaviour)
+            else if (Components[c].SenseBehaviour)
             {
                 SenseList.Add(Components[c]);
             }
@@ -88,8 +108,10 @@ public class UrbPerception : UrbBehaviour
         cBehaviours = ContactList.ToArray();
         sBehaviours = SenseList.ToArray();
         ContactList.Clear();
+        
+        contactsSynced = true;
     }
-
+    
     static ProfilerMarker s_ContactCheck_p = new ProfilerMarker("UrbPerception.ContactCheck_afterThrottle");
 
     UrbTile[] ContactSearchCache;
@@ -98,9 +120,15 @@ public class UrbPerception : UrbBehaviour
     protected IEnumerator ContactCheck()
     {
         //This happens if ContactCheck gets called too soon
-        if (mAgent.CurrentTile == null && LastContactTile == null)
+        if (mAgent.CurrentTile == null)
         {
             yield return new WaitUntil(() => mAgent.CurrentTile != null);
+        }
+
+        if (!contactsSynced && Components != null)
+        {
+            SyncContacts();
+            yield return BehaviourThrottle;
         }
         
         if (LastContactTile != mAgent.CurrentTile)
@@ -124,20 +152,27 @@ public class UrbPerception : UrbBehaviour
         yield return BehaviourThrottle;
 
         s_ContactCheck_p.Begin();
+        UrbTile tile;
         for (int i = 0; i < ContactSearchCache.Length; i++)
         {
-            for(int b = 0; b < ContactBehaviours.Length; b++)
+            tile = ContactSearchCache[i];
+            if (tile == null)
             {
-                Evaluation = ContactBehaviours[b].TileEvaluateCheck(ContactSearchCache[i], true);
+                continue;
+            }
+
+            for (int b = 0; b < ContactBehaviours.Length; b++)
+            {
+                Evaluation = ContactBehaviours[b].TileEvaluateCheck(tile, true);
                 if (Evaluation > float.Epsilon)
                 {
-                    ContactBehaviours[b].RegisterTileForBehaviour(Evaluation, ContactSearchCache[i], i);
+                    ContactBehaviours[b].RegisterTileForBehaviour(Evaluation, tile, i);
                 }
             }
+
             s_ContactCheck_p.End();
             yield return BehaviourThrottle;
             s_ContactCheck_p.Begin();
-
         }
 
         s_ContactCheck_p.End();
@@ -163,14 +198,20 @@ public class UrbPerception : UrbBehaviour
 
         yield return BehaviourThrottle;
 
+        UrbTile tile;
         for (int i = 0; i < SenseSearchCache.Length; i++)
         {
+            tile = SenseSearchCache[i];
+            if (tile == null)
+            {
+                continue;
+            }
             for (int b = 0; b < SenseBehaviours.Length; b++)
             {
-                float Evaluation = SenseBehaviours[b].TileEvaluateCheck(SenseSearchCache[i], true);
+                float Evaluation = SenseBehaviours[b].TileEvaluateCheck(tile, true);
                 if (Evaluation > float.Epsilon)
                 {
-                    SenseBehaviours[b].RegisterTileForBehaviour(Evaluation, SenseSearchCache[i], i);
+                    SenseBehaviours[b].RegisterTileForBehaviour(Evaluation, tile, i);
                 }
             }
         }

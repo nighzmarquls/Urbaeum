@@ -433,6 +433,8 @@ public class UrbTile
 
     public void OnAgentArrive(UrbAgent input)
     {
+        Assert.IsNotNull(input);
+        
         s_OnAgentArrive_p.Begin(input);
         Contents.Add(input);
         
@@ -443,7 +445,6 @@ public class UrbTile
         //I can only find OwningMap being set once, at game initialization...
         //Can we move CurrentMap to object initialization?
         input.CurrentMap = OwningMap;
-      
         
         input.transform.localScale = new Vector3(this.OwningMap.TileSize, this.OwningMap.TileSize, this.OwningMap.TileSize)*input.SizeOffset;
 
@@ -452,13 +453,17 @@ public class UrbTile
             ScentDirty = true;
         }
 
-        CalculateRemainingCapacity();
-        UpdateClearance();
-
-        if (input.Shuffle)
+        if (input.HasEnableBeenCalled)
         {
-            VisualShuffle();
+            CalculateRemainingCapacity();
+            UpdateClearance();
+            
+            if (input.Shuffle)
+            {
+                VisualShuffle();
+            }
         }
+        
         s_OnAgentArrive_p.End();
     }
 
@@ -638,20 +643,7 @@ public class UrbTile
             }
 
             UpdateClearance();
-
-            if (!ScentDirty)
-            {
-                if (Occupants.Count > 0)
-                {
-                    if (Time.fixedTime - LastScentUpdate > MinimumScentUpdate)
-                    {
-                        ScentDirty = true;
-                        LastScentUpdate = Time.fixedTime;
-                    }
-                }
-                continue;
-            }
-
+            
             //Don't need to call this _that_ often, but I'm still not sure how often we SHOULD call it 
             SynchronizeScents();
             
@@ -698,6 +690,15 @@ public class UrbTile
                 }
             }
             ScentDirty = false;
+
+            if (!ScentDirty && Occupants.Count > 0)
+            {
+                if (Time.fixedTime - LastScentUpdate > MinimumScentUpdate)
+                {
+                    ScentDirty = true;
+                    LastScentUpdate = Time.fixedTime;
+                }
+            }
         }
     }
 
