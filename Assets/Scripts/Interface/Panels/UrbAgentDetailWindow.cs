@@ -40,7 +40,7 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
         }
     }
 
-    //String Concatenation is slow. TODO: use stringbuilder.
+    //String Concatenation is slow. TODO: move to use this stringbuilder.
     StringBuilder sb = new StringBuilder(1000);
     string TextSummary()
     {
@@ -51,18 +51,17 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
         }
 
         string LocalName = mAgent.AgentLocalName;
-        string Mass = mAgent.Mass.ToString();
         string MassPerTile = mAgent.MassPerTile.ToString();
 
         string returnText =
             "Name: " + LocalName + ((mAgent.Alive) ? "\n" : " (Deceased) \n") +
-            "Map: " + mAgent.CurrentMap.gameObject.name + "\n" +
-            "Mass: " + Mass + "\n" +
-            "Mass Per Tile:" + MassPerTile + "\n";
+            $"Map: {mAgent.CurrentMap.gameObject.name}\n" +
+            $"Mass: {mAgent.Mass} / {mAgent.MaxMass}\n" +
+            $"Mass Per Tile: {MassPerTile}\n";
 
         if (mAgent.HasMetabolism && mAgent.Alive)
         {
-            returnText += "Energy: " + mAgent.Metabolism.EnergyBudget + "\n";
+            returnText += $"Energy: {mAgent.Metabolism.EnergyBudget}\n";
         }
 
         if (!mAgent.IsMindNull && mAgent.Alive)

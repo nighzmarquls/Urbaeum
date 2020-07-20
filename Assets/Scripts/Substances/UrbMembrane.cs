@@ -7,6 +7,7 @@ public class UrbMembrane
 {
     protected UrbComposition ContainingComposition;
 
+    //MembraneLayers is a property that is sampled from the Skin Recipes.
     protected UrbSubstanceTag[] MembraneLayers;
     public UrbSubstanceTag[] Layers {
         get { return MembraneLayers; }

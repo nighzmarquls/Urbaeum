@@ -56,7 +56,14 @@ public class UrbAction
         float Muscle = TestBody.BodyComposition[UrbSubstanceTag.Muscle];
         float Nerves = TestBody.BodyComposition[UrbSubstanceTag.Nerves];
         Result = Mathf.Min(Muscle, Nerves) * 2;
-        float BodyRatio = Muscle / TestBody.BodyComposition.Mass;
+
+        float mass = TestBody.BodyComposition.Mass;
+        if (mass < 1)
+        {
+            return 0;
+        }
+        
+        float BodyRatio = Muscle / mass;
         return Result * BodyRatio;
     }
     public virtual float Test(UrbAgent target, float Modifier = 0.0f)

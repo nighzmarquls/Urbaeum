@@ -6,7 +6,8 @@ public class UrbAgentSpawner
     static ProfilerMarker s_SpawnAgent_prof = new ProfilerMarker("AgentSpawner.SpawnAgent");
     public static bool SpawnAgent(UrbAgent TestAgent, UrbTile Tile, out GameObject spawned, UrbObjectData Data = null)
     {
-        Assert.IsTrue(Tile?.Occupants != null);
+        Assert.IsTrue(Tile != null, "Tile != null");
+        Assert.IsTrue(Tile.Occupants != null, "Tile.Occupants != null");
         
         s_SpawnAgent_prof.Begin();
 

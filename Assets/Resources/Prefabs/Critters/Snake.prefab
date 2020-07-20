@@ -105,10 +105,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b2e0f7c83d69948a96dc66fccbac5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  ValidateMe: 0
   BirthTime: 0
-  CurrentMap: {fileID: 0}
+  IsCurrentMapNull: 1
   Shuffle: 1
-  Interacting: 0
   SizeOffset: 1
   TileprintString: 1
 --- !u!114 &4574942228798516745
@@ -123,6 +124,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7820138edadbea4ab3ada9d2530f9c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  ValidateMe: 0
   Interval: 1
 --- !u!114 &-2832398848432110761
 MonoBehaviour:
@@ -136,6 +139,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9f725e25e0b28c4d8aef6238c55a7ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  ValidateMe: 0
   Interval: 1
   GoalTag: 6
   Size: 0
@@ -152,8 +157,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dfd735a9f716e74398620d0212a3ee9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  ValidateMe: 0
   Interval: 0.5
-  FoodSubstances: 06000000050000000a000000
+  FoodSubstances: 0700000006000000050000000a0000000b000000
 --- !u!114 &6241092312237831420
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,6 +173,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d2d170163064e42bda7b740df8716e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  ValidateMe: 0
   BodyRecipe:
   - Substance: 5
     SubstanceAmount: 100
@@ -179,7 +188,6 @@ MonoBehaviour:
   CriticalBodyPartAmounts:
   - Substance: 5
     SubstanceAmount: 50
-  Height: 1
 --- !u!114 &2918307162233589454
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192,12 +200,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b2f4988372b7c64a95866759bfbf429, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  ValidateMe: 0
   Interval: 0.5
   BodyGrowthRecipe:
   - Substance: 5
     SubstanceAmount: 200
   BodyEnergyReserveStorage: 6
   GrowthRate: 10
+  MetabolismReady: 0
 --- !u!114 &584398893670210297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210,6 +221,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d973e6a44621c2a4ba41b85a65aa5087, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  ValidateMe: 0
   Modifications:
   - DisplayDrivingSubstance: 13
     SubstanceSizeRatio: 750
@@ -235,6 +248,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89760c5a60a1c48469e26698ab374520, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  ValidateMe: 0
 --- !u!114 &-5642155373378065091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,6 +262,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 595bc0b273ea0d64c9696083da17f405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogMe: 0
+  ValidateMe: 0
   Interval: 1
   PerceptionPrintString: 
   ContactPrintString: 

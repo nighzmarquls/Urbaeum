@@ -90,13 +90,24 @@ public class UrbAgent : UrbBase
     }
 
     protected float LastCheckedMass = 0;
+    
+    public float MaxMass { get
+        {
+            if(!HasBody || mBody.BodyComposition == null)
+            {
+                return 0;
+            }
+            
+            return mBody.BodyComposition.MaxCapacity;
+        }
+    }
+    
     public float Mass {  get {
             if(!HasBody || mBody.BodyComposition == null)
             {
                 return 0;
             }
             
-            //This is Asserted on in the setter of the UsedCapacity.
             return mBody.BodyComposition.UsedCapacity;
         } }
 
@@ -444,6 +455,9 @@ public class UrbAgent : UrbBase
             else
             {
                 Express(UrbDisplayFace.Expression.Dead);
+                //It will take ~20 iterations to DecaySubstances before all of the substances
+                //hit 0
+                mBody.BodyComposition.DecaySubstances(20);
                 if (mBody.BodyEmpty())
                 {
                     Remove();

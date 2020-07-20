@@ -41,16 +41,35 @@ public class UrbBreeder : UrbBehaviour
 
     public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Breed;
 
+    int breedCheckedFrame;
+    bool _potentiallyBreed;
+    bool _canBreed;
     public bool CanBreed
     {
         get
         {
-            if (HasAgent && HasBody && mBody.HasComposition)
+            if (!_potentiallyBreed)
             {
-                //TODO: (IMO) Breeding should mean the Agent is well-off, compositionally-speaking
-                //So we should consider choosing a ratio of Composition excess.
-                return mAgent.mBody.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe);
+                return false;
             }
+            
+            if (!mAgent.Alive)
+            {
+                _potentiallyBreed = false;
+                return false;
+            }
+            
+            int currentFrame = Time.frameCount;
+            if (breedCheckedFrame == currentFrame)
+            {
+                return _canBreed;
+            }
+            
+            //TODO: (IMO) Breeding should mean the Agent is well-off, compositionally-speaking
+            //So we should consider choosing a ratio of Composition excess.
+            _canBreed = mAgent.mBody.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe);
+            breedCheckedFrame = currentFrame;
+            
             return false;
         }
     }
@@ -66,6 +85,8 @@ public class UrbBreeder : UrbBehaviour
         }
         
         base.OnEnable();
+
+        _potentiallyBreed = HasAgent && HasBody && mBody.HasComposition;
     }
 
     protected void SetOffspringData(UrbAgent Offspring)

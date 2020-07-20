@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Assertions;
 using UnityEngine;
 using UnityEngine.Assertions.Comparers;
@@ -18,8 +19,8 @@ public class UrbComposition
         get { return _maxCapacity; }
         protected set
         {
-            //MaxCapacity cannot be zero. So we force it to 1 
-            //in case it does..
+            //MaxCapacity should not be zero. So we force it to 1 
+            //in case it is..
             if (value <= 0)
             {
                 value = 1;
@@ -37,6 +38,12 @@ public class UrbComposition
         }
         protected set
         {
+            if (value < 1)
+            {
+                _usedCapacity = 0;
+                return;
+            }
+            
             Assert.IsFalse(float.IsNaN(value) || float.IsInfinity(value));
             _usedCapacity = value;
         }
@@ -79,7 +86,6 @@ public class UrbComposition
 
     public float AvailableCapacity {
         get {
-
             var availCapacity = MaxCapacity - UsedCapacity;
             
             Assert.IsFalse(float.IsNaN(availCapacity) || float.IsInfinity(availCapacity));
@@ -111,17 +117,18 @@ public class UrbComposition
             {
                 return UsedCapacity;
             }
-            else if (Substances.ContainsKey(Tag))
+
+            if (Substances.TryGetValue(Tag, out float val))
             {
-                return Substances[Tag];
+                return val;
             }
-            else
-            {
-                return 0.0f;
-            }
+
+            return 0.0f;
         }
     }
 
+    //Dictionaries are random-access memory, so operating on more than one at a time is slow
+    //TODO: Replace this mechanism with the dual-list construct.
     protected Dictionary<UrbSubstanceTag, float> Substances = new Dictionary<UrbSubstanceTag, float>();
     protected List<UrbComposition> Compositions = new List<UrbComposition>();
     
@@ -153,6 +160,48 @@ public class UrbComposition
         Assert.IsFalse(float.IsInfinity(UsedCapacity) || float.IsNaN(UsedCapacity));
     }
 
+    // Intended to be called when the agent is deceased-- A "magical"
+    //means of mass disappearing into the void, and therefore, a bit
+    //of a compromise to the system's integrity.
+    // Deceased bodies will get removed from the map over time.
+    //In the future, this should be replaced with actual decay mechanisms
+    //FOR EXAMPLE: Fur/teeth are not eaten by sneks. 
+    // Could solve that loophole by having fur first in the ordering?
+    public void DecaySubstances(int decay = 2)
+    {
+        Assert.IsTrue(decay > 0, "decay must be > 0");
+        
+        ContainingComposition?.DecaySubstances();
+        
+        UrbSubstanceTag[] subs = Substances.Keys.ToArray();
+        float[] values = Substances.Values.ToArray();
+        float val;
+
+        for (int i = 0; i < subs.Length; i++)
+        {
+            val = values[i];
+            if (val <= 0)
+            {
+                continue;
+            }
+
+            UrbSubstanceTag tag = subs[i];
+
+            if (val <= 1)
+            {
+                UsedCapacity -= val;
+                Substances[tag] -= val;
+                break;
+            }
+            
+            float reduction = val / decay;
+            Substances[tag] -= reduction;
+            UsedCapacity -= reduction;
+            //I was going to have the 
+            break;
+        }
+    }
+    
     public float GetProportionOfTotal(UrbSubstanceTag[] Tags)
     {
         if(UsedCapacity <= 0)
@@ -330,6 +379,7 @@ public class UrbComposition
         {
             TransferAmount += RemoveSubstance(Recipe[r].Substance, Recipe[r].SubstanceAmount);
         }
+        
         return TransferAmount;
     }
 
@@ -348,6 +398,7 @@ public class UrbComposition
         float TransferAmount = Amount;
         //Debug.Log("Attempting Transfer " + TransferAmount + " from " + Tag.ToString());
 
+        //Is this Supposed to be addition? 
         float CapacityAfter = UsedCapacity + Amount;
         if (CapacityAfter < 0)
         {
@@ -540,14 +591,13 @@ public class UrbComposition
     {
         for(int i = 0; i < Recipe.Length; i++)
         {
-            if (Substances.ContainsKey(Recipe[i].Substance))
+            //My attempt at optimization - Zoru
+            if (!Substances.TryGetValue(Recipe[i].Substance, out float value))
             {
-                if (Substances[Recipe[i].Substance] != Recipe[i].SubstanceAmount)
-                {
-                    return false;
-                }
+                return false;
             }
-            else
+
+            if (value != Recipe[i].SubstanceAmount)
             {
                 return false;
             }
@@ -572,16 +622,21 @@ public class UrbComposition
 
     public bool ContainsLessThan(UrbSubstance[] Recipe)
     {
+        UrbSubstanceTag tag;
         for (int i = 0; i < Recipe.Length; i++)
         {
-            if (Substances.ContainsKey(Recipe[i].Substance))
+            tag = Recipe[i].Substance; 
+            if (!Substances.TryGetValue(tag, out float ourValue))
             {
-                if (Substances[Recipe[i].Substance] >= Recipe[i].SubstanceAmount)
-                {
-                    return false;
-                }
+                return false;
+            }
+
+            if (ourValue >= Recipe[i].SubstanceAmount)
+            {
+                return false;
             }
         }
+        
         return true;
     }
 
@@ -606,16 +661,16 @@ public class UrbComposition
 
     public bool ContainsMoreOrEqualThan(UrbSubstance[] Recipe)
     {
+        UrbSubstanceTag tag;
         for (int i = 0; i < Recipe.Length; i++)
         {
-            if (Substances.ContainsKey(Recipe[i].Substance))
+            tag = Recipe[i].Substance; 
+            if (!Substances.TryGetValue(tag, out float ourValue))
             {
-                if (Substances[Recipe[i].Substance] < Recipe[i].SubstanceAmount)
-                {
-                    return false;
-                }
+                return false;
             }
-            else
+
+            if (ourValue <= Recipe[i].SubstanceAmount)
             {
                 return false;
             }
