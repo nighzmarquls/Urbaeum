@@ -51,24 +51,17 @@ public class UrbBehaviour : UrbBase
         {
             mAgent.AddDeathBehaviour(this);
         }
-    }
-
-    //Start is 
-    public override void Start()
-    {
+        
         //ensure that OnEnable is called BEFORE we start running
         //the coroutines.
         mCoroutine = IntervalCoroutine();
 
-        if (ShouldInterval && isActiveAndEnabled)
+        if (ShouldInterval)
         {
             StartCoroutine(mCoroutine);
         }
-        
-        base.Start();
     }
     
-
     public override void OnDisable()
     {
         if (mCoroutine != null)

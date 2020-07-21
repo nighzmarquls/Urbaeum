@@ -1,8 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using Unity.Assertions;
 using Unity.Profiling;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public enum UrbBreedTag
 {
@@ -38,15 +42,23 @@ public class UrbBreeder : UrbBehaviour
     protected static UrbLoveAction LoveAction = new UrbLoveAction();
 
     protected int Crowd = 0;
+    //TODO: Consider Gestation as an abstraction over certain ingredients mixing?
     public bool Gestating { get; protected set; }
 
     public override UrbUrgeCategory UrgeSatisfied => UrbUrgeCategory.Breed;
-
+    
+//This pattern is useful for high-frequency events   
+// #if DEBUG
+//BreedReason is relevant when CanBreed
     protected string _breedReason = "Coroutine not run";
+//Relevant primarily when Gestating    
+    protected string _birthStatus = "Not yet set";
+// #endif
     
     int breedCheckedFrame;
     bool _potentiallyBreed;
     bool _canBreed;
+    
     public bool CanBreed
     {
         get
@@ -56,9 +68,12 @@ public class UrbBreeder : UrbBehaviour
                 return false;
             }
             
+            //Currently, breeding requires agents to all be alive
+            //But this may not work for agents that spawn from corpses 
+            //Phoenixes and Zombies come to mind. 
             if (!mAgent.Alive)
             {
-                _potentiallyBreed = false;
+                // _potentiallyBreed = false;
                 return false;
             }
             
@@ -69,27 +84,36 @@ public class UrbBreeder : UrbBehaviour
             {
                 return _canBreed;
             }
+
+            breedCheckedFrame = currentFrame;
+            
+            if (Gestating)
+            {
+                _canBreed = false;
+                return false;
+            }
             
             //TODO: (IMO) Breeding should mean the Agent is well-off, compositionally-speaking
             //So we should consider choosing a ratio of Composition excess.
             _canBreed = mAgent.mBody.BodyComposition.ContainsMoreOrEqualThan(GestationRecipe);
-            breedCheckedFrame = currentFrame;
             return _canBreed;
         }
     }
 
     public override void OnEnable()
     {
-        Gestating = false;
-        Crowd = 0;
-
         if (OffspringData == null || OffspringData.Length <= 0)
         {
             EncodeOffspringData();
         }
         
+        Gestating = false;
+        Crowd = 0;
+        _canBreed = false;
+        breedCheckedFrame = 0;
+        
         base.OnEnable();
-
+        
         _potentiallyBreed = HasAgent && HasBody && mBody.HasComposition;
     }
 
@@ -118,27 +142,29 @@ public class UrbBreeder : UrbBehaviour
 
     protected override bool ValidToInterval()
     {
+        Assert.IsTrue(mAgent.Breeder == this);
+        
         if (!base.ValidToInterval())
         {
-            _breedReason = "UrbBase interval invalid";
+            _birthStatus = _breedReason = "UrbBase interval invalid";
             return false;
         }
         
         if (mAgent.CurrentTile == null || OffspringData == null)
         {
-            _breedReason = "Current Tile/OffSpringData == Null";
+            _birthStatus = _breedReason = "Current Tile/OffSpringData == Null";
             return false;
         }
 
         if (!HasBody)
         {
-            _breedReason = "HasBody False";
+            _birthStatus = _breedReason = "HasBody False";
             return false;
         }
 
         if (OffspringData.Length == 0)
         {
-            _breedReason = "OffspringData len == 0";
+            _birthStatus = _breedReason = "OffspringData len == 0";
             return false;
         }
 
@@ -173,8 +199,7 @@ public class UrbBreeder : UrbBehaviour
                 _breedReason = "Tile Occupants list is null";
                 return 0;
             }
-
-
+            
             if (Crowd > MateCrowding)
             {
                 _breedReason = "Crowd > Mate Crowding";
@@ -207,7 +232,7 @@ public class UrbBreeder : UrbBehaviour
                     Evaluation += Target.Occupants[c].Mass;
                 }
 
-                if(Crowd >= MateCrowding)
+                if (Crowd >= MateCrowding)
                 {
                     _breedReason = "Crowd >= MateCrowding";
                     return 0;
@@ -330,8 +355,9 @@ public class UrbBreeder : UrbBehaviour
 
     public string BreedReason()
     {
-        return _breedReason;
+        return Gestating ? _birthStatus : _breedReason;
     }
+    
     
     // Cached Values for Functional Coroutine;
     private UrbTile LastBreedTile = null;
@@ -354,25 +380,9 @@ public class UrbBreeder : UrbBehaviour
         }
     }
 
-    public override IEnumerator FunctionalCoroutine()
+    protected IEnumerator AttemptSpawn()
     {
-        if (!ValidToInterval())
-        {
-            yield break;
-        }
-
-        if (!Gestating || !CanBreed)
-        {
-            yield return new WaitForSeconds(Interval);
-        }
-        
-        yield return new WaitForSeconds(Gestation);
-
-        if (!ValidToInterval())
-        {
-            yield break;
-        }
-
+        //TODO: Make spawning cost energy ?
         SetOffspringTemplate(Random.Range(0, OffspringObjects.Length));
 
         if (LastBreedTile != mAgent.CurrentTile)
@@ -381,30 +391,46 @@ public class UrbBreeder : UrbBehaviour
             SearchCache = DispersalDistance < 0 ? mAgent.Tileprint.GetAllPrintTiles(mAgent) : mAgent.Tileprint.GetBorderingTiles(mAgent, true, DispersalDistance);
         }
 
-        Delay = Random.Range((int)0, (int)3);
+        Delay = Random.Range((int)0, (int)(SearchCache.Length / 2));
         NumberOffspring = 0;
 
         for (int t = 0; t < SearchCache.Length; t++)
         {
-            if (SearchCache[t] == null || SearchCache[t].Blocked || !SearchCache[t].TerrainPassable(RequiredOffspringTerrain) || SearchCache[t].RemainingCapacity < OffspringRequiredSpace)
-            {
-                continue;
-            }
-
             if (--Delay > 0)
             {
+                _birthStatus = "not ready to spawn";
+                continue;
+            }
+            
+            var current = SearchCache[t];
+
+            if (current == null)
+            {
+                _birthStatus = $"tile {t} was null";
                 continue;
             }
 
+            if (current.Blocked)
+            {
+                _birthStatus = "tile was blocked";
+                continue;
+            }
+            
+            if (!current.TerrainPassable(RequiredOffspringTerrain) || current.RemainingCapacity < OffspringRequiredSpace)
+            {
+                _birthStatus = "terrain not passable or doesnt match required space";
+                continue;
+            }
+            
             if (NumberOffspring >= OffspringCount)
             {
-                _breedReason = "Too many offspring";
+                _birthStatus = "Too many offspring";
                 break;
             }
 
             if (mAgent.mBody.BodyComposition.ContainsLessThan(GestationRecipe))
             {
-                _breedReason = "Not enough resources to spawn baby";
+                _birthStatus = "Not enough resources to spawn baby";
                 break;
             }
             
@@ -426,10 +452,46 @@ public class UrbBreeder : UrbBehaviour
             }
             else
             {
-                logger.LogWarning("Unable to spawn offspring", mAgent);
+                _birthStatus = "Spawn attempt failed";
+                logger.LogWarning("Failed to spawn offspring", mAgent);
             }
         }
+        
         Gestating = false;
+    }
+    
+    public override IEnumerator FunctionalCoroutine()
+    {
+        yield return new WaitUntil(ValidToInterval);
+        
+        if (!Gestating)
+        {
+            _birthStatus = "not gestating";
+            yield break;
+        }
+        
+        //TODO: Better feedback for debugging purposes.
+        // TimeUntilSpawn = Gestation - (CurrentTime - TimeOfImpregnation) ? 
+        _birthStatus = "to sleeping intervals";
+        yield return new WaitForSeconds(Interval);
+        _birthStatus = "GestationBake Interval";
+        yield return new WaitForSeconds(Gestation - Interval);
+        _birthStatus = "after sleeping intervals";
+
+        if (!ValidToInterval())
+        {
+            _birthStatus = "secondary ValidToInterval check failed";
+            yield break;
+        }
+
+        if (Gestating && mAgent.Alive)
+        {
+            yield return AttemptSpawn();
+        }
+        else
+        {
+            _birthStatus = "gestation check failed";
+        }
     }
 
     public override UrbComponentData GetComponentData()
@@ -470,9 +532,7 @@ public class UrbBreeder : UrbBehaviour
 
         return Data;
     }
-
-
-
+    
     public override bool SetComponentData(UrbComponentData Data)
     {
         MateRequirement = (int)UrbEncoder.GetField("MateRequirement", Data);
@@ -492,8 +552,7 @@ public class UrbBreeder : UrbBehaviour
         RivalScents = UrbEncoder.GetEnumArray<UrbScentTag>("RivalScents", Data);
 
         GestationRecipe = UrbEncoder.GetSubstancesFromArray("GestationRecipe", Data);
-
-
+        
         return true;
     }
 

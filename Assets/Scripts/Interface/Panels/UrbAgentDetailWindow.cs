@@ -49,15 +49,21 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             TargetAgent = null;
             return "Lost";
         }
+        
+        sb.Clear();
+        
+        sb
+            .Append("Name: ")
+            .Append(mAgent.AgentLocalName)
+            .AppendLine(((mAgent.Alive) ? "" : " (Deceased)"));
+        sb
+            .Append("Map: ")
+            .AppendLine(mAgent.CurrentMap.gameObject.name);
+        sb
+            .AppendFormat("Mass: {0} / {1} | MassPerTile: {2}\n", mAgent.Mass, mAgent.MaxMass, mAgent.MassPerTile);
 
-        string MassPerTile = mAgent.MassPerTile.ToString();
-
-        string returnText =
-            $"Name: {mAgent.AgentLocalName}" + ((mAgent.Alive) ? "\n" : " (Deceased) \n") +
-            $"Map: {mAgent.CurrentMap.gameObject.name}\n" +
-            $"Mass: {mAgent.Mass} / {mAgent.MaxMass}\n" +
-            $"Mass Per Tile: {MassPerTile}\n";
-
+        //Will convert the rest of this to use stringbuilder later, as it annoys me - Zoru.
+        string returnText = sb.ToString();
         if (mAgent.HasMetabolism && mAgent.Alive)
         {
             returnText += $"Energy: {mAgent.Metabolism.EnergyBudget}\n";
@@ -113,7 +119,6 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
                     returnText += " ]\n";
                 }
             }
-            
         }
         
         if (mAgent.IsBreeder)
@@ -128,11 +133,11 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
             else
             {
                 returnText += $"\tCanBreed: {Breeder.CanBreed} - Not Gestating\n";
-
-                if (Breeder.CanBreed)
-                {
-                    returnText += $"\t{Breeder.BreedReason()}\n";
-                }
+            }
+            
+            if (Breeder.Gestating || Breeder.CanBreed)
+            {
+                returnText += $"\t{Breeder.BreedReason()}\n";
             }
         }
         

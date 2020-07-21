@@ -27,7 +27,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4574942228798516746
 Transform:
   m_ObjectHideFlags: 0
@@ -231,16 +231,18 @@ MonoBehaviour:
   ValidateMe: 0
   Interval: 2
   MateRequirement: 1
-  MateCrowding: 2
-  OffspringCount: 0
-  OffspringRequiredSpace: 500
-  Gestation: 30
+  MateCrowding: 5
+  OffspringCount: 1
+  OffspringRequiredSpace: 200
+  Gestation: 10
   DispersalDistance: 0
   BreedType: 1
   RequiredOffspringTerrain: 0
   MateScents: 0400000006000000
   RivalScents: 05000000
-  GestationRecipe: []
+  GestationRecipe:
+  - Substance: 6
+    SubstanceAmount: 45
   OffspringObjects:
   - {fileID: 4574942228798516750}
   - {fileID: 4574942228798516750, guid: 19c19e44250f1a94bbe0f2cd566ceaf4, type: 3}

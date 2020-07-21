@@ -25,7 +25,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4574942228798516746
 Transform:
   m_ObjectHideFlags: 0
@@ -106,6 +106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   BirthTime: 0
   IsCurrentMapNull: 1
   Shuffle: 0
@@ -126,6 +127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
 --- !u!114 &-8220914805162621343
 MonoBehaviour:
@@ -140,6 +142,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
   GoalTag: 1
   Size: 1
@@ -157,6 +160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 0.5
   FoodSubstances: 040000000300000002000000060000000500000001000000
 --- !u!114 &-7516547713024925317
@@ -172,6 +176,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   BodyRecipe:
   - Substance: 5
     SubstanceAmount: 500
@@ -185,7 +190,6 @@ MonoBehaviour:
   CriticalBodyPartAmounts:
   - Substance: 5
     SubstanceAmount: 250
-  Height: 1
 --- !u!114 &-7324362360393659095
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,12 +203,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
   BodyGrowthRecipe:
   - Substance: 0
     SubstanceAmount: 0
   BodyEnergyReserveStorage: 6
   GrowthRate: 25
+  MetabolismReady: 0
 --- !u!114 &7104056634503351380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -218,6 +224,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
 --- !u!114 &5930587149508230605
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -231,6 +238,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Modifications:
   - DisplayDrivingSubstance: 13
     SubstanceSizeRatio: 2000
@@ -257,6 +265,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LogMe: 0
+  ValidateMe: 0
   Interval: 1
   PerceptionPrintString: 
   ContactPrintString: 
