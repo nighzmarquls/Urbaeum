@@ -45,22 +45,25 @@ public class UrbAgentSpawner
         {
             UrbEncoder.Write(Data, spawned);
         }
-        
-        if (spawned.activeSelf == false)
-        {
-            Debug.Log("the spawned object was inactive!");
-        }
+
+        // Tweaked the Critter prefabs so they *should* spawn as inactive
+        // if (spawned.activeSelf == false)
+        // {
+        //     Debug.Log("the spawned object was inactive!");
+        // }
 
         UrbAgent Agent = spawned.GetComponent<UrbAgent>();
+        //Doing this should mean not required to manually activate children
         spawned.SetActive(true);
         
-        if (!Agent.enabled)
+        if (!Agent.HasAwakeBeenCalled)
         {
-            //This method should automatically be called by Unity.
-            //I wonder why it's not always being called all the time
             Agent.gameObject.SetActive(true);
         }
-
+        
+        //This loop is kept around mostly out of concern that Agent SetActive
+        //may fail to trigger children. Decent chance this is no longer required.
+        //light testing shows removing may be acceptable.
         foreach (var urb in Agent.GetComponents<UrbBase>())
         {
             if (!urb.isActiveAndEnabled)
