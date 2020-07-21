@@ -137,6 +137,7 @@ public class UrbBehaviour : UrbBase
 
     public virtual float TileEvaluateCheck(UrbTile Target, bool Contact = false)
     {
+        Assert.IsNotNull(Target, "base TileEvaluateCheck, Target != null");
         return -1f;
     }
     

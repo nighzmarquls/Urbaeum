@@ -86,12 +86,13 @@ public class UrbPerception : UrbBehaviour
     {
         List<UrbBehaviour> ContactList = new List<UrbBehaviour>();
         List<UrbBehaviour> SenseList = new List<UrbBehaviour>();
-        
-        Assert.IsNotNull(mAgent.CurrentTile);
+
+        UrbTile currentTile = mAgent.CurrentTile; 
+        Assert.IsNotNull(currentTile, $"AgentLocalName: {mAgent.AgentLocalName}, ID: {mAgent.ID}");
         
         for (int c = 0; c < Components.Length; c++)
         {
-            if (!(Components[c].TileEvaluateCheck(mAgent.CurrentTile) > -1f))
+            if (!(Components[c].TileEvaluateCheck(currentTile) > -1f))
             {
                 continue;
             }
@@ -123,6 +124,7 @@ public class UrbPerception : UrbBehaviour
         if (mAgent.CurrentTile == null)
         {
             yield return new WaitUntil(() => mAgent.CurrentTile != null);
+            Assert.IsNotNull(mAgent.CurrentTile);
         }
 
         if (!contactsSynced && Components != null)
