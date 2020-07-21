@@ -14,11 +14,13 @@ public class UrbUserAction
     public virtual Sprite MapDisplaySprite { get; set; } = null;
     public bool MapDisplayInitialized { get; protected set; }
 
-    protected GameObject MapDisplay = new GameObject();
+    protected GameObject MapDisplay = null;
     
     protected virtual void InitializeMapDisplaySprite()
     {
-        if (!string.IsNullOrEmpty(MapDisplayAssetPath) || MapDisplaySprite != null)
+        //This should only occur once maybe twice a frame tops if the User is being silly with clicking.
+        //Probably not a performance risk but important that we don't clear the MapDisplay like we were.
+        if (MapDisplay == null && (!string.IsNullOrEmpty(MapDisplayAssetPath) || MapDisplaySprite != null))
         {
             MapDisplay = new GameObject();
             var Renderer = MapDisplay.AddComponent<SpriteRenderer>();
