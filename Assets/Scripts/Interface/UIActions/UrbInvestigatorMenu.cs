@@ -23,7 +23,7 @@ public class UrbInvestigatorMenu : UrbUserAction
     };
 
     public override string Name => "Investigator Menu";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
 
     UrbInvestigatorTool[] Investigators = null;
 

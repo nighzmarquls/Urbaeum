@@ -149,7 +149,6 @@ public class UrbDisplayFeature : MonoBehaviour
         get { return mSpritePath; }
         set {
 
-            bool HaveMask = false;
             if (HaveMask)
             {
                 Sprite MaskSprite = Resources.Load<Sprite>(FeaturePath + value + MaskAppend);
@@ -257,5 +256,7 @@ public class UrbDisplayFeature : MonoBehaviour
         HaveFill = mFillRenderer != null;
         HaveOverlay = mOverlayRenderer != null;
         HaveMask = mMaskRenderer != null;
+
+       
     }
 }

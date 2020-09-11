@@ -5,9 +5,8 @@ using UnityEngine;
 
 public struct UrbPlanStep
 {
-    public System.Type TaskType;
+    public UrbTask Task;
     public uint Index;
-    public UrbSubstance[] RequiredSubstance;
     public UrbPlan RequiredPlan;
 }
 
@@ -34,19 +33,18 @@ public abstract class UrbPlan : UrbBase
         return true;
     }
 
-    public bool CompleteStep(uint StepIndex, UrbTask CompletedTask)
+    public bool CompleteStep(uint StepIndex)
     {
-        if(CompletedTask.Matches(FullPlan[StepIndex].TaskType))
+        if (FullPlan[StepIndex].Task.TaskComplete())
         {
-            StepComplete[StepIndex] = true;
-
-            if(Index == StepIndex)
+            if (Index == StepIndex)
             {
                 ProgressPlan();
             }
 
             return true;
         }
+        
         return false;
     }
 
@@ -63,7 +61,5 @@ public abstract class UrbPlan : UrbBase
     }
 
     protected uint Index;
-
     protected UrbPlanStep[] FullPlan;
-    protected bool[] StepComplete;
 }

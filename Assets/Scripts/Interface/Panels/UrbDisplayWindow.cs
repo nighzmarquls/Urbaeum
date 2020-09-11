@@ -171,7 +171,7 @@ public abstract class UrbDisplayWindow : MonoBehaviour
 public class UrbDisplayWindowClose : UrbUserAction
 {
     public override string Name => "Close Window";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
 
     public UrbDisplayWindow OwningWindow;
 
@@ -191,7 +191,7 @@ public class UrbDisplayWindowClose : UrbUserAction
 public class UrbDisplayWindowMinimize : UrbUserAction
 {
     public override string Name => "Minimize Window";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
 
     public UrbDisplayWindow OwningWindow;
 

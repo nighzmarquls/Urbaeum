@@ -194,7 +194,7 @@ public class UrbSystemIO : MonoBehaviour
 public class UrbSaveAction : UrbUserAction
 {
     public override string Name => "Save";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
 
     public override void SelectAction()
     {
@@ -215,7 +215,7 @@ public class UrbSaveAction : UrbUserAction
 public class UrbLoadAction : UrbUserAction
 {
     public override string Name => "Load";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
 
     public override void SelectAction()
     {

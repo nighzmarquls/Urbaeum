@@ -173,7 +173,8 @@ public class UrbAgentDetailWindow : UrbDisplayWindow
 public class UrbGetAgentDetails : UrbUserAction
 {
     public override string Name => "Investigate Agent";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
+
     public override void MouseClick(UrbTile currentCursorTile)
     {
         Ray mouseray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -198,7 +199,7 @@ public class UrbGetAgentDetails : UrbUserAction
 public class UrbTrackAgent : UrbUserAction
 {
     public override string Name => "Track Agent";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
 
     public UrbAgentDetailWindow OwningWindow;
 

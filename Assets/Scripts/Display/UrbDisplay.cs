@@ -35,8 +35,8 @@ public class UrbDisplay : UrbBase
     public float minFaceRatio = 0.25f;
     public float featureOffset = 0.001f;
 
-    [SerializeField][Range(0, 3)]
-    protected  float defultHeight = 1;
+    [SerializeField][Range(0, 4)]
+    protected  float defaultHeight = 1;
 
     [SerializeField]
     protected UrbDisplayFeature FeatureTemplate;
@@ -86,7 +86,8 @@ public class UrbDisplay : UrbBase
 
     protected float mBodySize = 1;
     protected float mFaceSize = 1;
-    protected Vector3 mInitialOffset;
+    protected Vector3 mInitialBodyOffset;
+
     bool mFlip = false;
     public bool Flip {
         get {
@@ -119,6 +120,23 @@ public class UrbDisplay : UrbBase
             }
 
             return DisplayBody.Invisible;
+        }
+    }
+
+    protected float _height = 1.0f;
+    public float Height {
+        get {
+            return _height;
+        }
+        set {
+            UpdateFeatureHeight(value, PrimaryFeatures);
+            UpdateFeatureHeight(value, SecondaryFeatures);
+            UpdateFeatureHeight(value, DetailFeatures);
+
+            DisplayBody.Height = value;
+            DisplayFace.Height = value;
+
+            _height = value;
         }
     }
 
@@ -273,7 +291,6 @@ public class UrbDisplay : UrbBase
         }
     }
 
-
     public SpriteRenderer EffectDisplay = null;
     protected List<UrbAction> EffectQueue;
     protected List<Vector3> EffectPositionQueue;
@@ -337,7 +354,8 @@ public class UrbDisplay : UrbBase
             EffectQueue = new List<UrbAction>();
             EffectPositionQueue = new List<Vector3>();
         }
-        mInitialOffset = this.transform.localPosition;
+        mInitialBodyOffset = this.transform.localPosition;
+
         mSignificance = 1f;
         DisplayBody = CreateFeature(BodySprite, Body);
         DisplayFace.FaceType = FaceSprite;
@@ -423,7 +441,10 @@ public class UrbDisplay : UrbBase
         DisplayFace.HighlightColor = mColors.HighlightColor;
         DisplayFace.SortingOrder = SortingOrder;
         DisplayBody.SortingOrder = SortingOrder;
-        
+
+        Height = defaultHeight;
+
+        SynchronizeBody();
         base.OnEnable();
     }
 
@@ -495,12 +516,20 @@ public class UrbDisplay : UrbBase
         }
     }
 
-    protected void UpdateFeatureColors(UrbColor Color, List<UrbDisplayFeature> Features)
+    protected void UpdateFeatureColors(UrbColor FeatureColor, List<UrbDisplayFeature> Features)
     {
         for (int i = 0; i < Features.Count; i++)
         {
-            Features[i].LineColor = Color.Line;
-            Features[i].FillColor = Color.Fill;
+            Features[i].LineColor = FeatureColor.Line;
+            Features[i].FillColor = FeatureColor.Fill;
+        }
+    }
+
+    protected void UpdateFeatureHeight(float FeatureHeight, List<UrbDisplayFeature> Features)
+    {
+        for (int i = 0; i < Features.Count; i++)
+        {
+            Features[i].Height = FeatureHeight;
         }
     }
     public override void Update()
@@ -516,7 +545,6 @@ public class UrbDisplay : UrbBase
         DisplayFeature.SpritePath = FeatureSprite;
         Feature.transform.position += (Vector3.forward * -offset);
         DisplayFeature.SortingOrder = SortingOrder;
-        DisplayFeature.Height = defultHeight;
         return DisplayFeature;
     }
 
@@ -527,12 +555,11 @@ public class UrbDisplay : UrbBase
             return;
         }
 
-        
         Face.position = FacePivot.position;
 
         FaceFeaturePoint.position = Face.position + (Vector3.forward * featureOffset);
         FaceFeaturePoint.localScale = Face.localScale;
         FaceFeaturePoint.rotation = Face.rotation;
-        transform.localPosition = mInitialOffset + Vector3.forward * BodySize;
+        transform.localPosition = mInitialBodyOffset + Vector3.forward * BodySize;
     }
 }

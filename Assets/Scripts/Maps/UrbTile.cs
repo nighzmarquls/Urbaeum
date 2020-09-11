@@ -128,6 +128,45 @@ public class UrbTile
         ScentDiffusion = UrbScent.ScentDiffusion * Free;
     }
 
+    public float this[UrbSubstanceTag[] Tags] { get {
+            if (Occupants.Count <= 0)
+            {
+                return 0;
+            }
+
+            float Amount = 0;
+
+            for (int i = 0; i < Occupants.Count; i++)
+            {
+                if (Occupants[i].HasBody)
+                {
+                    Amount += Occupants[i].mBody.BodyComposition[Tags];
+                }
+            }
+            return Amount;
+        }
+    }
+
+    public float this[UrbSubstanceTag Tag] {
+        get {
+            if (Occupants.Count <= 0)
+            {
+                return 0;
+            }
+
+            float Amount = 0;
+
+            for (int i = 0; i < Occupants.Count; i++)
+            {
+                if (Occupants[i].HasBody)
+                {
+                    Amount += Occupants[i].mBody.BodyComposition[Tag];
+                }
+            }
+            return Amount;
+        }
+    }
+
     public void VisualShuffle()
     {
         LocationOffset = Vector3.zero;

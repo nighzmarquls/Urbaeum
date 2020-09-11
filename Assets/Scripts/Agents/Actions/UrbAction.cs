@@ -12,12 +12,12 @@ public enum UrbTestCategory
     Bash = 8,
     Cut = 16,
     Pierce = 32,
+    Hold = 64
 }
 
 [System.Serializable]
 public class UrbAction
 {
-    
     protected Sprite CachedSprite = null;
     public Sprite ActionIcon    { get{
             if(string.IsNullOrEmpty(IconPath))
@@ -32,6 +32,7 @@ public class UrbAction
             return CachedSprite;
         }
     }
+
     protected const string IconDiretory = "Sprites/Icons/";
 
     public virtual UrbTestCategory Category { get { return UrbTestCategory.None; } }

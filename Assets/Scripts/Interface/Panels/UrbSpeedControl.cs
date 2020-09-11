@@ -43,7 +43,7 @@ public class UrbSpeedControl : UrbUIPanel
 public class UrbChangeSpeed : UrbUserAction
 {
     public override string Name => "Change Speed";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
 
     public UrbSpeedControl SpeedControl;
 

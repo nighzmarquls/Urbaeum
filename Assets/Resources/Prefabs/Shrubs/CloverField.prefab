@@ -226,7 +226,7 @@ MonoBehaviour:
   LogMe: 0
   ValidateMe: 0
   Interval: 10
-  MinimumMergeCount: 2
+  MinimumMergeCount: 1
   MinimumMass: 5250
   MinimumTiles: 1
   MaximumTiles: 9

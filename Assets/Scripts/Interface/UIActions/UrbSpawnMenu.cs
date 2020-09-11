@@ -5,7 +5,7 @@ using UnityEngine;
 public class UrbSpawnMenu : UrbUserAction
 {
     public override string Name => "Spawn Menu";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
 
     UrbSpawnAction[] Creatable = null;
 

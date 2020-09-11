@@ -5,7 +5,7 @@ using UnityEngine;
 public class UrbKillAgent : UrbUserAction
 {
     public override string Name => "Kill";
-    public override string MapDisplayAssetPath => "";
+    public override bool UseMapDisplay => false;
     public override void MouseClick(UrbTile currentCursorTile)
     {
 

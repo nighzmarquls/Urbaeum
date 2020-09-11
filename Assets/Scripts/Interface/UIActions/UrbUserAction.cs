@@ -10,6 +10,8 @@ public class UrbUserAction
     public virtual Color IconColor { get; set; } = Color.white;
     public virtual string Name { get; set; } = "";
     public virtual string Description { get; set; } = "";
+
+    public virtual bool UseMapDisplay { get; set; } = true;
     public virtual string MapDisplayAssetPath { get; set; } = "Sprites/blank";
     public virtual Sprite MapDisplaySprite { get; set; } = null;
     public bool MapDisplayInitialized { get; protected set; }
@@ -59,14 +61,19 @@ public class UrbUserAction
 
     public virtual void SelectAction()
     {
-        InitializeMapDisplaySprite();
+        if (UseMapDisplay)
+        {
+            InitializeMapDisplaySprite();
+        }
 
-        Debug.Log("Player-Selected Action " + Name);
         UrbUIManager.SetCurrentAction(this);
     }
 
     public virtual void UnselectAction() {
-        UninitializeMapDisplaySprites();
+        if (UseMapDisplay)
+        {
+            UninitializeMapDisplaySprites();
+        }
     }
     
     public virtual void MouseClick(UrbTile currentCursorTile) { }

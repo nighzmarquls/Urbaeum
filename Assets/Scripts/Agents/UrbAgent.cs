@@ -31,6 +31,8 @@ public class UrbAgent : UrbBase
     public UrbDisplay Display { get; private set; }
     public bool HasDisplay { get; protected set; }
 
+    public UrbTestCategory ValidActionCategories { get; protected set; }
+
     public string AgentLocalName { get; protected set; }
     public bool IsCurrentMapNull = true;
     UrbMap _currentMap;
@@ -169,7 +171,8 @@ public class UrbAgent : UrbBase
 
     public virtual void AddAction(UrbAction Action)
     {
-        if(AvailableActions == null)
+        ValidActionCategories = ValidActionCategories | Action.Category;
+        if (AvailableActions == null)
         {
             AvailableActions = new []{ Action };
             return;
@@ -183,6 +186,7 @@ public class UrbAgent : UrbBase
 
     public virtual void RemoveAction(UrbAction Action)
     {
+        ValidActionCategories = ValidActionCategories & (~Action.Category);
         if (AvailableActions == null || AvailableActions.Length == 0)
         {
             return;
@@ -195,6 +199,11 @@ public class UrbAgent : UrbBase
             TempList.Remove(Action);
             AvailableActions = TempList.ToArray();
         }
+    }
+
+    public virtual bool HasAction(UrbTestCategory Test)
+    {
+        return (ValidActionCategories & Test) == Test;
     }
 
     public UrbAction[] AvailableActions { get; private set; }
@@ -234,11 +243,18 @@ public class UrbAgent : UrbBase
     static ProfilerMarker s_PickAction_p = new ProfilerMarker("UrbAgent.PickAction");
     public UrbAction PickAction(UrbTestCategory Test, float Result = 0, UrbTestCategory Exclude = UrbTestCategory.None)
     {
+        
         using (s_PickAction_p.Auto())
         {
             if (Removing)
             {
                 logger.Log("Chose not to pick an action because removing", this);
+                return null;
+            }
+
+            if (HasAction(Test))
+            {
+                logger.Log($"No actions of type {Test} Found", this);
                 return null;
             }
 
@@ -264,7 +280,7 @@ public class UrbAgent : UrbBase
                 }
             }
 
-            Debug.Log($"No actions of type {Test} Found", this);
+            logger.Log($"No actions of type {Test} Found", this);
             return null;
         }
     }
