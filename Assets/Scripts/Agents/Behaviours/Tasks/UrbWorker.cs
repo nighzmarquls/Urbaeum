@@ -12,6 +12,7 @@ public class UrbWorker : UrbBehaviour
 
     public uint MaxTasks = 1;
     public List<UrbPlanStep> WorkerTasks { get; protected set; }
+    
     bool TasksChanged = true;
 
     UrbUrgeCategory CachedUrges;
@@ -58,10 +59,29 @@ public class UrbWorker : UrbBehaviour
     public override float TileEvaluateCheck(UrbTile Target, bool Contact = false)
     {
        float value = 0;
+       if(WorkerTasks.Count < MaxTasks)
+       {
+
+       }
        for(int j = 0; j < WorkerTasks.Count; j++)
        {
             value += WorkerTasks[j].Task.TaskSuitableTileCheck(Target);
        }
        return value;
+    }
+
+    public override void ExecuteTileBehaviour()
+    {
+        for (int t = 0; t < RegisteredTiles.Length; t++)
+        {
+            for (int j = 0; j < WorkerTasks.Count; j++)
+            {
+                if(WorkerTasks[j].Task.TaskComplete())
+                {
+                    continue;
+                }
+                WorkerTasks[j].Task.PerformTask(mAgent, RegisteredTiles[t]);
+            }
+        }
     }
 }

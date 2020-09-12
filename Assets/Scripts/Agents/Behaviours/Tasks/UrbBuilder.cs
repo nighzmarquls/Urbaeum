@@ -14,7 +14,7 @@ public class UrbGatherTask : UrbTask
 
     bool NoTarget = true;
 
-    public float HeldAmount { get; protected set; } = 0;
+    public float DeliveredAmount { get; protected set; } = 0;
 
     public UrbSubstance GoalSubstance;
 
@@ -41,9 +41,16 @@ public class UrbGatherTask : UrbTask
             UrbAction Action = Instigator.PickAction(UrbTestCategory.Hold);
             float CarryAmount = 0;
 
-            for(int o = 0; o < WorkTile.Occupants.Count; o++)
+            if (WorkTile == TargetTile)
             {
 
+            }
+            else
+            {
+                for (int o = 0; o < WorkTile.Occupants.Count; o++)
+                {
+
+                }
             }
         }
 

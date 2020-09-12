@@ -14,7 +14,7 @@ public class UrbBase : MonoBehaviour
 #region OptionalComponents
     //Optional Urb Components which may find themselves on a given UrbAgent 
     [DontSerialize] public UrbEater Eater { get; protected set; }
-
+    [DontSerialize] public UrbGrasper Grasper { get; protected set; }
     [DontSerialize] public UrbBreeder Breeder { get; protected set; }
     
     [DontSerialize] public UrbBody mBody { get; protected set; }
@@ -38,7 +38,8 @@ public class UrbBase : MonoBehaviour
     [DontSerialize] public bool HasBody { get; protected set; }
     
     [DontSerialize] public bool IsBreeder { get; protected set; }
-    
+    [DontSerialize] public bool IsGrasper { get; protected set; }
+
     [DontSerialize] public bool IsEater { get; protected set; }
     [DontSerialize] public bool HasAgent { get; protected set; }
 
@@ -90,6 +91,7 @@ public class UrbBase : MonoBehaviour
         IsMindNull = Mind == null;
         
         IsEater = Eater != null;
+        IsGrasper = Grasper != null;
         IsBreeder = Breeder != null;
         IsSmelly = SmellSource != null;
         
@@ -144,6 +146,7 @@ public class UrbBase : MonoBehaviour
         WasDestroyed = true;
         
         IsEater = false;
+        IsGrasper = false;
         IsBreeder = false;
         IsSmelly = false;
         
@@ -187,7 +190,13 @@ public class UrbBase : MonoBehaviour
         {
             Eater = null;
         }
-        
+
+        Grasper = GetComponent<UrbGrasper>();
+        if (Grasper == this)
+        {
+            Grasper = null;
+        }
+
         Breeder = GetComponent<UrbBreeder>();
         if (Breeder == this)
         {

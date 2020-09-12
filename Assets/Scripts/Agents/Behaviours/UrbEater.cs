@@ -196,6 +196,8 @@ public class UrbBiteAttack : UrbAttack
     protected override string IconPath => IconDiretory + "BiteAttack";
     public override Color IconColor => base.IconColor;
     protected override UrbDamage DamageAction { get; set; } = new UrbBiteDamage();
+    public override UrbTestCategory Category => base.Category | UrbTestCategory.Hold;
+
     public override float Test(UrbAgent target, float Modifier = 0)
     {
         float Teeth = target.mBody.BodyComposition[UrbSubstanceTag.Teeth];
