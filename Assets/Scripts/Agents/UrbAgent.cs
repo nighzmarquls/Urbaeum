@@ -489,16 +489,17 @@ public class UrbAgent : UrbBase
                 //It will take ~20 iterations to DecaySubstances before all of the substances
                 //hit 0
                 mBody.BodyComposition.DecaySubstances(20);
+
+                if(IsEater)
+                {
+                    Eater.Stomach.DecaySubstances(20);
+                }
+
                 if (mBody.BodyEmpty())
                 {
                     Remove();
                 }
             }
-
-            // if (BodyDisplay != null)
-            // {
-            //     BodyDisplay.UpdateDisplay(mBody.BodyComposition);
-            // }
         }
         
         s_TickToBody_p.End();
@@ -546,6 +547,7 @@ public class UrbAgent : UrbBase
 
         s_TickToDisplay_p.End();
     }
+
     static ProfilerMarker s_UpdateUrbAgent_p = new ProfilerMarker("UrbAgent.Update");
     
     public override UrbComponentData GetComponentData()
